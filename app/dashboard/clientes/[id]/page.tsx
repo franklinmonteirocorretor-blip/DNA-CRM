@@ -142,7 +142,7 @@ export default async function FichaClientePage({ params }: Props) {
     hour: '2-digit', minute: '2-digit',
   })
   const diasSemContato = Math.floor(
-    (Date.now() - new Date(cliente.ultima_atividade_em).getTime()) / 86400000
+    (new Date().getTime() - new Date(cliente.ultima_atividade_em).getTime()) / 86400000
   )
 
   return (

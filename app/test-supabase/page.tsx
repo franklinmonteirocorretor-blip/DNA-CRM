@@ -16,8 +16,8 @@ export default function TestSupabase() {
         } else {
           setStatus('✅ Conexão com Supabase funcionando!')
         }
-      } catch (err: any) {
-        setStatus('❌ Erro: ' + err.message)
+      } catch (err: unknown) {
+        setStatus('❌ Erro: ' + (err instanceof Error ? err.message : String(err)))
       }
     }
     test()

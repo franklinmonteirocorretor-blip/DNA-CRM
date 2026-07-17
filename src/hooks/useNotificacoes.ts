@@ -21,26 +21,28 @@ export function useNotificacoes(usuarioId: string | undefined): UseNotificacoesR
   const [carregando, setCarregando] = useState(true)
 
   // ── Busca inicial ────────────────────────────────────────────────────────
-  const buscarNotificacoes = useCallback(async () => {
-    if (!usuarioId) return
-
-    const { data, error } = await supabase
-      .from('notificacoes')
-      .select('*')
-      .eq('usuario_id', usuarioId)
-      .order('created_at', { ascending: false })
-      .limit(50)
-      .returns<Notificacao[]>()
-
-    if (!error && data) {
-      setNotificacoes(data)
-    }
-    setCarregando(false)
-  }, [usuarioId])
-
   useEffect(() => {
-    buscarNotificacoes()
-  }, [buscarNotificacoes])
+    let ignorado = false
+    const buscar = async () => {
+      if (!usuarioId) return
+      const { data, error } = await supabase
+        .from('notificacoes')
+        .select('*')
+        .eq('usuario_id', usuarioId)
+        .order('created_at', { ascending: false })
+        .limit(50)
+        .returns<Notificacao[]>()
+
+      if (!ignorado && !error && data) {
+        setNotificacoes(data)
+      }
+      if (!ignorado) {
+        setCarregando(false)
+      }
+    }
+    buscar()
+    return () => { ignorado = true }
+  }, [usuarioId])
 
   // ── Supabase Realtime: escuta novas notificações ─────────────────────────
   useEffect(() => {

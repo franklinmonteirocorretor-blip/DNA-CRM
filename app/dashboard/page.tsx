@@ -12,7 +12,7 @@ export default async function DashboardPage() {
 
   // Busca a produção diária do corretor logado (últimos 7 dias)
   const hoje = new Date().toISOString().slice(0, 10)
-  const seteDiasAtras = new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10)
+  const seteDiasAtras = new Date(new Date().getTime() - 7 * 86400000).toISOString().slice(0, 10)
 
   const { data: producao } = await supabase
     .from('producao_diaria')
@@ -33,7 +33,7 @@ export default async function DashboardPage() {
   // ---- Alertas ----
 
   // 1. Clientes sem contato há ≥ 5 dias (etapas ativas)
-  const cincoDiasAtras = new Date(Date.now() - 5 * 86400000).toISOString()
+  const cincoDiasAtras = new Date(new Date().getTime() - 5 * 86400000).toISOString()
   const etapasParado = ['NOVO_LEAD', 'CONTATOS', 'AGENDAMENTO', 'COMPARECIMENTO']
   const { data: clientesParados } = await supabase
     .from('clientes')
@@ -88,7 +88,7 @@ export default async function DashboardPage() {
   )
 
   // 4. Pós-venda com prazo vencido ou próximo (até 3 dias)
-  const tresDiasFuturo = new Date(Date.now() + 3 * 86400000).toISOString()
+  const tresDiasFuturo = new Date(new Date().getTime() + 3 * 86400000).toISOString()
   const { data: posVendaAlertas } = await supabase
     .from('clientes')
     .select('id, nome, proxima_acao, proxima_acao_em')

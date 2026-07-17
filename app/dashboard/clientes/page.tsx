@@ -217,7 +217,7 @@ function ClienteCard({ cliente }: { cliente: Cliente }) {
 
   // Calcula dias desde a última atividade
   const diasSemContato = Math.floor(
-    (Date.now() - new Date(cliente.ultima_atividade_em).getTime()) / 86400000
+    (new Date().getTime() - new Date(cliente.ultima_atividade_em).getTime()) / 86400000
   )
 
   // Alerta se está parado há ≥ 5 dias (exceto etapas finais)

@@ -131,7 +131,7 @@ export default async function EquipePage() {
   )
 
   // ── Produção semanal da equipe ─────────────────────────────────────────
-  const seteDiasAtras = new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10)
+  const seteDiasAtras = new Date(new Date().getTime() - 7 * 86400000).toISOString().slice(0, 10)
 
   const { data: producaoSemanal } = await supabase
     .from('producao_diaria')

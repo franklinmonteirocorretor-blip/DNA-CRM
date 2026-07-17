@@ -1,5 +1,5 @@
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
-import { Cliente, Agendamento, Comparecimento, Documento } from '@/src/types'
+import type { Cliente, Agendamento, Documento } from '@/src/types'
 import Link from 'next/link'
 
 // Calcula dias entre duas datas
@@ -41,6 +41,7 @@ export default async function LembretesDashboard() {
     .lt('data_hora', depoisDeAmanha.toISOString())
     .order('data_hora', { ascending: true })
     .limit(15)
+    .returns<(Pick<Agendamento, 'id'|'cliente_id'|'data_hora'|'empreendimento_interesse'|'status'> & { clientes: { nome: string } | null; comparecimentos: { id: string }[] | null })[]>()
 
   // === 3. Documentos pendentes de validação ===
   const { data: documentosPendentes } = await supabase
@@ -50,6 +51,7 @@ export default async function LembretesDashboard() {
     .is('deleted_at', null)
     .order('created_at', { ascending: true })
     .limit(10)
+    .returns<(Pick<Documento, 'id'|'cliente_id'|'tipo'|'created_at'> & { clientes: { nome: string } | null })[]>()
 
   // === 4. Pós-venda com prazo vencido ou próximo (≤ 3 dias) ===
   const tresDiasFuturo = new Date(hoje)
@@ -62,6 +64,8 @@ export default async function LembretesDashboard() {
     .not('proxima_acao_em', 'is', null)
     .lte('proxima_acao_em', tresDiasFuturo.toISOString())
     .order('proxima_acao_em', { ascending: true })
+    .limit(10)
+    .returns<Pick<Cliente, 'id'|'nome'|'proxima_acao'|'proxima_acao_em'|'etapa_atual'>[]>()
     .limit(10)
 
   // Conta o total de alertas
@@ -137,10 +141,10 @@ export default async function LembretesDashboard() {
             cor="blue"
             subtitulo={`${agendamentosProximos.length} visita${agendamentosProximos.length !== 1 ? 's' : ''} próxima${agendamentosProximos.length !== 1 ? 's' : ''}`}
           >
-            {agendamentosProximos.map((a: any) => {
+            {agendamentosProximos.map((a) => {
               const data = new Date(a.data_hora)
               const ehHoje = data.toDateString() === hoje.toDateString()
-              const jaTemComparecimento = a.comparecimentos?.length > 0
+              const jaTemComparecimento = (a.comparecimentos?.length ?? 0) > 0
 
               return (
                 <Link
@@ -177,7 +181,7 @@ export default async function LembretesDashboard() {
             cor="amber"
             subtitulo={`${documentosPendentes.length} doc${documentosPendentes.length !== 1 ? 's' : ''} aguardando validação`}
           >
-            {documentosPendentes.map((d: any) => (
+            {documentosPendentes.map((d) => (
               <Link
                 key={d.id}
                 href={`/dashboard/clientes/${d.cliente_id}`}
@@ -207,8 +211,8 @@ export default async function LembretesDashboard() {
             cor="indigo"
             subtitulo={`${posVendaPrazos.length} cliente${posVendaPrazos.length !== 1 ? 's' : ''} com prazo próximo`}
           >
-            {posVendaPrazos.map((c: any) => {
-              const prazo = new Date(c.proxima_acao_em)
+            {posVendaPrazos.map((c) => {
+              const prazo = new Date(c.proxima_acao_em!)
               const dias = diasEntre(hoje, prazo)
               const vencido = dias < 0
 
