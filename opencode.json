@@ -1,0 +1,27 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "username": "Dono",
+  "default_agent": "mimo",
+  "snapshot": true,
+  "autoupdate": "notify",
+  "instructions": [
+    "AGENTS.md"
+  ],
+  "permission": {
+    "edit": "allow",
+    "bash": "allow",
+    "read": "allow",
+    "glob": "allow",
+    "grep": "allow",
+    "task": "allow",
+    "external_directory": "allow",
+    "webfetch": "allow",
+    "websearch": "allow",
+    "todowrite": "allow",
+    "question": "allow"
+  },
+  "compaction": {
+    "auto": true,
+    "tail_turns": 2
+  }
+}
