@@ -48,6 +48,23 @@ interface RegistrarPosVendaInput {
   proxima_acao_em: string | null
 }
 
+// === SPRINT 1 — Feature 01: Edição de Cliente ===
+
+export interface EditarClienteInput {
+  cliente_id: string
+  nome: string
+  cpf: string           // apenas dígitos (11)
+  telefone: string      // apenas dígitos (10 ou 11)
+  email: string | null
+  renda: number | null
+  dependentes: number
+  tempo_clt_meses: number | null
+  saldo_fgts: number
+  eh_casado: boolean
+  empreendimento_id: string | null
+  observacoes: string | null
+}
+
 export async function agendarVisita(input: AgendarVisitaInput) {
   const supabase = await createSupabaseServerClient()
 
@@ -399,6 +416,96 @@ export async function registrarPosVenda(input: RegistrarPosVendaInput) {
   })
 
   revalidatePath(`/dashboard/clientes/${input.cliente_id}`)
+
+  return { sucesso: true }
+}
+
+// === SPRINT 1 — Feature 01: Edição de Cliente ===
+
+export async function editarCliente(input: EditarClienteInput) {
+  const supabase = await createSupabaseServerClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { erro: 'Você precisa estar logado.' }
+  }
+
+  // Validação completa dos campos
+  const erros: string[] = []
+
+  if (!input.nome || input.nome.trim().length < 3) {
+    erros.push('O nome deve ter pelo menos 3 caracteres.')
+  }
+
+  if (!input.cpf || input.cpf.length !== 11) {
+    erros.push('O CPF deve ter exatamente 11 dígitos.')
+  }
+
+  if (!input.telefone || (input.telefone.length !== 11 && input.telefone.length !== 10)) {
+    erros.push('O telefone deve ter 10 ou 11 dígitos (com DDD).')
+  }
+
+  if (input.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.email.trim())) {
+    erros.push('O e-mail informado não é válido.')
+  }
+
+  if (input.renda !== null && input.renda < 0) {
+    erros.push('A renda não pode ser negativa.')
+  }
+
+  if (input.dependentes < 0 || input.dependentes > 20) {
+    erros.push('O número de dependentes deve ser entre 0 e 20.')
+  }
+
+  if (input.tempo_clt_meses !== null && input.tempo_clt_meses < 0) {
+    erros.push('O tempo de CLT não pode ser negativo.')
+  }
+
+  if (input.saldo_fgts < 0) {
+    erros.push('O saldo FGTS não pode ser negativo.')
+  }
+
+  if (erros.length > 0) {
+    return { erros }
+  }
+
+  // Atualiza o cliente no Supabase
+  const { error } = await supabase
+    .from('clientes')
+    .update({
+      nome: input.nome.trim(),
+      cpf: input.cpf,
+      telefone: input.telefone,
+      email: input.email?.trim() || null,
+      renda: input.renda,
+      dependentes: input.dependentes,
+      tempo_clt_meses: input.tempo_clt_meses,
+      saldo_fgts: input.saldo_fgts,
+      eh_casado: input.eh_casado,
+      empreendimento_id: input.empreendimento_id || null,
+      observacoes: input.observacoes?.trim() || null,
+    })
+    .eq('id', input.cliente_id)
+
+  if (error) {
+    return { erros: [error.message] }
+  }
+
+  // Registra atividade automática de auditoria
+  await supabase.from('atividades').insert({
+    cliente_id: input.cliente_id,
+    usuario_id: user.id,
+    tipo: 'WHATSAPP' as const,
+    resultado: 'Dados do cliente atualizados',
+    observacao: `Campos editados por ${user.email ?? user.id}`,
+  })
+
+  // Revalida tanto a ficha individual quanto a listagem
+  revalidatePath(`/dashboard/clientes/${input.cliente_id}`)
+  revalidatePath('/dashboard/clientes')
 
   return { sucesso: true }
 }

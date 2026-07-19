@@ -1,7 +1,7 @@
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
-import { Cliente, Conjuge, Atividade, Documento, Agendamento, Comparecimento, EtapaFunil, TipoAtividade } from '@/src/types'
+import { Cliente, Conjuge, Atividade, Documento, Agendamento, Comparecimento, TipoAtividade } from '@/src/types'
 import { notFound } from 'next/navigation'
-import Link from 'next/link'
+import FormEdicaoCliente from '@/src/components/clients/FormEdicaoCliente'
 import FormAtividade from '@/src/components/clients/FormAtividade'
 import FormAgendamento from '@/src/components/clients/FormAgendamento'
 import SecaoDocumentos from '@/src/components/clients/SecaoDocumentos'
@@ -10,35 +10,7 @@ import FormAnalise from '@/src/components/clients/FormAnalise'
 import FormFechamento from '@/src/components/clients/FormFechamento'
 import FormPosVenda from '@/src/components/clients/FormPosVenda'
 
-// Labels das etapas do funil em português
-const ETAPA_LABEL: Record<EtapaFunil, string> = {
-  NOVO_LEAD: 'Novo Lead',
-  CONTATOS: 'Contatos',
-  AGENDAMENTO: 'Agendamento',
-  COMPARECIMENTO: 'Comparecimento',
-  ANALISE: 'Análise',
-  RESTRICOES: 'Restrições',
-  CONDICIONADOS: 'Condicionados',
-  APROVADOS: 'Aprovados',
-  FECHAMENTOS: 'Fechamentos',
-  POS_VENDA: 'Pós-Venda',
-}
-
-// Cores dos badges por etapa
-const ETAPA_COR: Record<EtapaFunil, string> = {
-  NOVO_LEAD: 'bg-gray-100 text-gray-700',
-  CONTATOS: 'bg-yellow-100 text-yellow-700',
-  AGENDAMENTO: 'bg-blue-100 text-blue-700',
-  COMPARECIMENTO: 'bg-purple-100 text-purple-700',
-  ANALISE: 'bg-orange-100 text-orange-700',
-  RESTRICOES: 'bg-red-100 text-red-700',
-  CONDICIONADOS: 'bg-pink-100 text-pink-700',
-  APROVADOS: 'bg-teal-100 text-teal-700',
-  FECHAMENTOS: 'bg-green-100 text-green-700',
-  POS_VENDA: 'bg-indigo-100 text-indigo-700',
-}
-
-// Labels e ícones dos tipos de atividade
+// Labels e ícones dos tipos de atividade (usados na seção de últimas atividades)
 const ATIVIDADE_LABEL: Record<TipoAtividade, { label: string; icone: string }> = {
   LIGACAO: { label: 'Ligação', icone: '📞' },
   WHATSAPP: { label: 'WhatsApp', icone: '💬' },
@@ -147,152 +119,19 @@ export default async function FichaClientePage({ params }: Props) {
 
   return (
     <div className="space-y-6">
-      {/* Cabeçalho */}
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-gray-900">{cliente.nome}</h1>
-            <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${ETAPA_COR[cliente.etapa_atual]}`}>
-              {ETAPA_LABEL[cliente.etapa_atual]}
-            </span>
-          </div>
-          <p className="mt-1 text-sm text-gray-500">
-            Cliente desde {criadoEm} · Última atividade: {ultimaAtividade}
-            {diasSemContato >= 3 && (
-              <span className="ml-2 text-orange-500 font-medium">
-                ({diasSemContato}d sem contato)
-              </span>
-            )}
-          </p>
-        </div>
-        <Link
-          href="/dashboard/clientes"
-          className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
-        >
-          ← Voltar
-        </Link>
-      </div>
-
-      {/* Grid de 2 colunas: Dados principais + Conjuge e complementares */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Coluna Esquerda — Dados pessoais e financeiros */}
-        <div className="space-y-6">
-          {/* Card: Dados pessoais */}
-          <div className="rounded-lg bg-white p-5 shadow-sm">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400">
-              Dados pessoais
-            </h2>
-            <dl className="mt-3 space-y-3">
-              <InfoItem label="CPF" value={cpfFormatado} />
-              <InfoItem label="Telefone" value={telFormatado} />
-              {cliente.email && <InfoItem label="E-mail" value={cliente.email} />}
-              <InfoItem label="Dependentes" value={String(cliente.dependentes)} />
-            </dl>
-          </div>
-
-          {/* Card: Informações financeiras */}
-          <div className="rounded-lg bg-white p-5 shadow-sm">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400">
-              Informações financeiras
-            </h2>
-            <dl className="mt-3 space-y-3">
-              <InfoItem label="Renda mensal" value={rendaFormatada} />
-              <InfoItem label="Saldo FGTS" value={fgtsFormatado} />
-              {cliente.tempo_clt_meses != null && (
-                <InfoItem label="Tempo CLT" value={`${cliente.tempo_clt_meses} meses`} />
-              )}
-            </dl>
-          </div>
-
-          {/* Card: Observações */}
-          {cliente.observacoes && (
-            <div className="rounded-lg bg-white p-5 shadow-sm">
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400">
-                Observações
-              </h2>
-              <p className="mt-2 whitespace-pre-wrap text-sm text-gray-700">
-                {cliente.observacoes}
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Coluna Direita — Cônjuge + Status do funil */}
-        <div className="space-y-6">
-          {/* Card: Cônjuge */}
-          <div className="rounded-lg bg-white p-5 shadow-sm">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400">
-              Cônjuge
-            </h2>
-            {cliente.eh_casado && conjuge ? (
-              <dl className="mt-3 space-y-3">
-                <InfoItem label="Nome" value={conjuge.nome || 'Não informado'} />
-                {conjuge.cpf && (
-                  <InfoItem
-                    label="CPF"
-                    value={conjuge.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')}
-                  />
-                )}
-                {conjuge.renda != null && (
-                  <InfoItem
-                    label="Renda mensal"
-                    value={`R$ ${conjuge.renda.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-                  />
-                )}
-                <InfoItem
-                  label="Saldo FGTS"
-                  value={`R$ ${conjuge.saldo_fgts.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-                />
-                {conjuge.tempo_clt_meses != null && (
-                  <InfoItem label="Tempo CLT" value={`${conjuge.tempo_clt_meses} meses`} />
-                )}
-              </dl>
-            ) : (
-              <p className="mt-2 text-sm text-gray-400">Cliente não é casado.</p>
-            )}
-          </div>
-
-          {/* Card: Status no funil */}
-          <div className="rounded-lg bg-white p-5 shadow-sm">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400">
-              Status no funil
-            </h2>
-            <dl className="mt-3 space-y-3">
-              <InfoItem label="Etapa atual" value={ETAPA_LABEL[cliente.etapa_atual]} />
-              {cliente.empreendimento_interesse && (
-                <InfoItem label="Empreendimento" value={cliente.empreendimento_interesse} />
-              )}
-              {cliente.resultado_analise && (
-                <InfoItem label="Resultado análise" value={cliente.resultado_analise} />
-              )}
-              {cliente.data_fechamento && (
-                <InfoItem
-                  label="Data fechamento"
-                  value={new Date(cliente.data_fechamento).toLocaleDateString('pt-BR')}
-                />
-              )}
-              {cliente.ficha_proposta_assinada && (
-                <InfoItem label="Ficha proposta" value="Assinada ✅" />
-              )}
-              {cliente.pasta_completa_em && (
-                <InfoItem
-                  label="Pasta completa"
-                  value={`${new Date(cliente.pasta_completa_em).toLocaleDateString('pt-BR')} 📁`}
-                />
-              )}
-              {cliente.proxima_acao && (
-                <InfoItem label="Próxima ação" value={cliente.proxima_acao} />
-              )}
-              {cliente.proxima_acao_em && (
-                <InfoItem
-                  label="Prazo próxima ação"
-                  value={new Date(cliente.proxima_acao_em).toLocaleDateString('pt-BR')}
-                />
-              )}
-            </dl>
-          </div>
-        </div>
-      </div>
+      {/* SPRINT 1 — Feature 01: Bloco editável de dados do cliente */}
+      <FormEdicaoCliente
+        cliente={cliente}
+        conjuge={conjuge ?? null}
+        cpfFormatado={cpfFormatado}
+        telFormatado={telFormatado}
+        rendaFormatada={rendaFormatada}
+        fgtsFormatado={fgtsFormatado}
+        criadoEm={criadoEm}
+        ultimaAtividade={ultimaAtividade}
+        diasSemContato={diasSemContato}
+        pastaCompleta={pastaCompleta}
+      />
 
       {/* Seção: Comparecimentos (agendamentos e resultados) */}
       <SecaoComparecimento
@@ -385,16 +224,6 @@ export default async function FichaClientePage({ params }: Props) {
           </p>
         )}
       </div>
-    </div>
-  )
-}
-
-// Micro-componente para pares label → valor nos cards
-function InfoItem({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-baseline justify-between gap-2">
-      <dt className="text-xs font-medium text-gray-500">{label}</dt>
-      <dd className="text-sm font-semibold text-gray-900 text-right">{value}</dd>
     </div>
   )
 }
