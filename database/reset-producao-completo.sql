@@ -1239,5 +1239,38 @@ revoke all on function fn_ranking_mes() from public;
 grant execute on function fn_ranking_mes() to authenticated;
 
 -- ==========================================================================
--- FIM DO RESET COMPLETO. Todas as 19 migrations aplicadas com correcoes.
+-- 0020 — MÓDULO AGENDA
+-- Colunas 'local' e 'observacao' em agendamentos + indices de busca
+-- ==========================================================================
+
+alter table agendamentos
+  add column if not exists local text;
+
+alter table agendamentos
+  add column if not exists observacao text;
+
+create index if not exists idx_agendamentos_status
+  on agendamentos (status)
+  where deleted_at is null;
+
+create index if not exists idx_agendamentos_observacao_trgm
+  on agendamentos using gin (observacao gin_trgm_ops)
+  where observacao is not null;
+
+-- Backfill: copia observacao da atividade associada mais recente
+update agendamentos a
+set observacao = (
+  select ativ.observacao
+  from atividades ativ
+  where ativ.cliente_id = a.cliente_id
+    and ativ.resultado = 'Visita agendada'
+    and ativ.created_at >= a.created_at
+    and ativ.created_at <= a.created_at + interval '5 minutes'
+  order by ativ.created_at desc
+  limit 1
+)
+where a.observacao is null;
+
+-- ==========================================================================
+-- FIM DO RESET COMPLETO. Todas as 20 migrations aplicadas com correcoes.
 -- ==========================================================================

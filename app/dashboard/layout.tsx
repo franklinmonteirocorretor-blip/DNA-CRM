@@ -64,6 +64,7 @@ export default async function DashboardLayout({
         <div className="flex items-center gap-1 overflow-x-auto">
           <NavLink href="/dashboard">Dashboard</NavLink>
           <NavLink href="/dashboard/clientes">Clientes</NavLink>
+          <NavLink href="/dashboard/agenda">Agenda</NavLink>
           <NavLink href="/dashboard/funil">Funil</NavLink>
           <NavLink href="/dashboard/empreendimentos">Empreendimentos</NavLink>
           <NavLink href="/dashboard/rankings">Rankings</NavLink>

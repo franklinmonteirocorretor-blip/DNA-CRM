@@ -124,6 +124,8 @@ export interface Agendamento {
   empreendimento_id: string | null
   data_hora: string
   status: StatusAgendamento
+  local: string | null
+  observacao: string | null
   created_at: string
   updated_at: string
 }
@@ -196,4 +198,49 @@ export interface HistoricoAcao {
   dados_novos: Record<string, unknown> | null
   observacao: string | null
   created_at: string
+}
+
+// === Sprint 2 — Módulo Agenda ===
+
+// Evento enriquecido de agendamento para a visualização do calendário
+export interface AgendaEvent {
+  agendamento: Agendamento
+  comparecimento: Comparecimento | null
+  cliente: {
+    id: string
+    nome: string
+    telefone: string
+    email: string | null
+    etapa_atual: EtapaFunil
+  }
+  corretor: {
+    id: string
+    nome: string
+  }
+  empreendimento: {
+    id: string
+    nome: string
+  } | null
+}
+
+// View do calendário
+export type AgendaView = 'monthly' | 'weekly' | 'daily' | 'list'
+
+// Resumo para o card do Dashboard
+export interface AgendaResumo {
+  total: number
+  confirmados: number
+  pendentes: number
+  reagendados: number
+  atrasados: number
+}
+
+// Filtros da agenda
+export interface AgendaFiltros {
+  corretorId: string | null
+  empreendimentoId: string | null
+  status: StatusAgendamento | 'COMPARECEU' | 'NAO_COMPARECEU' | null
+  dataInicio: string | null
+  dataFim: string | null
+  clienteBusca: string | null
 }

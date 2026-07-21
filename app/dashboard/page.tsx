@@ -2,6 +2,7 @@ import { createSupabaseServerClient } from '@/src/lib/server/supabase'
 import { ProducaoDiaria, Cliente, Agendamento, Documento } from '@/src/types'
 import Link from 'next/link'
 import SecaoAlertas from '@/src/components/dashboard/SecaoAlertas'
+import CardAgendaHoje from '@/src/components/dashboard/CardAgendaHoje'
 
 export default async function DashboardPage() {
   const supabase = await createSupabaseServerClient()
@@ -117,7 +118,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Acesso rápido */}
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         <Link
           href="/dashboard/clientes"
           className="rounded-lg border border-blue-100 bg-blue-50 p-4 shadow-sm hover:bg-blue-100 transition"
@@ -142,6 +143,9 @@ export default async function DashboardPage() {
           <p className="mt-3 text-sm font-semibold text-green-700">+ Cadastrar</p>
           <p className="mt-1 text-[11px] text-green-400">Adicionar cliente →</p>
         </Link>
+
+        {/* Sprint 2: Card Agenda de Hoje */}
+        <CardAgendaHoje />
       </div>
 
       {/* Alertas e Lembretes */}
