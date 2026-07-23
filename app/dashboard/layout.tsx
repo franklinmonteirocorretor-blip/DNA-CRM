@@ -63,6 +63,7 @@ export default async function DashboardLayout({
       <nav className="border-b bg-white px-6 py-2">
         <div className="flex items-center gap-1 overflow-x-auto">
           <NavLink href="/dashboard">Dashboard</NavLink>
+          <NavLink href="/dashboard/operacao">Operação</NavLink>
           <NavLink href="/dashboard/clientes">Clientes</NavLink>
           <NavLink href="/dashboard/corretores">Corretores</NavLink>
           <NavLink href="/dashboard/agenda">Agenda</NavLink>
