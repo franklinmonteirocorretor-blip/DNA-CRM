@@ -244,3 +244,158 @@ export interface AgendaFiltros {
   dataFim: string | null
   clienteBusca: string | null
 }
+
+// === Sprint 3 — Gestão Comercial ===
+
+// Seção 1: Resumo da Operação
+export interface GestaoResumoOperacao {
+  leadsAtivos: number
+  clientesAtendimento: number
+  agendamentosHoje: number
+  comparecimentosHoje: number
+  aprovacoesMes: number
+  vendasMes: number
+  vgvMes: number
+  comissaoPrevista: number
+}
+
+// Seção 2: KPIs Diários por corretor
+export interface GestaoKPI {
+  usuarioId: string
+  nome: string
+  avatarUrl: string | null
+  ligacoes: number
+  whatsapps: number
+  followUps: number
+  agendamentos: number
+  comparecimentos: number
+  pastas: number
+  percentualDiario: number // 0-100
+  status: 'META_BATIDA' | 'META_PENDENTE'
+}
+
+// Metas oficiais (constantes)
+export const KPI_METAS_OFICIAIS = {
+  ligacoes: 80,
+  whatsapps: 40,
+  followUps: 20,
+  agendamentos: 2,
+  comparecimentos: 2,
+  pastas: 1,
+} as const
+
+// Seção 3: Ranking
+export interface GestaoRankingItem {
+  posicao: number
+  usuarioId: string
+  nome: string
+  avatarUrl: string | null
+  pontuacao: number
+  vendas: number
+  aprovacoes: number
+}
+
+export const PONTUACAO_RANKING = {
+  venda: 1000,
+  aprovacao: 300,
+  comparecimento: 120,
+  agendamento: 70,
+  pasta: 40,
+  followUp: 10,
+  whatsapp: 3,
+  ligacao: 1,
+} as const
+
+// Seção 4: Funil Gerencial
+export interface GestaoFunilEtapa {
+  etapa: EtapaFunil
+  label: string
+  quantidade: number
+  percentual: number // % do total de clientes ativos no funil
+  taxaConversao: number | null // % que avançou da etapa anterior; null na primeira
+}
+
+// Seção 5: Produtividade
+export interface GestaoProducaoSerie {
+  data: string
+  ligacoes: number
+  whatsapps: number
+  followUps: number
+  agendamentos: number
+  comparecimentos: number
+  aprovacoes: number
+  vendas: number
+  pontuacao: number
+}
+
+export type GestaoProducaoAgrupamento = 'daily' | 'weekly' | 'monthly'
+
+// Seção 6: Alertas gerenciais
+export interface GestaoAlertaClienteParado {
+  clienteId: string
+  nome: string
+  etapa: EtapaFunil
+  diasSemContato: number
+  corretorNome: string
+}
+
+export interface GestaoAlertaAgendamentoPerdido {
+  agendamentoId: string
+  clienteNome: string
+  dataHora: string
+  status: StatusAgendamento
+  corretorNome: string
+}
+
+export interface GestaoAlertaPendenciaDoc {
+  clienteId: string
+  clienteNome: string
+  qtdDocumentosPendentes: number
+  etapa: EtapaFunil
+}
+
+export interface GestaoAlertaClienteParadoFunil {
+  clienteId: string
+  nome: string
+  etapa: EtapaFunil
+  diasNaEtapa: number
+  corretorNome: string
+}
+
+export interface GestaoAlertaAguardandoRetorno {
+  clienteId: string
+  nome: string
+  proximaAcao: string
+  proximaAcaoEm: string
+  corretorNome: string
+}
+
+export interface GestaoAlertas {
+  clientesSemContato3dias: GestaoAlertaClienteParado[]
+  agendamentosPerdidos: GestaoAlertaAgendamentoPerdido[]
+  pendenciasDocumentais: GestaoAlertaPendenciaDoc[]
+  clientesParadosFunil: GestaoAlertaClienteParadoFunil[]
+  aguardandoRetorno: GestaoAlertaAguardandoRetorno[]
+}
+
+// Seção 7: Metas
+export interface GestaoMeta {
+  metaEquipe: { vendas: number; aprovacoes: number; agendamentos: number; comparecimentos: number; pastas: number }
+  metaIndividual: { vendas: number; aprovacoes: number; agendamentos: number; comparecimentos: number; pastas: number }
+  realizadoEquipe: { vendas: number; aprovacoes: number; agendamentos: number; comparecimentos: number; pastas: number }
+  realizadoIndividual: { vendas: number; aprovacoes: number; agendamentos: number; comparecimentos: number; pastas: number }
+  percentualEquipe: number // 0-100
+  percentualIndividual: number // 0-100
+  diasRestantes: number
+  projecaoFechamento: { vendas: number; vgv: number }
+}
+
+// Seção 8: Filtros
+export interface GestaoFiltros {
+  periodo: 'hoje' | 'semana' | 'mes' | 'personalizado'
+  dataInicio: string | null
+  dataFim: string | null
+  corretorId: string | null
+  empreendimentoId: string | null
+  equipeId: string | null
+}
