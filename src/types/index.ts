@@ -107,6 +107,8 @@ export interface Cliente {
   observacoes: string | null
   ultima_atividade_em: string
   pasta_completa_em: string | null
+  entrou_etapa_em: string | null
+  tempo_etapas: PipelineTempoEtapa[] | null
   created_at: string
   updated_at: string
   deleted_at: string | null
@@ -472,4 +474,99 @@ export interface TransferenciaCarteira {
   transferirClientes: boolean
   transferirAgendamentos: boolean
   transferirFollowUps: boolean
+}
+
+// === Sprint 5 — Pipeline Inteligente ===
+
+// Registro de tempo em uma etapa (armazenado no JSONB tempo_etapas)
+export interface PipelineTempoEtapa {
+  etapa: EtapaFunil
+  data_entrada: string
+  data_saida: string
+}
+
+// Configuração visual de cada etapa no pipeline
+export interface PipelineEtapaConfig {
+  etapa: EtapaFunil
+  label: string
+  cor: string
+  icone: string
+  descricao: string
+  proximaAcaoSugerida: string
+  tempoMaximoHoras: number
+}
+
+// Card de cliente no pipeline (dados mínimos para o card)
+export interface PipelineClienteCard {
+  id: string
+  nome: string
+  telefone: string
+  etapaAtual: EtapaFunil
+  entrouEtapaEm: string | null
+  diasNaEtapa: number
+  ultimaAtividadeEm: string | null
+  proximaAcao: string | null
+  proximaAcaoEm: string | null
+  vgv: number | null
+  empreendimentoInteresse: string | null
+  corretorNome: string
+  pendenciaDoc: boolean
+  agendamentoProximo: { dataHora: string; status: string } | null
+  diasSemContato: number
+}
+
+// Dados completos do cliente no painel lateral
+export interface PipelineClienteDetalhe {
+  id: string
+  nome: string
+  telefone: string
+  email: string | null
+  etapaAtual: EtapaFunil
+  entrouEtapaEm: string | null
+  diasNaEtapa: number
+  ultimaAtividadeEm: string | null
+  diasSemContato: number
+  proximaAcao: string | null
+  proximaAcaoEm: string | null
+  vgv: number | null
+  comissaoValor: number | null
+  empreendimentoInteresse: string | null
+  empreendimentoNome: string | null
+  corretorNome: string
+  historicoEtapas: PipelineTempoEtapa[]
+  agendamentos: { id: string; dataHora: string; status: string }[]
+  documentos: { id: string; tipo: string; status: string }[]
+  atividadesRecentes: { tipo: string; resultado: string | null; created_at: string }[]
+  pendenciaDoc: boolean
+  pendenciaAcao: boolean
+}
+
+// KPIs do pipeline
+export interface PipelineKPIs {
+  clientesAtivos: number
+  tempoMedioGeralHoras: number
+  conversaoGeral: number // % leads → fechamentos
+  vgvTotalNegociacao: number
+  vgvPrevisto: number
+  comissaoPrevista: number
+  tempoPorEtapa: { etapa: EtapaFunil; label: string; tempoMedioHoras: number; quantidade: number }[]
+  vgvPorEtapa: { etapa: EtapaFunil; label: string; vgvTotal: number; comissaoTotal: number; quantidade: number }[]
+}
+
+// Alertas do pipeline
+export interface PipelineAlertas {
+  semContato: PipelineClienteCard[]
+  paradosNaEtapa: PipelineClienteCard[]
+  aguardandoDocumentos: PipelineClienteCard[]
+  aguardandoAprovacao: PipelineClienteCard[]
+  semProximaAcao: PipelineClienteCard[]
+  comVisitaMarcada: PipelineClienteCard[]
+}
+
+// Filtros do pipeline
+export interface PipelineFiltros {
+  etapa: EtapaFunil | null
+  corretorId: string | null
+  empreendimentoId: string | null
+  busca: string | null
 }

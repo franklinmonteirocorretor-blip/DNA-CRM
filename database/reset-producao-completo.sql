@@ -1362,5 +1362,113 @@ update usuarios
 where perfil = 'ADMINISTRADOR' and status_usuario is null;
 
 -- ==========================================================================
--- FIM DO RESET COMPLETO. Todas as 21 migrations aplicadas com correcoes.
+-- 0022 — PIPELINE INTELIGENTE
+-- Rastreamento de tempo nas etapas + trigger de proxima acao
+-- ==========================================================================
+
+alter table clientes
+  add column if not exists entrou_etapa_em timestamptz,
+  add column if not exists tempo_etapas jsonb default '[]'::jsonb;
+
+update clientes
+  set entrou_etapa_em = updated_at
+where entrou_etapa_em is null;
+
+create index if not exists idx_clientes_entrou_etapa
+  on clientes (entrou_etapa_em)
+  where deleted_at is null;
+
+create or replace function fn_pipeline_mudanca_etapa()
+returns trigger as $$
+declare
+  etapa_anterior text;
+begin
+  if new.etapa_atual is distinct from old.etapa_atual then
+    etapa_anterior := old.etapa_atual;
+    new.tempo_etapas := old.tempo_etapas || jsonb_build_object(
+      'etapa', etapa_anterior,
+      'data_entrada', old.entrou_etapa_em,
+      'data_saida', now()
+    );
+    new.entrou_etapa_em := now();
+    new.proxima_acao := case new.etapa_atual
+      when 'NOVO_LEAD'       then 'Fazer primeiro contato (ligacao)'
+      when 'CONTATOS'        then 'Agendar analise financeira'
+      when 'AGENDAMENTO'     then 'Confirmar presenca na visita'
+      when 'COMPARECIMENTO'  then 'Encaminhar para analise de credito'
+      when 'ANALISE'         then 'Solicitar documentacao completa'
+      when 'RESTRICOES'      then 'Resolver pendencias financeiras'
+      when 'CONDICIONADOS'   then 'Aguardar aprovacao do banco'
+      when 'APROVADOS'       then 'Agendar visita ao empreendimento'
+      when 'FECHAMENTOS'     then 'Conferir documentacao para contrato'
+      when 'POS_VENDA'       then 'Solicitar indicacao de novos clientes'
+      else 'Acompanhar cliente'
+    end;
+    new.proxima_acao_em := case new.etapa_atual
+      when 'NOVO_LEAD'       then now() + interval '24 hours'
+      when 'CONTATOS'        then now() + interval '48 hours'
+      when 'AGENDAMENTO'     then now() + interval '24 hours'
+      when 'COMPARECIMENTO'  then now() + interval '48 hours'
+      when 'ANALISE'         then now() + interval '72 hours'
+      when 'RESTRICOES'      then now() + interval '72 hours'
+      when 'CONDICIONADOS'   then now() + interval '72 hours'
+      when 'APROVADOS'       then now() + interval '72 hours'
+      when 'FECHAMENTOS'     then now() + interval '48 hours'
+      when 'POS_VENDA'       then now() + interval '168 hours'
+      else now() + interval '72 hours'
+    end;
+  end if;
+  return new;
+end;
+$$ language plpgsql;
+
+drop trigger if exists trg_pipeline_mudanca_etapa on clientes;
+create trigger trg_pipeline_mudanca_etapa
+  before update on clientes
+  for each row
+  execute function fn_pipeline_mudanca_etapa();
+
+create or replace function fn_tempo_medio_etapas()
+returns table (etapa text, tempo_medio_horas numeric, quantidade int) as $$
+begin
+  return query
+  with historico as (
+    select jsonb_array_elements(tempo_etapas) as registro
+    from clientes
+    where deleted_at is null
+      and tempo_etapas is not null
+      and jsonb_array_length(tempo_etapas) > 0
+  )
+  select
+    registro->>'etapa' as etapa,
+    round(avg(extract(epoch from
+      (registro->>'data_saida')::timestamptz -
+      (registro->>'data_entrada')::timestamptz
+    ) / 3600)::numeric, 1) as tempo_medio_horas,
+    count(*)::int as quantidade
+  from historico
+  group by registro->>'etapa'
+  order by etapa;
+end;
+$$ language plpgsql stable security definer;
+
+create or replace function fn_vgv_por_etapa(p_corretor_id uuid default null)
+returns table (etapa text, vgv_total numeric, comissao_total numeric, quantidade int) as $$
+begin
+  return query
+  select
+    c.etapa_atual::text,
+    coalesce(sum(c.vgv), 0)::numeric,
+    coalesce(sum(c.comissao_valor), 0)::numeric,
+    count(*)::int
+  from clientes c
+  where c.deleted_at is null
+    and (p_corretor_id is null or c.corretor_responsavel_id = p_corretor_id)
+  group by c.etapa_atual
+  order by c.etapa_atual;
+end;
+$$ language plpgsql stable security definer;
+
+-- ==========================================================================
+-- FIM DO RESET COMPLETO. Todas as 22 migrations aplicadas com correcoes.
 -- ==========================================================================
