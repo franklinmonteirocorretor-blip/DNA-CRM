@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { buscarClienteDetalhe, moverEtapa } from '@/app/dashboard/funil/actions'
-import { PipelineClienteDetalhe, EtapaFunil } from '@/src/types'
+import { verificarChecklist } from '@/app/dashboard/documentos/actions'
+import { PipelineClienteDetalhe, EtapaFunil, CHECKLIST_OBRIGATORIO } from '@/src/types'
 import Link from 'next/link'
 
 const ETAPA_LABELS: Record<EtapaFunil, string> = {
@@ -50,7 +51,19 @@ export default function PainelClientePipeline({
     })
   }, [clienteId])
 
+  const [mensagemBloqueio, setMensagemBloqueio] = useState<string | null>(null)
+
   async function avancarEtapa(novaEtapa: EtapaFunil) {
+    // Sprint 7: verifica checklist obrigatório antes de avançar para etapas que exigem docs
+    const obrigatorios = CHECKLIST_OBRIGATORIO[novaEtapa]
+    if (obrigatorios && obrigatorios.length > 0) {
+      const check = await verificarChecklist(clienteId, novaEtapa)
+      if (!check.completo) {
+        setMensagemBloqueio(`Checklist incompleto. Faltam: ${check.faltantes.join(', ')}`)
+        return
+      }
+    }
+    setMensagemBloqueio(null)
     const r = await moverEtapa(clienteId, novaEtapa)
     if (r.success) onAtualizado()
   }
@@ -143,6 +156,15 @@ export default function PainelClientePipeline({
               <p className="font-semibold text-red-800">Pendências</p>
               {dados.pendenciaDoc && <p className="text-red-600">📄 Documentos pendentes de validação</p>}
               {dados.pendenciaAcao && <p className="text-red-600">⚠️ Próxima ação vencida ou não definida</p>}
+            </div>
+          )}
+
+          {/* Sprint 7: Bloqueio documental */}
+          {mensagemBloqueio && (
+            <div className="rounded-md bg-red-50 border border-red-200 p-3 text-xs">
+              <p className="font-semibold text-red-800">🚫 Avanço bloqueado</p>
+              <p className="mt-0.5 text-red-600">{mensagemBloqueio}</p>
+              <button onClick={() => setMensagemBloqueio(null)} className="mt-1 text-[10px] text-red-400 hover:text-red-600">Fechar</button>
             </div>
           )}
 

@@ -32,8 +32,17 @@ export type TipoDocumento =
   | 'CONTRATO'
   | 'PROPOSTA_PDF'
   | 'OUTRO'
+  | 'COMPROVANTE_ENDERECO'
+  | 'CERTIDAO_NASCIMENTO'
+  | 'CERTIDAO_CASAMENTO'
+  | 'CERTIDAO_CASAMENTO_AVERBACAO'
+  | 'MO_AUTODECLARACAO_DEPENDENTE'
+  | 'HOLERITE'
+  | 'CARTEIRA_TRABALHO'
+  | 'EXTRATO_FGTS'
+  | 'DECLARACAO_IR'
 
-export type StatusValidacaoDoc = 'PENDENTE' | 'VALIDADO' | 'REJEITADO'
+export type StatusValidacaoDoc = 'PENDENTE' | 'VALIDADO' | 'REJEITADO' | 'RECEBIDO' | 'EM_ANALISE'
 
 export type AcaoAuditoria = 'CRIACAO' | 'ATUALIZACAO' | 'EXCLUSAO' | 'MUDANCA_ETAPA'
 
@@ -166,6 +175,13 @@ export interface Documento {
   arquivo_url: string
   status_validacao: StatusValidacaoDoc
   enviado_por: string
+  de_dependente: boolean
+  grau_parentesco: string | null
+  observacoes: string | null
+  data_aprovacao: string | null
+  vencimento: string | null
+  versao: number
+  atualizado_por: string | null
   created_at: string
   deleted_at: string | null
 }
@@ -569,4 +585,63 @@ export interface PipelineFiltros {
   corretorId: string | null
   empreendimentoId: string | null
   busca: string | null
+}
+
+// === Sprint 7 — Central de Documentos ===
+
+// Checklist de documentos obrigatórios por etapa
+export const CHECKLIST_OBRIGATORIO: Partial<Record<EtapaFunil, TipoDocumento[]>> = {
+  ANALISE: ['RG', 'CPF', 'COMPROVANTE_RENDA', 'HOLERITE'],
+  RESTRICOES: ['RG', 'CPF', 'COMPROVANTE_RENDA', 'EXTRATO_FGTS', 'CARTEIRA_TRABALHO'],
+  CONDICIONADOS: ['RG', 'CPF', 'COMPROVANTE_RENDA', 'HOLERITE', 'EXTRATO_FGTS', 'DECLARACAO_IR'],
+  APROVADOS: ['RG', 'CPF', 'COMPROVANTE_RENDA', 'COMPROVANTE_ENDERECO'],
+  FECHAMENTOS: ['RG', 'CPF', 'COMPROVANTE_RENDA', 'COMPROVANTE_ENDERECO', 'CERTIDAO_NASCIMENTO', 'CERTIDAO_CASAMENTO'],
+}
+
+// Labels amigáveis para tipos de documento
+export const TIPO_DOCUMENTO_LABEL: Record<TipoDocumento, string> = {
+  RG: 'RG', CPF: 'CPF', CNH: 'CNH',
+  COMPROVANTE_RENDA: 'Comprovante de Renda', FGTS: 'Extrato FGTS',
+  CONTRATO: 'Contrato', PROPOSTA_PDF: 'Proposta',
+  OUTRO: 'Outros', COMPROVANTE_ENDERECO: 'Comprovante de Residência',
+  CERTIDAO_NASCIMENTO: 'Certidão de Nascimento', CERTIDAO_CASAMENTO: 'Certidão de Casamento',
+  CERTIDAO_CASAMENTO_AVERBACAO: 'Certidão Casamento (Averb.)',
+  MO_AUTODECLARACAO_DEPENDENTE: 'Autodeclaração Dependente',
+  HOLERITE: 'Holerite', CARTEIRA_TRABALHO: 'Carteira de Trabalho',
+  EXTRATO_FGTS: 'Extrato FGTS', DECLARACAO_IR: 'Declaração IR',
+}
+
+// Painel gerencial de documentos
+export interface PainelDocumentos {
+  totalClientes: number
+  clientesCompleto: number
+  clientesPendentes: number
+  documentosRejeitados: number
+  tempoMedioConferenciaHoras: number
+  clientesResumo: {
+    clienteId: string
+    nome: string
+    corretorNome: string
+    etapaAtual: EtapaFunil
+    docsAprovados: number
+    docsPendentes: number
+    docsRejeitados: number
+    checklistCompleto: boolean
+    ultimaAtualizacao: string | null
+  }[]
+}
+
+// Dossiê completo do cliente (para o componente de checklist)
+export interface ClienteDossie {
+  clienteId: string
+  clienteNome: string
+  clienteTelefone: string
+  corretorNome: string
+  etapaAtual: EtapaFunil
+  empreendimentoInteresse: string | null
+  checklistObrigatorio: TipoDocumento[]
+  documentos: Documento[]
+  faltantes: TipoDocumento[]
+  checklistCompleto: boolean
+  ultimaAtualizacao: string | null
 }

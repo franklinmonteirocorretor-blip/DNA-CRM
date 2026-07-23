@@ -4,7 +4,12 @@ import { Agendamento, Documento, TipoDocumento } from '@/src/types'
 // Labels dos tipos de documento
 const DOC_LABEL: Record<TipoDocumento, string> = {
   RG: 'RG', CPF: 'CPF', CNH: 'CNH', COMPROVANTE_RENDA: 'Comprovante de Renda',
-  FGTS: 'FGTS', CONTRATO: 'Contrato', PROPOSTA_PDF: 'Proposta', OUTRO: 'Outro',
+  COMPROVANTE_ENDERECO: 'Comprovante de Residência', FGTS: 'FGTS',
+  CONTRATO: 'Contrato', PROPOSTA_PDF: 'Proposta', OUTRO: 'Outro',
+  CERTIDAO_NASCIMENTO: 'Certidão de Nascimento', CERTIDAO_CASAMENTO: 'Certidão de Casamento',
+  CERTIDAO_CASAMENTO_AVERBACAO: 'Cert. Casamento Averb.', MO_AUTODECLARACAO_DEPENDENTE: 'Autodecl. Dependente',
+  HOLERITE: 'Holerite', CARTEIRA_TRABALHO: 'Carteira de Trabalho',
+  EXTRATO_FGTS: 'Extrato FGTS', DECLARACAO_IR: 'Declaração IR',
 }
 
 type Alerta = {

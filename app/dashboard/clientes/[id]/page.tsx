@@ -9,6 +9,7 @@ import SecaoComparecimento from '@/src/components/clients/SecaoComparecimento'
 import FormAnalise from '@/src/components/clients/FormAnalise'
 import FormFechamento from '@/src/components/clients/FormFechamento'
 import FormPosVenda from '@/src/components/clients/FormPosVenda'
+import ChecklistDocumentos from '@/src/components/documentos/ChecklistDocumentos'
 
 // Labels e ícones dos tipos de atividade (usados na seção de últimas atividades)
 const ATIVIDADE_LABEL: Record<TipoAtividade, { label: string; icone: string }> = {
@@ -167,6 +168,9 @@ export default async function FichaClientePage({ params }: Props) {
         <FormAtividade clienteId={cliente.id} />
         <FormAgendamento clienteId={cliente.id} />
       </div>
+
+      {/* Seção: Checklist Sprint 7 */}
+      <ChecklistDocumentos clienteId={cliente.id} />
 
       {/* Seção: Documentos */}
       <SecaoDocumentos

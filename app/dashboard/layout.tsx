@@ -65,6 +65,7 @@ export default async function DashboardLayout({
           <NavLink href="/dashboard">Dashboard</NavLink>
           <NavLink href="/dashboard/operacao">Operação</NavLink>
           <NavLink href="/dashboard/clientes">Clientes</NavLink>
+          <NavLink href="/dashboard/documentos">Documentos</NavLink>
           <NavLink href="/dashboard/corretores">Corretores</NavLink>
           <NavLink href="/dashboard/agenda">Agenda</NavLink>
           <NavLink href="/dashboard/gestao">Gestão</NavLink>

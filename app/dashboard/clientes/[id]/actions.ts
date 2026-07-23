@@ -2,6 +2,7 @@
 
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
 import { revalidatePath } from 'next/cache'
+import { TipoDocumento } from '@/src/types'
 
 interface RegistrarAtividadeInput {
   cliente_id: string
@@ -18,7 +19,7 @@ interface AgendarVisitaInput {
 
 interface UploadDocumentoInput {
   cliente_id: string
-  tipo: 'RG' | 'CPF' | 'CNH' | 'COMPROVANTE_RENDA' | 'FGTS' | 'CONTRATO' | 'PROPOSTA_PDF' | 'OUTRO'
+  tipo: TipoDocumento
   arquivo_base64: string
   nome_arquivo: string
 }
