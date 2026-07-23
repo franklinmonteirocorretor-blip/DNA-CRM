@@ -687,3 +687,65 @@ export interface Cliente360 {
   diasSemContato: number
   diasNaEtapa: number
 }
+
+// === Sprint 9 — Central de Captação e Follow-up ===
+
+/** Item da caixa de entrada */
+export interface FollowUpItem {
+  id: string
+  clienteId: string
+  nome: string
+  telefone: string
+  etapa: string
+  etapaLabel: string
+  corretorNome: string
+  categoria: 'NOVO_LEAD' | 'SEM_CONTATO' | 'AGUARDANDO_RETORNO' | 'VENCIDO' | 'ESQUECIDO'
+  diasSemContato: number
+  proximaAcao: string | null
+  proximaAcaoEm: string | null
+  prioridade: number // 0-1000
+  statusEmoji: string
+  alerta: string | null
+}
+
+/** Item de próxima ação agendada */
+export interface FollowUpProximaAcao {
+  clienteId: string
+  nome: string
+  acao: string
+  dataHora: string
+  prioridade: 'ALTA' | 'MEDIA' | 'BAIXA'
+  responsavel: string
+  tempoRestanteMinutos: number
+  etapa: string
+}
+
+/** Sugestão inteligente */
+export interface FollowUpSugestao {
+  clienteId: string
+  nome: string
+  motivo: string
+  sugestao: string
+  prioridade: number
+}
+
+/** Dados agregados do Follow-up */
+export interface FollowUpData {
+  caixaEntrada: FollowUpItem[]
+  proximasAcoes: FollowUpProximaAcao[]
+  painelCorretor: {
+    minhasTarefas: number
+    meusClientes: number
+    followUpsHoje: number
+    followUpsAtrasados: number
+    tempoMedioRespostaMinutos: number
+  }
+  painelGerente: {
+    clientesEsquecidos: FollowUpItem[]
+    corretoresSemFollowUp: string[]
+    followUpsHoje: number
+    followUpsAtrasados: number
+    tempoMedioRespostaMinutos: number
+  }
+  sugestoes: FollowUpSugestao[]
+}
