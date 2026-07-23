@@ -645,3 +645,45 @@ export interface ClienteDossie {
   checklistCompleto: boolean
   ultimaAtualizacao: string | null
 }
+
+// === Sprint 8 — Central do Cliente 360º ===
+
+// Tipo para evento da timeline
+export interface Cliente360Evento {
+  data: string
+  hora: string
+  tipo: 'CADASTRO' | 'LIGACAO' | 'WHATSAPP' | 'AGENDAMENTO' | 'COMPARECIMENTO' | 'MUDANCA_ETAPA' | 'DOCUMENTO' | 'ANALISE' | 'OBSERVACAO' | 'CONTRATO' | 'POS_VENDA'
+  usuarioNome: string
+  descricao: string
+  detalhes: string | null
+}
+
+// Dados completos 360º
+export interface Cliente360 {
+  cliente: Cliente
+  conjuge: Conjuge | null
+  corretorNome: string
+  empreendimentoNome: string | null
+  timeline: Cliente360Evento[]
+  pipeline: { etapa: EtapaFunil; label: string; status: 'concluida' | 'atual' | 'pendente'; tempoHoras: number | null }[]
+  agendamentos: { id: string; dataHora: string; status: string; comparecimentoResultado: string | null }[]
+  documentos: Documento[]
+  checklist: { obrigatorios: TipoDocumento[]; faltantes: TipoDocumento[]; completo: boolean }
+  financeiro: {
+    vgv: number | null; comissaoValor: number | null; comissaoPercentual: number | null
+    renda: number | null; saldoFgts: number; entradaEstimada: number | null; financiamentoEstimado: number | null
+    parcelasEstimadas: number | null; subsídio: number | null
+  }
+  analiseFinanceira: {
+    renda: number | null; dependentes: number; tempoCltMeses: number | null
+    restricoes: string | null; resultado: string | null
+  }
+  painelGerencial: {
+    tempoTotalFunilHoras: number
+    tempoPorEtapa: { etapa: string; horas: number }[]
+    totalContatos: number; totalAgendamentos: number; totalComparecimentos: number
+    docsPendentes: number; probabilidadeFechamento: number; scoreCliente: number
+  }
+  diasSemContato: number
+  diasNaEtapa: number
+}

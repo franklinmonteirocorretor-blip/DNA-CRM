@@ -2,7 +2,7 @@
 
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
 import { revalidatePath } from 'next/cache'
-import { TipoDocumento } from '@/src/types'
+import { Cliente, Conjuge, Documento, TipoDocumento, EtapaFunil, CHECKLIST_OBRIGATORIO, Cliente360Evento } from '@/src/types'
 
 interface RegistrarAtividadeInput {
   cliente_id: string
@@ -509,4 +509,205 @@ export async function editarCliente(input: EditarClienteInput) {
   revalidatePath('/dashboard/clientes')
 
   return { sucesso: true }
+}
+
+// ═══ Sprint 8: Central do Cliente 360º ═══
+
+export async function cliente360(id: string) {
+  const supabase = await createSupabaseServerClient()
+
+  const { data: cliente } = await supabase
+    .from('clientes')
+    .select('*, usuarios!corretor_responsavel_id(nome), empreendimentos(nome)')
+    .eq('id', id)
+    .single()
+
+  if (!cliente) return null
+
+  const { data: conjuge } = await supabase.from('conjuges').select('*').eq('cliente_id', id).maybeSingle()
+
+  const [{ data: atividades }, { data: historico }, { data: docs }, { data: agendamentos }, { data: comparecimentos }] = await Promise.all([
+    supabase.from('atividades').select('id, tipo, resultado, created_at, usuarios!inner(nome)').eq('cliente_id', id).order('created_at', { ascending: false }).limit(100),
+    supabase.from('historico_acoes').select('*').eq('entidade_id', id).eq('entidade', 'clientes').order('created_at', { ascending: false }).limit(50),
+    supabase.from('documentos').select('*').eq('cliente_id', id).is('deleted_at', null).order('created_at', { ascending: false }),
+    supabase.from('agendamentos').select('id, data_hora, status, created_at, usuarios!inner(nome)').eq('cliente_id', id).order('data_hora', { ascending: false }),
+    supabase.from('comparecimentos').select('id, resultado, agendamento_id, created_at').in('agendamento_id', (await supabase.from('agendamentos').select('id').eq('cliente_id', id)).data?.map(a => a.id) ?? []),
+  ])
+
+  const timeline: Cliente360Evento[] = []
+
+  timeline.push({
+    data: new Date(cliente.created_at).toISOString().slice(0, 10),
+    hora: new Date(cliente.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+    tipo: 'CADASTRO', usuarioNome: 'Sistema',
+    descricao: 'Cliente cadastrado no DNA CRM',
+    detalhes: `Etapa inicial: ${cliente.etapa_atual}`,
+  })
+
+  for (const a of atividades ?? []) {
+    timeline.push({
+      data: new Date(a.created_at).toISOString().slice(0, 10),
+      hora: new Date(a.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+      tipo: a.tipo as Cliente360Evento['tipo'],
+      usuarioNome: (a.usuarios as unknown as { nome: string })?.nome ?? '',
+      descricao: a.tipo === 'LIGACAO' ? 'Ligação realizada' : a.tipo === 'WHATSAPP' ? 'WhatsApp enviado' : 'Follow-up',
+      detalhes: a.resultado,
+    })
+  }
+
+  for (const h of historico ?? []) {
+    if (h.acao === 'MUDANCA_ETAPA') {
+      const ant = (h.dados_anteriores as Record<string, unknown>)?.etapa_atual as string ?? ''
+      const nova = (h.dados_novos as Record<string, unknown>)?.etapa_atual as string ?? ''
+      timeline.push({
+        data: new Date(h.created_at).toISOString().slice(0, 10),
+        hora: new Date(h.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+        tipo: 'MUDANCA_ETAPA', usuarioNome: '',
+        descricao: `Etapa alterada: ${ant} → ${nova}`,
+        detalhes: h.observacao,
+      })
+    }
+  }
+
+  for (const d of docs ?? []) {
+    timeline.push({
+      data: new Date(d.created_at).toISOString().slice(0, 10),
+      hora: new Date(d.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+      tipo: 'DOCUMENTO', usuarioNome: '',
+      descricao: `Documento ${d.tipo} enviado`,
+      detalhes: d.status_validacao,
+    })
+    if (d.status_validacao === 'VALIDADO') {
+      timeline.push({
+        data: d.data_aprovacao ? new Date(d.data_aprovacao).toISOString().slice(0, 10) : new Date(d.created_at).toISOString().slice(0, 10),
+        hora: d.data_aprovacao ? new Date(d.data_aprovacao).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '',
+        tipo: 'DOCUMENTO', usuarioNome: '',
+        descricao: `Documento ${d.tipo} aprovado`,
+        detalhes: `Versão ${d.versao}`,
+      })
+    }
+  }
+
+  for (const a of agendamentos ?? []) {
+    timeline.push({
+      data: new Date(a.data_hora).toISOString().slice(0, 10),
+      hora: new Date(a.data_hora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+      tipo: 'AGENDAMENTO',
+      usuarioNome: (a.usuarios as unknown as { nome: string })?.nome ?? '',
+      descricao: `Visita ${a.status === 'CONFIRMADO' ? 'confirmada' : a.status === 'CANCELADO' ? 'cancelada' : 'agendada'}`,
+      detalhes: a.status,
+    })
+  }
+
+  for (const c of comparecimentos ?? []) {
+    const ag = (agendamentos ?? []).find(a => a.id === c.agendamento_id)
+    timeline.push({
+      data: new Date(c.created_at).toISOString().slice(0, 10),
+      hora: new Date(c.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+      tipo: 'COMPARECIMENTO', usuarioNome: '',
+      descricao: c.resultado === 'COMPARECEU' ? 'Cliente compareceu' : 'Cliente NÃO compareceu',
+      detalhes: ag ? new Date(ag.data_hora).toLocaleDateString('pt-BR') : null,
+    })
+  }
+
+  if (cliente.ficha_proposta_assinada) {
+    timeline.push({
+      data: cliente.data_fechamento ? new Date(cliente.data_fechamento).toISOString().slice(0, 10) : '',
+      hora: cliente.data_fechamento ? new Date(cliente.data_fechamento).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '',
+      tipo: 'CONTRATO', usuarioNome: '',
+      descricao: 'Ficha proposta assinada — fechamento!',
+      detalhes: cliente.vgv ? `VGV: R$ ${cliente.vgv.toLocaleString('pt-BR')}` : null,
+    })
+  }
+
+  timeline.sort((a, b) => new Date(a.data + ' ' + (a.hora || '00:00')).getTime() - new Date(b.data + ' ' + (b.hora || '00:00')).getTime())
+
+  const ETAPA_ORDEM: EtapaFunil[] = ['NOVO_LEAD', 'CONTATOS', 'AGENDAMENTO', 'COMPARECIMENTO', 'ANALISE', 'RESTRICOES', 'CONDICIONADOS', 'APROVADOS', 'FECHAMENTOS', 'POS_VENDA']
+  const ETAPA_LABELS: Record<EtapaFunil, string> = {
+    NOVO_LEAD: 'Novo Contato', CONTATOS: 'Contato Realizado', AGENDAMENTO: 'Visita Agendada', COMPARECIMENTO: 'Visita',
+    ANALISE: 'Análise', RESTRICOES: 'Restrições', CONDICIONADOS: 'Condicionado', APROVADOS: 'Aprovado',
+    FECHAMENTOS: 'Documentação/Contrato', POS_VENDA: 'Pós-venda',
+  }
+  const idxAtual = ETAPA_ORDEM.indexOf(cliente.etapa_atual as EtapaFunil)
+
+  const temposMap: Record<string, number> = {}
+  if (Array.isArray(cliente.tempo_etapas)) {
+    for (const t of cliente.tempo_etapas as Array<{ etapa: string; data_entrada: string; data_saida: string }>) {
+      const horas = Math.round((new Date(t.data_saida).getTime() - new Date(t.data_entrada).getTime()) / 3600000)
+      temposMap[t.etapa] = horas
+    }
+  }
+  if (cliente.entrou_etapa_em) {
+    temposMap[cliente.etapa_atual] = Math.round((Date.now() - new Date(cliente.entrou_etapa_em).getTime()) / 3600000)
+  }
+
+  const pipeline = ETAPA_ORDEM.map((etapa, i) => ({
+    etapa, label: ETAPA_LABELS[etapa],
+    status: (i < idxAtual ? 'concluida' : i === idxAtual ? 'atual' : 'pendente') as 'concluida' | 'atual' | 'pendente',
+    tempoHoras: temposMap[etapa] ?? null,
+  }))
+
+  const obrigatorios = CHECKLIST_OBRIGATORIO[cliente.etapa_atual as EtapaFunil] ?? []
+  const aprovadosTipos = new Set((docs ?? []).filter(d => d.status_validacao === 'VALIDADO').map(d => d.tipo))
+  const faltantes = obrigatorios.filter(t => !aprovadosTipos.has(t))
+
+  const totalContatos = (atividades ?? []).filter(a => a.tipo === 'LIGACAO' || a.tipo === 'WHATSAPP').length
+  const totalAgendamentos = (agendamentos ?? []).length
+  const totalComparecimentos = (comparecimentos ?? []).filter(c => c.resultado === 'COMPARECEU').length
+
+  let probabilidade = 5
+  if (cliente.etapa_atual === 'FECHAMENTOS') probabilidade += 50
+  else if (cliente.etapa_atual === 'APROVADOS') probabilidade += 35
+  else if (cliente.etapa_atual === 'CONDICIONADOS') probabilidade += 20
+  else if (cliente.etapa_atual === 'ANALISE') probabilidade += 10
+  if (faltantes.length === 0 && obrigatorios.length > 0) probabilidade += 15
+  if (totalComparecimentos > 0) probabilidade += 10
+  if (cliente.ficha_proposta_assinada) probabilidade = 100
+  probabilidade = Math.min(100, probabilidade)
+
+  let score = 0
+  score += totalContatos * 2
+  score += totalAgendamentos * 5
+  score += totalComparecimentos * 10
+  if (cliente.ficha_proposta_assinada) score += 50
+  if (faltantes.length === 0) score += 20
+  score += (probabilidade / 100) * 30
+
+  const tempoTotalHoras = Object.values(temposMap).reduce((a, b) => a + b, 0)
+
+  return {
+    cliente: cliente as unknown as Cliente, conjuge: conjuge as Conjuge | null,
+    corretorNome: (cliente.usuarios as unknown as { nome: string })?.nome ?? '',
+    empreendimentoNome: (cliente.empreendimentos as unknown as { nome: string } | null)?.nome ?? null,
+    timeline, pipeline,
+    agendamentos: (agendamentos ?? []).map(a => ({
+      id: a.id, dataHora: a.data_hora, status: a.status,
+      comparecimentoResultado: (comparecimentos ?? []).find(c => c.agendamento_id === a.id)?.resultado ?? null,
+    })),
+    documentos: (docs ?? []) as unknown as Documento[],
+    checklist: { obrigatorios, faltantes, completo: faltantes.length === 0 },
+    financeiro: {
+      vgv: cliente.vgv, comissaoValor: cliente.comissao_valor, comissaoPercentual: cliente.comissao_percentual,
+      renda: cliente.renda, saldoFgts: cliente.saldo_fgts,
+      entradaEstimada: cliente.saldo_fgts > 0 ? cliente.saldo_fgts : null,
+      financiamentoEstimado: cliente.vgv ? cliente.vgv - (cliente.saldo_fgts || 0) : null,
+      parcelasEstimadas: cliente.vgv && cliente.renda ? Math.round((cliente.vgv - (cliente.saldo_fgts || 0)) / (cliente.renda * 0.3 * 12)) : null,
+      subsídio: null,
+    },
+    analiseFinanceira: {
+      renda: cliente.renda, dependentes: cliente.dependentes, tempoCltMeses: cliente.tempo_clt_meses,
+      restricoes: cliente.resultado_analise === 'RESTRICAO' ? 'Restrições encontradas' : null,
+      resultado: cliente.resultado_analise,
+    },
+    painelGerencial: {
+      tempoTotalFunilHoras: tempoTotalHoras,
+      tempoPorEtapa: Object.entries(temposMap).map(([etapa, horas]) => ({ etapa, horas })),
+      totalContatos, totalAgendamentos, totalComparecimentos,
+      docsPendentes: (docs ?? []).filter(d => d.status_validacao !== 'VALIDADO').length,
+      probabilidadeFechamento: probabilidade,
+      scoreCliente: Math.round(score),
+    },
+    diasSemContato: Math.floor((Date.now() - new Date(cliente.ultima_atividade_em).getTime()) / 86400000),
+    diasNaEtapa: cliente.entrou_etapa_em ? Math.floor((Date.now() - new Date(cliente.entrou_etapa_em).getTime()) / 86400000) : 0,
+  }
 }
