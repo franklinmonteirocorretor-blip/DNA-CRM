@@ -42,22 +42,10 @@ export default async function FollowUpPage() {
         </p>
       </div>
 
-      {/* ═══ SEÇÃO 4: Prioridade — integrada na Caixa de Entrada ═══ */}
-      {/* O score de prioridade já é calculado e exibido na Seção 1 */}
-
       {/* ═══ SEÇÃO 4: Score de Prioridade ═══ */}
       <FollowUpPrioridade />
 
-      {/* ═══ SEÇÃO 6: Painel do Corretor ═══ */}
-      <FollowUpPainelCorretor painel={data.painelCorretor} />
-
-      {/* ═══ SEÇÃO 7: Painel do Gerente (condicional) ═══ */}
-      {ehGerente && <FollowUpPainelGerente painel={data.painelGerente} />}
-
-      {/* ═══ SEÇÃO 8: Inteligência (sugestões automáticas) ═══ */}
-      <FollowUpInteligencia sugestoes={data.sugestoes} />
-
-      {/* ═══ SEÇÃO 5: Automações (explicação visual) ═══ */}
+      {/* ═══ SEÇÃO 5: Automações ═══ */}
       <div className="rounded-lg bg-gray-50 p-5 shadow-sm border border-gray-200">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">Automações Ativas</h2>
         <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3 text-xs text-gray-600">
@@ -75,6 +63,15 @@ export default async function FollowUpPage() {
           </div>
         </div>
       </div>
+
+      {/* ═══ SEÇÃO 6: Painel do Corretor ═══ */}
+      <FollowUpPainelCorretor painel={data.painelCorretor} />
+
+      {/* ═══ SEÇÃO 7: Painel do Gerente (condicional) ═══ */}
+      {ehGerente && <FollowUpPainelGerente painel={data.painelGerente} />}
+
+      {/* ═══ SEÇÃO 8: Inteligência (sugestões automáticas) ═══ */}
+      <FollowUpInteligencia sugestoes={data.sugestoes} />
     </div>
   )
 }
