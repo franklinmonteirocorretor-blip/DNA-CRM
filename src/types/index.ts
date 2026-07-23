@@ -1,7 +1,7 @@
 // Tipos globais do DNA CRM
 // Todos gerados a partir do schema do banco (0000_producao_completa.sql)
 
-export type PerfilUsuario = 'CORRETOR' | 'GERENTE' | 'ADMINISTRADOR'
+export type PerfilUsuario = 'CORRETOR' | 'GERENTE' | 'ADMINISTRADOR' | 'SUPERVISOR'
 
 export type EtapaFunil =
   | 'NOVO_LEAD'
@@ -37,6 +37,8 @@ export type StatusValidacaoDoc = 'PENDENTE' | 'VALIDADO' | 'REJEITADO'
 
 export type AcaoAuditoria = 'CRIACAO' | 'ATUALIZACAO' | 'EXCLUSAO' | 'MUDANCA_ETAPA'
 
+export type StatusUsuario = 'ATIVO' | 'FERIAS' | 'AFASTADO' | 'DESLIGADO'
+
 export type TipoNotificacao =
   | 'CLIENTE_PARADO'
   | 'AGENDAMENTO_HOJE'
@@ -57,6 +59,22 @@ export interface Usuario {
   gerente_id: string | null
   avatar_url: string | null
   ativo: boolean
+  cpf: string | null
+  creci: string | null
+  data_admissao: string | null
+  cargo: string | null
+  supervisor_id: string | null
+  status_usuario: StatusUsuario
+  equipe_id: string | null
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+}
+
+export interface Equipe {
+  id: string
+  nome: string
+  gerente_id: string | null
   created_at: string
   updated_at: string
   deleted_at: string | null
@@ -398,4 +416,60 @@ export interface GestaoFiltros {
   corretorId: string | null
   empreendimentoId: string | null
   equipeId: string | null
+}
+
+// === Sprint 4 — Gestão de Corretores e Equipes ===
+
+// Corretor enriquecido (Usuario + KPIs + dados agregados)
+export interface CorretorGestao extends Usuario {
+  equipeNome: string | null
+  supervisorNome: string | null
+  // KPIs do mês atual
+  kpisMensais: {
+    ligacoes: number
+    whatsapps: number
+    followUps: number
+    agendamentos: number
+    comparecimentos: number
+    pastas: number
+    aprovacoes: number
+    vendas: number
+    vgv: number
+    comissao: number
+    conversao: number // % de leads → vendas
+  }
+  metaDiaria: number // percentual 0-100
+  metaMensal: number // percentual 0-100
+  clientesAtivos: number
+}
+
+// Perfil completo do corretor (sub-rota [id])
+export interface PerfilCorretor {
+  usuario: Usuario
+  equipeNome: string | null
+  supervisorNome: string | null
+  producaoDiaria: { data: string; ligacoes: number; whatsapp: number; followUps: number; agendamentos: number; comparecimentos: number; pastas: number; aprovacoes: number; vendas: number; pontuacao: number }[]
+  producaoMensal: { mes: string; vendas: number; vgv: number; comissao: number; aprovacoes: number; pontuacao: number }[]
+  producaoAnual: { ano: string; vendas: number; vgv: number; comissao: number; pontuacao: number }[]
+  clientes: { id: string; nome: string; etapa: string }[]
+  ranking: { posicao: number; pontuacao: number }
+  proximosAgendamentos: { id: string; clienteNome: string; dataHora: string; status: string }[]
+}
+
+// Filtros da lista de corretores
+export interface CorretoresFiltros {
+  busca: string | null
+  status: StatusUsuario | 'TODOS' | null
+  equipeId: string | null
+  supervisorId: string | null
+  ordenacao: 'nome' | 'admissao' | 'producao' | 'vendas'
+}
+
+// Transferência de carteira
+export interface TransferenciaCarteira {
+  origemId: string
+  destinoId: string
+  transferirClientes: boolean
+  transferirAgendamentos: boolean
+  transferirFollowUps: boolean
 }

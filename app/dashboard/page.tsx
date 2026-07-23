@@ -3,6 +3,7 @@ import { ProducaoDiaria, Cliente, Agendamento, Documento } from '@/src/types'
 import Link from 'next/link'
 import SecaoAlertas from '@/src/components/dashboard/SecaoAlertas'
 import CardAgendaHoje from '@/src/components/dashboard/CardAgendaHoje'
+import CardEquipeDashboard from '@/src/components/dashboard/CardEquipeDashboard'
 
 export default async function DashboardPage() {
   const supabase = await createSupabaseServerClient()
@@ -118,7 +119,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Acesso rápido */}
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
         <Link
           href="/dashboard/clientes"
           className="rounded-lg border border-blue-100 bg-blue-50 p-4 shadow-sm hover:bg-blue-100 transition"
@@ -146,6 +147,9 @@ export default async function DashboardPage() {
 
         {/* Sprint 2: Card Agenda de Hoje */}
         <CardAgendaHoje />
+
+        {/* Sprint 4: Card Equipe */}
+        <CardEquipeDashboard />
       </div>
 
       {/* Alertas e Lembretes */}

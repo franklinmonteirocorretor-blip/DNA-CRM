@@ -1272,5 +1272,95 @@ set observacao = (
 where a.observacao is null;
 
 -- ==========================================================================
--- FIM DO RESET COMPLETO. Todas as 20 migrations aplicadas com correcoes.
+-- 0021 — GESTÃO DE CORRETORES E EQUIPES
+-- Campos profissionais em usuarios + tabela equipes
+-- ==========================================================================
+
+do $$
+begin
+  if not exists (select 1 from pg_type where typname = 'status_usuario') then
+    create type status_usuario as enum ('ATIVO', 'FERIAS', 'AFASTADO', 'DESLIGADO');
+  end if;
+end;
+$$;
+
+do $$
+begin
+  alter type perfil_usuario add value if not exists 'SUPERVISOR';
+end;
+$$;
+
+alter table usuarios
+  add column if not exists cpf              text,
+  add column if not exists creci            text,
+  add column if not exists data_admissao    date,
+  add column if not exists cargo            text,
+  add column if not exists supervisor_id    uuid references usuarios (id),
+  add column if not exists status_usuario   status_usuario not null default 'ATIVO',
+  add column if not exists equipe_id        uuid;
+
+update usuarios
+  set status_usuario = case
+    when ativo  = true  then 'ATIVO'::status_usuario
+    when ativo  = false then 'DESLIGADO'::status_usuario
+    else 'ATIVO'::status_usuario
+  end
+where status_usuario is null;
+
+create index if not exists idx_usuarios_cpf       on usuarios (cpf)       where cpf is not null;
+create index if not exists idx_usuarios_creci     on usuarios (creci)     where creci is not null;
+create index if not exists idx_usuarios_supervisor on usuarios (supervisor_id);
+create index if not exists idx_usuarios_status     on usuarios (status_usuario);
+create index if not exists idx_usuarios_equipe     on usuarios (equipe_id) where equipe_id is not null;
+
+create table if not exists equipes (
+  id          uuid primary key default gen_random_uuid(),
+  nome        text not null,
+  gerente_id  uuid references usuarios (id),
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now(),
+  deleted_at  timestamptz,
+  constraint equipes_nome_unico unique (nome) where deleted_at is null
+);
+
+create index if not exists idx_equipes_gerente on equipes (gerente_id);
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'usuarios_equipe_id_fkey'
+  ) then
+    alter table usuarios
+      add constraint usuarios_equipe_id_fkey
+      foreign key (equipe_id) references equipes (id);
+  end if;
+end;
+$$;
+
+create or replace function fn_update_equipes_updated_at()
+returns trigger as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$ language plpgsql;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_trigger where tgname = 'trg_equipes_updated_at'
+  ) then
+    create trigger trg_equipes_updated_at
+      before update on equipes
+      for each row execute function fn_update_equipes_updated_at();
+  end if;
+end;
+$$;
+
+update usuarios
+  set status_usuario = 'ATIVO'
+where perfil = 'ADMINISTRADOR' and status_usuario is null;
+
+-- ==========================================================================
+-- FIM DO RESET COMPLETO. Todas as 21 migrations aplicadas com correcoes.
 -- ==========================================================================
