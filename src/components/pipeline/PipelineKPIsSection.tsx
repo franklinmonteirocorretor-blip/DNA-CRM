@@ -1,28 +1,18 @@
 import { PipelineKPIs as PipelineKPIsType } from '@/src/types'
-
-function formatarMoeda(valor: number): string {
-  if (valor >= 1000000) return `R$ ${(valor / 1000000).toFixed(1)}M`
-  if (valor >= 1000) return `R$ ${(valor / 1000).toFixed(0)}k`
-  return `R$ ${valor}`
-}
-
-function formatarHoras(horas: number): string {
-  if (horas < 24) return `${horas}h`
-  if (horas < 168) return `${Math.round(horas / 24)} dias`
-  return `${Math.round(horas / 168)} sem`
-}
+import KpiCard from '@/src/components/ui/KpiCard'
+import { formatarMoedaCompacta, formatarHoras } from '@/src/lib/formatters'
 
 export default function PipelineKPIs({ kpis }: { kpis: PipelineKPIsType }) {
   return (
     <section>
       <h2 className="text-lg font-semibold text-gray-900">KPIs do Pipeline</h2>
       <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-        <KpiCard label="Clientes ativos" value={kpis.clientesAtivos.toLocaleString('pt-BR')} cor="sky" />
-        <KpiCard label="Tempo médio" value={formatarHoras(kpis.tempoMedioGeralHoras)} cor="amber" />
-        <KpiCard label="Conversão" value={`${kpis.conversaoGeral}%`} cor="emerald" />
-        <KpiCard label="VGV negociação" value={formatarMoeda(kpis.vgvTotalNegociacao)} cor="teal" />
-        <KpiCard label="VGV previsto" value={formatarMoeda(kpis.vgvPrevisto)} cor="cyan" />
-        <KpiCard label="Comissão prev." value={formatarMoeda(kpis.comissaoPrevista)} cor="rose" />
+        <KpiCard label="Clientes ativos" value={kpis.clientesAtivos.toLocaleString('pt-BR')} color="sky" />
+        <KpiCard label="Tempo médio" value={formatarHoras(kpis.tempoMedioGeralHoras)} color="amber" />
+        <KpiCard label="Conversão" value={`${kpis.conversaoGeral}%`} color="emerald" />
+        <KpiCard label="VGV negociação" value={formatarMoedaCompacta(kpis.vgvTotalNegociacao)} color="teal" />
+        <KpiCard label="VGV previsto" value={formatarMoedaCompacta(kpis.vgvPrevisto)} color="cyan" />
+        <KpiCard label="Comissão prev." value={formatarMoedaCompacta(kpis.comissaoPrevista)} color="rose" />
       </div>
 
       {/* Tempo por etapa */}
@@ -47,22 +37,5 @@ export default function PipelineKPIs({ kpis }: { kpis: PipelineKPIsType }) {
         </div>
       )}
     </section>
-  )
-}
-
-function KpiCard({ label, value, cor }: { label: string; value: string; cor: string }) {
-  const palettes: Record<string, string> = {
-    sky: 'bg-sky-50 text-sky-700 border-sky-200',
-    amber: 'bg-amber-50 text-amber-700 border-amber-200',
-    emerald: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-    teal: 'bg-teal-50 text-teal-700 border-teal-200',
-    cyan: 'bg-cyan-50 text-cyan-700 border-cyan-200',
-    rose: 'bg-rose-50 text-rose-700 border-rose-200',
-  }
-  return (
-    <div className={`rounded-lg border p-3 ${palettes[cor] ?? 'bg-gray-50 text-gray-700 border-gray-200'}`}>
-      <p className="text-[10px] font-medium uppercase tracking-wide opacity-70">{label}</p>
-      <p className="mt-0.5 text-lg font-bold">{value}</p>
-    </div>
   )
 }

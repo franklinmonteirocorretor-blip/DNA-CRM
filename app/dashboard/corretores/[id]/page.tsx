@@ -1,12 +1,11 @@
 import { perfilCorretor } from '../actions'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import KpiCard from '@/src/components/ui/KpiCard'
 
 export const dynamic = 'force-dynamic'
 
-function formatarMoeda(valor: number): string {
-  return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0, maximumFractionDigits: 0 })
-}
+import { formatarMoeda } from '@/src/lib/formatters'
 
 export default async function PerfilCorretorPage({
   params,
@@ -58,12 +57,12 @@ export default async function PerfilCorretorPage({
 
       {/* Cards de KPIs rápidos */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-        <KpiCard label="Ranking" value={`#${dados.ranking.posicao}`} sub={`${dados.ranking.pontuacao} pts`} cor="yellow" />
-        <KpiCard label="Vendas Mês" value={dados.producaoMensal[dados.producaoMensal.length - 1]?.vendas.toString() ?? '0'} cor="teal" />
-        <KpiCard label="VGV Mês" value={formatarMoeda(dados.producaoMensal[dados.producaoMensal.length - 1]?.vgv ?? 0)} cor="cyan" />
-        <KpiCard label="Comissão" value={formatarMoeda(dados.producaoMensal[dados.producaoMensal.length - 1]?.comissao ?? 0)} cor="rose" />
-        <KpiCard label="Clientes" value={dados.clientes.length.toString()} cor="blue" />
-        <KpiCard label="Agend. Futuros" value={dados.proximosAgendamentos.length.toString()} cor="violet" />
+        <KpiCard label="Ranking" value={`#${dados.ranking.posicao} · ${dados.ranking.pontuacao} pts`} color="amber" />
+        <KpiCard label="Vendas Mês" value={dados.producaoMensal[dados.producaoMensal.length - 1]?.vendas.toString() ?? '0'} color="teal" />
+        <KpiCard label="VGV Mês" value={formatarMoeda(dados.producaoMensal[dados.producaoMensal.length - 1]?.vgv ?? 0)} color="cyan" />
+        <KpiCard label="Comissão" value={formatarMoeda(dados.producaoMensal[dados.producaoMensal.length - 1]?.comissao ?? 0)} color="rose" />
+        <KpiCard label="Clientes" value={dados.clientes.length.toString()} color="blue" />
+        <KpiCard label="Agend. Futuros" value={dados.proximosAgendamentos.length.toString()} color="violet" />
       </div>
 
       {/* Dados pessoais */}
@@ -166,34 +165,6 @@ export default async function PerfilCorretorPage({
           </div>
         )}
       </section>
-    </div>
-  )
-}
-
-function KpiCard({
-  label,
-  value,
-  sub,
-  cor,
-}: {
-  label: string
-  value: string
-  sub?: string
-  cor: 'yellow' | 'teal' | 'cyan' | 'rose' | 'blue' | 'violet'
-}) {
-  const palettes = {
-    yellow: 'bg-yellow-50 text-yellow-700 border-yellow-200',
-    teal: 'bg-teal-50 text-teal-700 border-teal-200',
-    cyan: 'bg-cyan-50 text-cyan-700 border-cyan-200',
-    rose: 'bg-rose-50 text-rose-700 border-rose-200',
-    blue: 'bg-blue-50 text-blue-700 border-blue-200',
-    violet: 'bg-violet-50 text-violet-700 border-violet-200',
-  }
-  return (
-    <div className={`rounded-lg border p-3 ${palettes[cor]}`}>
-      <p className="text-[10px] font-medium uppercase tracking-wide opacity-70">{label}</p>
-      <p className="mt-0.5 text-lg font-bold">{value}</p>
-      {sub && <p className="text-[10px] opacity-60">{sub}</p>}
     </div>
   )
 }

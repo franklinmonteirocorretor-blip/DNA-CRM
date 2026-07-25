@@ -1,5 +1,6 @@
 import { CorretorGestao } from '@/src/types'
 import Link from 'next/link'
+import { formatarMoeda } from '@/src/lib/formatters'
 
 function StatusBadge({ status }: { status: string }) {
   const mapa: Record<string, { cor: string; label: string }> = {
@@ -14,10 +15,6 @@ function StatusBadge({ status }: { status: string }) {
       {info.label}
     </span>
   )
-}
-
-function formatarMoeda(valor: number): string {
-  return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0, maximumFractionDigits: 0 })
 }
 
 export default function ListaCorretores({ corretores }: { corretores: CorretorGestao[] }) {

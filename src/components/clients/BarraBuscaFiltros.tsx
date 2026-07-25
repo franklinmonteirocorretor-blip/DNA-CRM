@@ -4,20 +4,12 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '@/src/lib/supabase'
 import type { Empreendimento } from '@/src/types'
+import { ETAPA_OPTIONS_DROPDOWN } from '@/src/config/pipeline'
 
-// Labels das etapas para o dropdown
+// Opções do dropdown com "Todas as etapas" como default
 const ETAPA_LABELS: { valor: string; rotulo: string }[] = [
   { valor: '', rotulo: 'Todas as etapas' },
-  { valor: 'NOVO_LEAD', rotulo: 'Novo Lead' },
-  { valor: 'CONTATOS', rotulo: 'Contatos' },
-  { valor: 'AGENDAMENTO', rotulo: 'Agendamento' },
-  { valor: 'COMPARECIMENTO', rotulo: 'Comparecimento' },
-  { valor: 'ANALISE', rotulo: 'Análise' },
-  { valor: 'RESTRICOES', rotulo: 'Restrições' },
-  { valor: 'CONDICIONADOS', rotulo: 'Condicionados' },
-  { valor: 'APROVADOS', rotulo: 'Aprovados' },
-  { valor: 'FECHAMENTOS', rotulo: 'Fechamentos' },
-  { valor: 'POS_VENDA', rotulo: 'Pós-Venda' },
+  ...ETAPA_OPTIONS_DROPDOWN,
 ]
 
 const ORDENACAO_LABELS: { valor: string; rotulo: string }[] = [

@@ -2,12 +2,7 @@
 
 import { DragEvent } from 'react'
 import { PipelineClienteCard } from '@/src/types'
-
-function formatarMoeda(valor: number): string {
-  if (valor >= 1000000) return `R$ ${(valor / 1000000).toFixed(1)}M`
-  if (valor >= 1000) return `R$ ${(valor / 1000).toFixed(0)}k`
-  return `R$ ${valor}`
-}
+import { formatarMoedaCompacta } from '@/src/lib/formatters'
 
 export default function PipelineCard({
   card,
@@ -57,7 +52,7 @@ export default function PipelineCard({
       {/* VGV + próxima ação */}
       <div className="mt-1 flex items-center justify-between text-[9px]">
         {card.vgv ? (
-          <span className="font-semibold text-gray-600">{formatarMoeda(card.vgv)}</span>
+          <span className="font-semibold text-gray-600">{formatarMoedaCompacta(card.vgv)}</span>
         ) : (
           <span className="text-gray-300">—</span>
         )}

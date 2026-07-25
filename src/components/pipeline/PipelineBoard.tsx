@@ -3,28 +3,9 @@
 import { useState, useCallback, useEffect, DragEvent } from 'react'
 import { EtapaFunil, PipelineClienteCard, PipelineFiltros } from '@/src/types'
 import { listarClientesPipeline, moverEtapa } from '@/app/dashboard/funil/actions'
+import { ETAPA_FULL_CONFIG, ETAPA_ORDEM } from '@/src/config/pipeline'
 import PipelineColuna from './PipelineColuna'
 import PainelClientePipeline from './PainelClientePipeline'
-
-// Configuração visual das etapas
-const ETAPA_CONFIG = {
-  NOVO_LEAD:       { label: 'Novo Contato',        cor: '#6b7280', icone: '🆕', desc: 'Leads recém-captados, sem contato ainda.' },
-  CONTATOS:        { label: 'Contato Realizado',    cor: '#eab308', icone: '📞', desc: 'Primeiro contato realizado com sucesso.' },
-  AGENDAMENTO:     { label: 'Visita Agendada',     cor: '#3b82f6', icone: '📅', desc: 'Visita ao empreendimento agendada.' },
-  COMPARECIMENTO:  { label: 'Visita',              cor: '#8b5cf6', icone: '🏠', desc: 'Cliente compareceu à visita.' },
-  ANALISE:         { label: 'Análise',             cor: '#f97316', icone: '🔍', desc: 'Análise financeira em andamento.' },
-  RESTRICOES:      { label: 'Restrições',          cor: '#ef4444', icone: '🚫', desc: 'Restrições encontradas na análise.' },
-  CONDICIONADOS:   { label: 'Condicionado',        cor: '#ec4899', icone: '⏳', desc: 'Aguardando aprovação condicional.' },
-  APROVADOS:       { label: 'Aprovado',            cor: '#14b8a6', icone: '✅', desc: 'Crédito aprovado pelo banco.' },
-  FECHAMENTOS:     { label: 'Documentação/Contrato', cor: '#22c55e', icone: '📝', desc: 'Documentação e contrato em andamento.' },
-  POS_VENDA:       { label: 'Pós-venda',           cor: '#6366f1', icone: '🤝', desc: 'Cliente fechado. Pós-venda e fidelização.' },
-}
-
-const ORDEM: EtapaFunil[] = [
-  'NOVO_LEAD', 'CONTATOS', 'AGENDAMENTO', 'COMPARECIMENTO',
-  'ANALISE', 'RESTRICOES', 'CONDICIONADOS', 'APROVADOS',
-  'FECHAMENTOS', 'POS_VENDA',
-]
 
 export default function PipelineBoard() {
   const [colunas, setColunas] = useState<Record<EtapaFunil, PipelineClienteCard[]>>({} as Record<EtapaFunil, PipelineClienteCard[]>)
@@ -68,8 +49,8 @@ export default function PipelineBoard() {
     if (!clienteId || !arrastando) return
 
     // Valida regra: não pode pular etapas (opcional, simplificado)
-    const idxOrigem = ORDEM.indexOf(arrastando.etapaOrigem)
-    const idxDestino = ORDEM.indexOf(etapaDestino)
+    const idxOrigem = ETAPA_ORDEM.indexOf(arrastando.etapaOrigem)
+    const idxDestino = ETAPA_ORDEM.indexOf(etapaDestino)
     if (idxDestino < idxOrigem) {
       // Movendo para trás — permitido (reclassificação)
     }
@@ -131,11 +112,11 @@ export default function PipelineBoard() {
       {/* Board com colunas */}
       <div className="overflow-x-auto pb-4">
         <div className="flex gap-3" style={{ minWidth: 'max-content' }}>
-          {ORDEM.map((etapa) => (
+          {ETAPA_ORDEM.map((etapa) => (
             <PipelineColuna
               key={etapa}
               etapa={etapa}
-              config={ETAPA_CONFIG[etapa]}
+              config={ETAPA_FULL_CONFIG[etapa]}
               cards={colunas[etapa] ?? []}
               onDragStart={onDragStart}
               onDragOver={onDragOver}

@@ -2,30 +2,10 @@ import { createSupabaseServerClient } from '@/src/lib/server/supabase'
 import { Cliente, EtapaFunil } from '@/src/types'
 import Link from 'next/link'
 import BarraBuscaFiltros from '@/src/components/clients/BarraBuscaFiltros'
-
-// Mapeamento de etapa → cor e rótulo em português para os badges
-const ETAPA_CONFIG: Record<EtapaFunil, { cor: string; rotulo: string }> = {
-  NOVO_LEAD:       { cor: 'bg-gray-100 text-gray-700',       rotulo: 'Novo Lead' },
-  CONTATOS:        { cor: 'bg-yellow-100 text-yellow-700',   rotulo: 'Contatos' },
-  AGENDAMENTO:     { cor: 'bg-blue-100 text-blue-700',       rotulo: 'Agendamento' },
-  COMPARECIMENTO:  { cor: 'bg-purple-100 text-purple-700',   rotulo: 'Comparecimento' },
-  ANALISE:         { cor: 'bg-orange-100 text-orange-700',   rotulo: 'Análise' },
-  RESTRICOES:      { cor: 'bg-red-100 text-red-700',         rotulo: 'Restrições' },
-  CONDICIONADOS:   { cor: 'bg-pink-100 text-pink-700',       rotulo: 'Condicionados' },
-  APROVADOS:       { cor: 'bg-teal-100 text-teal-700',       rotulo: 'Aprovados' },
-  FECHAMENTOS:     { cor: 'bg-green-100 text-green-700',     rotulo: 'Fechamentos' },
-  POS_VENDA:       { cor: 'bg-indigo-100 text-indigo-700',   rotulo: 'Pós-Venda' },
-}
-
-// Ordem visual do funil (do topo ao fundo)
-const ORDEM_FUNIL: EtapaFunil[] = [
-  'NOVO_LEAD', 'CONTATOS', 'AGENDAMENTO', 'COMPARECIMENTO',
-  'ANALISE', 'RESTRICOES', 'CONDICIONADOS', 'APROVADOS',
-  'FECHAMENTOS', 'POS_VENDA',
-]
+import { ETAPA_LABEL_PLURAL, ETAPA_ORDEM, ETAPA_BADGE_COLORS } from '@/src/config/pipeline'
 
 // Valida se uma string é um EtapaFunil válido
-const ETAPAS_VALIDAS = new Set<string>(ORDEM_FUNIL)
+const ETAPAS_VALIDAS = new Set<string>(ETAPA_ORDEM)
 
 function isEtapaValida(valor: string): valor is EtapaFunil {
   return ETAPAS_VALIDAS.has(valor)
@@ -101,7 +81,7 @@ export default async function ClientesPage({ searchParams }: Props) {
   const clientesFiltrados = clientes ?? []
 
   // Agrupa clientes por etapa do funil (para visualização sem filtro)
-  const clientesPorEtapa = ORDEM_FUNIL.reduce(
+  const clientesPorEtapa = ETAPA_ORDEM.reduce(
     (acc, etapa) => {
       const naEtapa = clientesFiltrados.filter((c) => c.etapa_atual === etapa)
       acc[etapa] = naEtapa
@@ -172,9 +152,8 @@ export default async function ClientesPage({ searchParams }: Props) {
       {/* Visualização sem filtro: agrupado por etapa (colunas do funil) */}
       {!temFiltro && totalClientes > 0 && (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-          {ORDEM_FUNIL.map((etapa) => {
+          {ETAPA_ORDEM.map((etapa) => {
             const clientesNaEtapa = clientesPorEtapa[etapa]
-            const config = ETAPA_CONFIG[etapa]
 
             // Etapas vazias: esconde colunas inteiras quando não há clientes nelas
             if (clientesNaEtapa.length === 0) return null
@@ -183,8 +162,8 @@ export default async function ClientesPage({ searchParams }: Props) {
               <div key={etapa} className="min-w-0 rounded-lg bg-white p-4 shadow-sm">
                 {/* Cabeçalho da coluna: badge da etapa + contagem */}
                 <div className="mb-3 flex items-center justify-between">
-                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${config.cor}`}>
-                    {config.rotulo}
+                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${ETAPA_BADGE_COLORS[etapa]}`}>
+                    {ETAPA_LABEL_PLURAL[etapa]}
                   </span>
                   <span className="text-xs font-semibold text-gray-400">
                     {clientesNaEtapa.length}
@@ -280,9 +259,7 @@ function ClienteCardLinha({ cliente }: { cliente: Cliente }) {
       ? `(${cliente.telefone.slice(0, 2)}) ${cliente.telefone.slice(2, 6)}-${cliente.telefone.slice(6)}`
       : cliente.telefone
 
-  const config = ETAPA_CONFIG[cliente.etapa_atual]
-
-  return (
+return (
     <Link
       href={`/dashboard/clientes/${cliente.id}`}
       className="flex items-center justify-between border-b border-gray-100 px-5 py-3.5 transition hover:bg-gray-50 last:border-b-0"
@@ -294,7 +271,7 @@ function ClienteCardLinha({ cliente }: { cliente: Cliente }) {
         <span className="text-xs text-gray-400">{telefoneFormatado}</span>
         {cliente.empreendimento_interesse && (
           <span className="hidden sm:inline text-xs text-gray-500">
-            · {cliente.empreendimento_interesse.slice(0, 25)}
+            &middot; {cliente.empreendimento_interesse.slice(0, 25)}
             {cliente.empreendimento_interesse.length > 25 ? '…' : ''}
           </span>
         )}
@@ -304,8 +281,8 @@ function ClienteCardLinha({ cliente }: { cliente: Cliente }) {
         {cliente.pasta_completa_em && (
           <span className="text-[11px] text-green-600 font-medium">📁</span>
         )}
-        <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${config.cor}`}>
-          {config.rotulo}
+        <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${ETAPA_BADGE_COLORS[cliente.etapa_atual]}`}>
+          {ETAPA_LABEL_PLURAL[cliente.etapa_atual]}
         </span>
       </div>
     </Link>

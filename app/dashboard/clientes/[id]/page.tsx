@@ -17,12 +17,7 @@ import FormAnalise from '@/src/components/clients/FormAnalise'
 import FormFechamento from '@/src/components/clients/FormFechamento'
 import FormPosVenda from '@/src/components/clients/FormPosVenda'
 import ChecklistDocumentos from '@/src/components/documentos/ChecklistDocumentos'
-
-const ETAPA_LABELS: Record<string, string> = {
-  NOVO_LEAD: 'Novo Contato', CONTATOS: 'Contato Realizado', AGENDAMENTO: 'Visita Agendada', COMPARECIMENTO: 'Visita',
-  ANALISE: 'Análise', RESTRICOES: 'Restrições', CONDICIONADOS: 'Condicionado', APROVADOS: 'Aprovado',
-  FECHAMENTOS: 'Documentação/Contrato', POS_VENDA: 'Pós-venda',
-}
+import { ETAPA_LABEL_SINGULAR } from '@/src/config/pipeline'
 
 interface Props {
   params: Promise<{ id: string }>
@@ -72,7 +67,7 @@ export default async function CentralClientePage({ params }: Props) {
         fgtsFormatado={fgtsFormatado}
         diasSemContato={diasSemContato}
         diasNaEtapa={diasNaEtapa}
-        etapaAtualLabel={ETAPA_LABELS[cliente.etapa_atual] ?? cliente.etapa_atual}
+        etapaAtualLabel={ETAPA_LABEL_SINGULAR[cliente.etapa_atual] ?? cliente.etapa_atual}
       />
 
       {/* ═══ SEÇÃO 2: Timeline completa ═══ */}

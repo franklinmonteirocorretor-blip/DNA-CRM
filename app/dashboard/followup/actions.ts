@@ -1,13 +1,8 @@
 'use server'
 
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
-import { FollowUpItem, FollowUpProximaAcao, FollowUpSugestao, FollowUpData } from '@/src/types'
-
-const ETAPA_LABELS: Record<string, string> = {
-  NOVO_LEAD: 'Novo Contato', CONTATOS: 'Contato Realizado', AGENDAMENTO: 'Visita Agendada', COMPARECIMENTO: 'Visita',
-  ANALISE: 'Análise', RESTRICOES: 'Restrições', CONDICIONADOS: 'Condicionado', APROVADOS: 'Aprovado',
-  FECHAMENTOS: 'Documentação/Contrato', POS_VENDA: 'Pós-venda',
-}
+import { FollowUpItem, FollowUpProximaAcao, FollowUpSugestao, FollowUpData, EtapaFunil } from '@/src/types'
+import { ETAPA_LABEL_SINGULAR } from '@/src/config/pipeline'
 
 /**
  * Calcula o score de prioridade para um item da caixa de entrada
@@ -153,7 +148,7 @@ export async function followupData() {
       nome: c.nome,
       telefone: c.telefone,
       etapa: c.etapa_atual,
-      etapaLabel: ETAPA_LABELS[c.etapa_atual] ?? c.etapa_atual,
+      etapaLabel: ETAPA_LABEL_SINGULAR[c.etapa_atual as EtapaFunil] ?? c.etapa_atual,
       corretorNome: (c.usuarios as unknown as { nome: string })?.nome ?? '',
       categoria,
       diasSemContato,
@@ -191,7 +186,7 @@ export async function followupData() {
       prioridade,
       responsavel: (c.usuarios as unknown as { nome: string })?.nome ?? '',
       tempoRestanteMinutos: tempoRestante,
-      etapa: ETAPA_LABELS[c.etapa_atual] ?? c.etapa_atual,
+      etapa: ETAPA_LABEL_SINGULAR[c.etapa_atual as EtapaFunil] ?? c.etapa_atual,
     })
   }
 

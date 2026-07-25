@@ -10,25 +10,7 @@ import {
   EtapaFunil,
   PipelineTempoEtapa,
 } from '@/src/types'
-
-// Configuração visual de cada etapa (spec Sprint 5)
-const ETAPA_LABELS: Record<EtapaFunil, string> = {
-  NOVO_LEAD: 'Novo Contato',
-  CONTATOS: 'Contato Realizado',
-  AGENDAMENTO: 'Visita Agendada',
-  COMPARECIMENTO: 'Visita',
-  ANALISE: 'Análise',
-  RESTRICOES: 'Restrições',
-  CONDICIONADOS: 'Condicionado',
-  APROVADOS: 'Aprovado',
-  FECHAMENTOS: 'Documentação/Contrato',
-  POS_VENDA: 'Pós-venda',
-}
-
-const ORDEM: EtapaFunil[] = [
-  'NOVO_LEAD', 'CONTATOS', 'AGENDAMENTO', 'COMPARECIMENTO', 'ANALISE',
-  'RESTRICOES', 'CONDICIONADOS', 'APROVADOS', 'FECHAMENTOS', 'POS_VENDA',
-]
+import { ETAPA_LABEL_SINGULAR, ETAPA_ORDEM } from '@/src/config/pipeline'
 
 // ─── Listar clientes do pipeline por etapa ───────────────────────────────────
 
@@ -72,7 +54,7 @@ export async function listarClientesPipeline(filtros?: PipelineFiltros): Promise
 
   const hoje = Date.now()
   const resultado: Record<EtapaFunil, PipelineClienteCard[]> = {} as Record<EtapaFunil, PipelineClienteCard[]>
-  for (const e of ORDEM) resultado[e] = []
+  for (const e of ETAPA_ORDEM) resultado[e] = []
 
   for (const c of clientes ?? []) {
     const etapa = c.etapa_atual as EtapaFunil
@@ -202,14 +184,14 @@ export async function pipelineKPIs(): Promise<PipelineKPIs> {
 
   const tempoPorEtapa = (tempoEtapas ?? []).map((t: { etapa: string; tempo_medio_horas: number; quantidade: number }) => ({
     etapa: t.etapa as EtapaFunil,
-    label: ETAPA_LABELS[t.etapa as EtapaFunil] ?? t.etapa,
+    label: ETAPA_LABEL_SINGULAR[t.etapa as EtapaFunil] ?? t.etapa,
     tempoMedioHoras: t.tempo_medio_horas,
     quantidade: t.quantidade,
   }))
 
   const vgvPorEtapa = (vgvEtapas ?? []).map((v: { etapa: string; vgv_total: number; comissao_total: number; quantidade: number }) => ({
     etapa: v.etapa as EtapaFunil,
-    label: ETAPA_LABELS[v.etapa as EtapaFunil] ?? v.etapa,
+    label: ETAPA_LABEL_SINGULAR[v.etapa as EtapaFunil] ?? v.etapa,
     vgvTotal: v.vgv_total,
     comissaoTotal: v.comissao_total,
     quantidade: v.quantidade,

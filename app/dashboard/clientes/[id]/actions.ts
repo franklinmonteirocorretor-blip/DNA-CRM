@@ -3,6 +3,7 @@
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
 import { revalidatePath } from 'next/cache'
 import { Cliente, Conjuge, Documento, TipoDocumento, EtapaFunil, CHECKLIST_OBRIGATORIO, Cliente360Evento } from '@/src/types'
+import { ETAPA_LABEL_SINGULAR, ETAPA_ORDEM } from '@/src/config/pipeline'
 
 interface RegistrarAtividadeInput {
   cliente_id: string
@@ -622,12 +623,6 @@ export async function cliente360(id: string) {
 
   timeline.sort((a, b) => new Date(a.data + ' ' + (a.hora || '00:00')).getTime() - new Date(b.data + ' ' + (b.hora || '00:00')).getTime())
 
-  const ETAPA_ORDEM: EtapaFunil[] = ['NOVO_LEAD', 'CONTATOS', 'AGENDAMENTO', 'COMPARECIMENTO', 'ANALISE', 'RESTRICOES', 'CONDICIONADOS', 'APROVADOS', 'FECHAMENTOS', 'POS_VENDA']
-  const ETAPA_LABELS: Record<EtapaFunil, string> = {
-    NOVO_LEAD: 'Novo Contato', CONTATOS: 'Contato Realizado', AGENDAMENTO: 'Visita Agendada', COMPARECIMENTO: 'Visita',
-    ANALISE: 'Análise', RESTRICOES: 'Restrições', CONDICIONADOS: 'Condicionado', APROVADOS: 'Aprovado',
-    FECHAMENTOS: 'Documentação/Contrato', POS_VENDA: 'Pós-venda',
-  }
   const idxAtual = ETAPA_ORDEM.indexOf(cliente.etapa_atual as EtapaFunil)
 
   const temposMap: Record<string, number> = {}
@@ -642,7 +637,7 @@ export async function cliente360(id: string) {
   }
 
   const pipeline = ETAPA_ORDEM.map((etapa, i) => ({
-    etapa, label: ETAPA_LABELS[etapa],
+    etapa, label: ETAPA_LABEL_SINGULAR[etapa],
     status: (i < idxAtual ? 'concluida' : i === idxAtual ? 'atual' : 'pendente') as 'concluida' | 'atual' | 'pendente',
     tempoHoras: temposMap[etapa] ?? null,
   }))

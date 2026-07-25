@@ -1,5 +1,6 @@
 import { PainelDocumentos as PainelDocumentosType } from '@/src/types'
 import Link from 'next/link'
+import KpiCard from '@/src/components/ui/KpiCard'
 
 function formatarTempo(h: number): string {
   if (h < 24) return `${h}h`
@@ -11,11 +12,11 @@ export default function PainelDocumentos({ dados }: { dados: PainelDocumentosTyp
     <div className="space-y-6">
       {/* KPIs */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
-        <KpiCard label="Clientes" value={dados.totalClientes} cor="sky" />
-        <KpiCard label="Completo" value={dados.clientesCompleto} cor="emerald" />
-        <KpiCard label="Pendentes" value={dados.clientesPendentes} cor="amber" />
-        <KpiCard label="Rejeitados" value={dados.documentosRejeitados} cor="red" />
-        <KpiCard label="Tempo médio" value={formatarTempo(dados.tempoMedioConferenciaHoras)} cor="violet" />
+        <KpiCard label="Clientes" value={dados.totalClientes} color="sky" />
+        <KpiCard label="Completo" value={dados.clientesCompleto} color="emerald" />
+        <KpiCard label="Pendentes" value={dados.clientesPendentes} color="amber" />
+        <KpiCard label="Rejeitados" value={dados.documentosRejeitados} color="red" />
+        <KpiCard label="Tempo médio" value={formatarTempo(dados.tempoMedioConferenciaHoras)} color="violet" />
       </div>
 
       {/* Lista de clientes */}
@@ -67,20 +68,6 @@ export default function PainelDocumentos({ dados }: { dados: PainelDocumentosTyp
           <p className="text-sm text-gray-400">Nenhum cliente em etapas que exigem documentação.</p>
         </div>
       )}
-    </div>
-  )
-}
-
-function KpiCard({ label, value, cor }: { label: string; value: string | number; cor: string }) {
-  const pals: Record<string, string> = {
-    sky: 'bg-sky-50 text-sky-700 border-sky-200', emerald: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-    amber: 'bg-amber-50 text-amber-700 border-amber-200', red: 'bg-red-50 text-red-700 border-red-200',
-    violet: 'bg-violet-50 text-violet-700 border-violet-200',
-  }
-  return (
-    <div className={`rounded-lg border p-3 ${pals[cor]}`}>
-      <p className="text-[10px] font-medium uppercase tracking-wide opacity-70">{label}</p>
-      <p className="mt-0.5 text-lg font-bold">{typeof value === 'number' ? value.toLocaleString('pt-BR') : value}</p>
     </div>
   )
 }

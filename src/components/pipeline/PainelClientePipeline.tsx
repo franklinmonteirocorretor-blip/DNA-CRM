@@ -4,33 +4,8 @@ import { useState, useEffect } from 'react'
 import { buscarClienteDetalhe, moverEtapa } from '@/app/dashboard/funil/actions'
 import { verificarChecklist } from '@/app/dashboard/documentos/actions'
 import { PipelineClienteDetalhe, EtapaFunil, CHECKLIST_OBRIGATORIO } from '@/src/types'
+import { ETAPA_LABEL_SINGULAR, PROXIMAS_ETAPAS } from '@/src/config/pipeline'
 import Link from 'next/link'
-
-const ETAPA_LABELS: Record<EtapaFunil, string> = {
-  NOVO_LEAD: 'Novo Contato',
-  CONTATOS: 'Contato Realizado',
-  AGENDAMENTO: 'Visita Agendada',
-  COMPARECIMENTO: 'Visita',
-  ANALISE: 'Análise',
-  RESTRICOES: 'Restrições',
-  CONDICIONADOS: 'Condicionado',
-  APROVADOS: 'Aprovado',
-  FECHAMENTOS: 'Documentação/Contrato',
-  POS_VENDA: 'Pós-venda',
-}
-
-const PROXIMAS_ETAPAS: Record<EtapaFunil, EtapaFunil[]> = {
-  NOVO_LEAD: ['CONTATOS'],
-  CONTATOS: ['AGENDAMENTO'],
-  AGENDAMENTO: ['COMPARECIMENTO'],
-  COMPARECIMENTO: ['ANALISE'],
-  ANALISE: ['RESTRICOES', 'CONDICIONADOS', 'APROVADOS'],
-  RESTRICOES: ['CONTATOS', 'ANALISE'],
-  CONDICIONADOS: ['APROVADOS', 'RESTRICOES'],
-  APROVADOS: ['AGENDAMENTO', 'FECHAMENTOS'],
-  FECHAMENTOS: ['POS_VENDA'],
-  POS_VENDA: [],
-}
 
 export default function PainelClientePipeline({
   clienteId,
@@ -131,7 +106,7 @@ export default function PainelClientePipeline({
             {dados.email && <Info linha="📧 E-mail" valor={dados.email} />}
             <Info linha="🏢 Empreendimento" valor={dados.empreendimentoNome ?? dados.empreendimentoInteresse ?? '—'} />
             <Info linha="👤 Corretor" valor={dados.corretorNome} />
-            <Info linha="📊 Etapa atual" valor={ETAPA_LABELS[dados.etapaAtual] ?? dados.etapaAtual} />
+            <Info linha="📊 Etapa atual" valor={ETAPA_LABEL_SINGULAR[dados.etapaAtual] ?? dados.etapaAtual} />
             <Info linha="⏱️ Dias na etapa" valor={`${dados.diasNaEtapa} dias`} />
             {dados.vgv && <Info linha="💰 VGV" valor={`R$ ${dados.vgv.toLocaleString('pt-BR')}`} />}
             {dados.comissaoValor && <Info linha="💵 Comissão" valor={`R$ ${dados.comissaoValor.toLocaleString('pt-BR')}`} />}
@@ -179,7 +154,7 @@ export default function PainelClientePipeline({
                     onClick={() => avancarEtapa(etapa)}
                     className="rounded-md bg-gray-100 px-2.5 py-1 text-[10px] font-medium text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition"
                   >
-                    {ETAPA_LABELS[etapa] ?? etapa}
+                    {ETAPA_LABEL_SINGULAR[etapa] ?? etapa}
                   </button>
                 ))}
               </div>
@@ -239,7 +214,7 @@ export default function PainelClientePipeline({
               <div className="space-y-1">
                 {dados.historicoEtapas.map((h, i) => (
                   <div key={i} className="text-[10px] text-gray-500">
-                    {ETAPA_LABELS[h.etapa] ?? h.etapa}: {new Date(h.data_entrada).toLocaleDateString('pt-BR')} → {new Date(h.data_saida).toLocaleDateString('pt-BR')}
+                    {ETAPA_LABEL_SINGULAR[h.etapa] ?? h.etapa}: {new Date(h.data_entrada).toLocaleDateString('pt-BR')} → {new Date(h.data_saida).toLocaleDateString('pt-BR')}
                   </div>
                 ))}
               </div>

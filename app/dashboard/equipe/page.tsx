@@ -1,28 +1,8 @@
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
 import { EtapaFunil, ProducaoDiaria, Usuario } from '@/src/types'
+import { ETAPA_FULL_CONFIG, ETAPA_ORDEM } from '@/src/config/pipeline'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-
-// ── Constantes de configuração do funil ──────────────────────────────────────
-
-const ETAPA_CONFIG: Record<EtapaFunil, { label: string; cor: string; corBg: string }> = {
-  NOVO_LEAD:       { label: 'Novo Lead',      cor: '#6b7280', corBg: '#f3f4f6' },
-  CONTATOS:        { label: 'Contatos',        cor: '#eab308', corBg: '#fef9c3' },
-  AGENDAMENTO:     { label: 'Agendamento',     cor: '#3b82f6', corBg: '#dbeafe' },
-  COMPARECIMENTO:  { label: 'Comparecimento',  cor: '#8b5cf6', corBg: '#ede9fe' },
-  ANALISE:         { label: 'Análise',         cor: '#f97316', corBg: '#ffedd5' },
-  RESTRICOES:      { label: 'Restrições',      cor: '#ef4444', corBg: '#fee2e2' },
-  CONDICIONADOS:   { label: 'Condicionados',   cor: '#ec4899', corBg: '#fce7f3' },
-  APROVADOS:       { label: 'Aprovados',       cor: '#14b8a6', corBg: '#ccfbf1' },
-  FECHAMENTOS:     { label: 'Fechamentos',     cor: '#22c55e', corBg: '#dcfce7' },
-  POS_VENDA:       { label: 'Pós-Venda',       cor: '#6366f1', corBg: '#e0e7ff' },
-}
-
-const ORDEM_FUNIL: EtapaFunil[] = [
-  'NOVO_LEAD', 'CONTATOS', 'AGENDAMENTO', 'COMPARECIMENTO',
-  'ANALISE', 'RESTRICOES', 'CONDICIONADOS', 'APROVADOS',
-  'FECHAMENTOS', 'POS_VENDA',
-]
 
 // ── Página ───────────────────────────────────────────────────────────────────
 
@@ -122,7 +102,7 @@ export default async function EquipePage() {
 
   const totalClientes = clientesEquipe?.length ?? 0
 
-  const funilConsolidado = ORDEM_FUNIL.reduce(
+  const funilConsolidado = ETAPA_ORDEM.reduce(
     (acc, etapa) => {
       acc[etapa] = (clientesEquipe ?? []).filter((c) => c.etapa_atual === etapa).length
       return acc
@@ -163,7 +143,7 @@ export default async function EquipePage() {
     const minhaProd = (producaoHoje ?? []).find((p) => p.usuario_id === corretor.id)
     const meusClientes = (clientesEquipe ?? []).filter((c) => c.corretor_responsavel_id === corretor.id)
 
-    const funilCorretor = ORDEM_FUNIL.reduce(
+    const funilCorretor = ETAPA_ORDEM.reduce(
       (acc, etapa) => {
         acc[etapa] = meusClientes.filter((c) => c.etapa_atual === etapa).length
         return acc
@@ -268,9 +248,9 @@ export default async function EquipePage() {
           </p>
         ) : (
           <div className="mt-4 space-y-1">
-            {ORDEM_FUNIL.map((etapa) => {
+            {ETAPA_ORDEM.map((etapa) => {
               const qtd = funilConsolidado[etapa]
-              const config = ETAPA_CONFIG[etapa]
+              const config = ETAPA_FULL_CONFIG[etapa]
               const largura = (qtd / maximoFunil) * 100
               const pct = totalClientes > 0 ? ((qtd / totalClientes) * 100).toFixed(1) : '0'
               const ativa = qtd > 0

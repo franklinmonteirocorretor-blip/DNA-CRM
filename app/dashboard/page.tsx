@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
 import { ProducaoDiaria, Cliente, Agendamento, Documento } from '@/src/types'
 import Link from 'next/link'
+import KpiCard from '@/src/components/ui/KpiCard'
 import SecaoAlertas from '@/src/components/dashboard/SecaoAlertas'
 import CardAgendaHoje from '@/src/components/dashboard/CardAgendaHoje'
 import CardEquipeDashboard from '@/src/components/dashboard/CardEquipeDashboard'
@@ -112,10 +113,10 @@ export default async function DashboardPage() {
 
       {/* Cards de métricas */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        <MetricaCard label="Ligações" value={hojeStats?.ligacoes ?? 0} color="blue" />
-        <MetricaCard label="WhatsApp" value={hojeStats?.whatsapp ?? 0} color="green" />
-        <MetricaCard label="Agendamentos" value={hojeStats?.agendamentos ?? 0} color="purple" />
-        <MetricaCard label="Comparecimentos" value={hojeStats?.comparecimentos ?? 0} color="orange" />
+        <KpiCard label="Ligações" value={hojeStats?.ligacoes ?? 0} color="blue" size="lg" padding="normal" />
+        <KpiCard label="WhatsApp" value={hojeStats?.whatsapp ?? 0} color="green" size="lg" padding="normal" />
+        <KpiCard label="Agendamentos" value={hojeStats?.agendamentos ?? 0} color="purple" size="lg" padding="normal" />
+        <KpiCard label="Comparecimentos" value={hojeStats?.comparecimentos ?? 0} color="orange" size="lg" padding="normal" />
       </div>
 
       {/* Acesso rápido */}
@@ -196,26 +197,3 @@ export default async function DashboardPage() {
   )
 }
 
-function MetricaCard({
-  label,
-  value,
-  color,
-}: {
-  label: string
-  value: number
-  color: 'blue' | 'green' | 'purple' | 'orange'
-}) {
-  const colors = {
-    blue: 'bg-blue-50 text-blue-700 border-blue-200',
-    green: 'bg-green-50 text-green-700 border-green-200',
-    purple: 'bg-purple-50 text-purple-700 border-purple-200',
-    orange: 'bg-orange-50 text-orange-700 border-orange-200',
-  }
-
-  return (
-    <div className={`rounded-lg border p-4 ${colors[color]}`}>
-      <p className="text-xs font-medium uppercase tracking-wide opacity-70">{label}</p>
-      <p className="mt-1 text-3xl font-bold">{value}</p>
-    </div>
-  )
-}
