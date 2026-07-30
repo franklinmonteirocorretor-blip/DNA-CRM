@@ -1,6 +1,6 @@
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
-import { redirect } from 'next/navigation'
 import { NextResponse } from 'next/server'
+import { getSiteUrl } from '@/src/utils/url'
 
 // POST /auth/signout — faz logout e redireciona para /login
 export async function POST() {
@@ -14,7 +14,7 @@ export async function POST() {
     await supabase.auth.signOut()
   }
 
-  return NextResponse.redirect(new URL('/login', process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'), {
+  return NextResponse.redirect(new URL('/login', getSiteUrl()), {
     status: 303,
   })
 }

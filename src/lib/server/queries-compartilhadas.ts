@@ -3,6 +3,7 @@
 // Reduz ~60% de duplicação entre os dois módulos
 
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
+import { unstable_cache } from 'next/cache'
 import { hoje, inicioDoMes, ultimoDiaDoMes } from '@/src/lib/analytics'
 import { ETAPA_LABEL_SINGULAR, ETAPA_ORDEM } from '@/src/config/pipeline'
 import type {
@@ -38,7 +39,7 @@ export function resolverPeriodo(periodo?: string): PeriodoParams {
 
 // ─── Resumo da Operação ───────────────────────────────────────────────────────
 
-export async function queryResumoOperacao(options?: {
+async function _queryResumoOperacao(options?: {
   inicio?: string
   fim?: string
 }): Promise<GestaoResumoOperacao> {
@@ -81,9 +82,15 @@ export async function queryResumoOperacao(options?: {
   }
 }
 
+export const queryResumoOperacao = unstable_cache(
+  _queryResumoOperacao,
+  ['resumo-operacao'],
+  { revalidate: 60, tags: ['resumo-operacao'] },
+)
+
 // ─── KPIs Diários ─────────────────────────────────────────────────────────────
 
-export async function queryKPIsDiarios(
+export async function _queryKPIsDiarios(
   corretorIds: string[],
   hojeStr: string,
 ): Promise<GestaoKPI[]> {
@@ -110,9 +117,15 @@ export async function queryKPIsDiarios(
   })
 }
 
+export const queryKPIsDiarios = unstable_cache(
+  _queryKPIsDiarios,
+  ['kpis-diarios'],
+  { revalidate: 60, tags: ['kpis-diarios'] },
+)
+
 // ─── Ranking ──────────────────────────────────────────────────────────────────
 
-export async function queryRanking(
+export async function _queryRanking(
   options?: { dataInicio?: string; dataFim?: string },
 ): Promise<GestaoRankingItem[]> {
   const supabase = await createSupabaseServerClient()
@@ -131,10 +144,10 @@ export async function queryRanking(
       vendas: Number(r.vendas),
       aprovacoes: (r.producao as Record<string, number>)?.aprovacoes ?? 0,
     }))
-    const ids = items.map((i: any) => i.usuarioId)
+    const ids = items.map((i: { usuarioId: string }) => i.usuarioId)
     const { data: usuarios } = await supabase.from('usuarios').select('id, avatar_url').in('id', ids)
     const mapa = (usuarios ?? []).reduce((acc, u) => { acc[u.id] = u.avatar_url; return acc }, {} as Record<string, string | null>)
-    return items.map((i: any) => ({ ...i, avatarUrl: mapa[i.usuarioId] ?? null }))
+    return items.map((i: { usuarioId: string }) => ({ ...i, avatarUrl: mapa[i.usuarioId] ?? null }))
   }
 
   const { data: producao } = await supabase.from('producao_diaria').select('*').gte('data', dataInicio).lte('data', dataFim)
@@ -152,9 +165,15 @@ export async function queryRanking(
     .map(([uid, d], i) => ({ posicao: i + 1, usuarioId: uid, nome: mapa[uid]?.nome ?? 'Desconhecido', avatarUrl: mapa[uid]?.avatar_url ?? null, pontuacao: d.pontuacao, vendas: d.vendas, aprovacoes: d.aprovacoes }))
 }
 
+export const queryRanking = unstable_cache(
+  _queryRanking,
+  ['ranking'],
+  { revalidate: 60, tags: ['ranking'] },
+)
+
 // ─── Funil Gerencial ──────────────────────────────────────────────────────────
 
-export async function queryFunilGerencial(options?: {
+export async function _queryFunilGerencial(options?: {
   corretorId?: string | null
   empreendimentoId?: string | null
 }): Promise<GestaoFunilEtapa[]> {
@@ -173,9 +192,15 @@ export async function queryFunilGerencial(options?: {
   })
 }
 
+export const queryFunilGerencial = unstable_cache(
+  _queryFunilGerencial,
+  ['funil-gerencial'],
+  { revalidate: 60, tags: ['funil-gerencial'] },
+)
+
 // ─── Alertas ───────────────────────────────────────────────────────────────────
 
-export async function queryAlertas(): Promise<GestaoAlertas> {
+export async function _queryAlertas(): Promise<GestaoAlertas> {
   const supabase = await createSupabaseServerClient()
   const tresDias = new Date(Date.now() - 3 * 86400000).toISOString()
   const seteDias = new Date(Date.now() - 7 * 86400000).toISOString()
@@ -222,9 +247,15 @@ export async function queryAlertas(): Promise<GestaoAlertas> {
   }
 }
 
+export const queryAlertas = unstable_cache(
+  _queryAlertas,
+  ['alertas'],
+  { revalidate: 60, tags: ['alertas'] },
+)
+
 // ─── Metas ─────────────────────────────────────────────────────────────────────
 
-export async function queryMetas(options: {
+export async function _queryMetas(options: {
   corretoresIds: string[]
   inicio: string
   fim: string
@@ -244,3 +275,9 @@ export async function queryMetas(options: {
     diasRestantes: diasRest, projecaoFechamento: { vendas: Math.round(realEq.vendas * 1.2), vgv: options.vgvMes * 1.2 },
   }
 }
+
+export const queryMetas = unstable_cache(
+  _queryMetas,
+  ['metas'],
+  { revalidate: 60, tags: ['metas'] },
+)

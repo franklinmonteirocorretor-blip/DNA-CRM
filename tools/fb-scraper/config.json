@@ -1,0 +1,18 @@
+{
+  "url": "https://www.facebook.com/ametafisicapoetica/photos?locale=pt_BR",
+  "outputDir": "./downloads",
+  "headless": false,
+  "parallelDownloads": 4,
+  "maxRetries": 3,
+  "scrollDelayMs": 2000,
+  "pageLoadTimeoutMs": 30000,
+  "actionTimeoutMs": 10000,
+  "maxScrollAttempts": 200,
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "checkpointFile": "./checkpoint.json",
+  "chromeUserDataDir": "C:\\Users\\Admin\\AppData\\Local\\Google\\Chrome\\User Data",
+  "chromeProfile": "Default"
+}

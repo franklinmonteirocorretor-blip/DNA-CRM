@@ -1,0 +1,13 @@
+'use client'
+
+import ErrorState from '@/src/components/ui/ErrorState'
+
+export default function NovoEmpreendimentoError({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string }
+  reset: () => void
+}) {
+  return <ErrorState error={error} reset={reset} />
+}

@@ -2,8 +2,6 @@
 // Sprint 10 — KPIs agregadas, resumos e cálculos de dashboard
 
 import { KPI_METAS_OFICIAIS } from '@/src/config/kpis'
-import { PONTUACAO_RANKING } from '@/src/config/ranking'
-import { META_MENSAL_INDIVIDUAL } from '@/src/config/metas'
 
 /**
  * Calcula o resumo da operação a partir de dados brutos
@@ -75,7 +73,7 @@ export function somarProducao(rows: Array<{
   whatsapps?: number
   followUps?: number
 }>): ProducaoAccumulator {
-  let acc: ProducaoAccumulator = { vendas: 0, aprovacoes: 0, agendamentos: 0, comparecimentos: 0, pastas: 0, ligacoes: 0, whatsapps: 0, followUps: 0 }
+  const acc: ProducaoAccumulator = { vendas: 0, aprovacoes: 0, agendamentos: 0, comparecimentos: 0, pastas: 0, ligacoes: 0, whatsapps: 0, followUps: 0 }
   for (const p of rows ?? []) {
     acc.vendas += p.vendas ?? 0
     acc.aprovacoes += p.aprovacoes ?? 0

@@ -2,8 +2,10 @@
 
 'use server'
 
+import { requireAuth } from '@/src/lib/auth/guards'
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
 import { hoje, inicioDoMes, ultimoDiaDoMes } from '@/src/lib/analytics'
+import { dispatchAutomation } from '@/src/lib/automation/engine'
 import type {
   ComissaoItem,
   ComissaoStatus,
@@ -46,6 +48,7 @@ function aplicarFiltrosBase(query: any, filtros?: FinanceiroFiltros) {
 // ─── SEÇÃO 1: Resumo ─────────────────────────────────────────────────────────
 
 export async function financeiroResumo(filtros?: FinanceiroFiltros): Promise<FinanceiroResumo> {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
   const { inicio, fim } = resolverPeriodo(filtros)
 
@@ -81,6 +84,7 @@ export async function financeiroResumo(filtros?: FinanceiroFiltros): Promise<Fin
 // ─── SEÇÃO 2: Tabela de Comissões ────────────────────────────────────────────
 
 export async function listarComissoes(filtros?: FinanceiroFiltros): Promise<ComissaoItem[]> {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
   const { inicio, fim } = resolverPeriodo(filtros)
 
@@ -120,6 +124,7 @@ export async function producaoFinanceira(
   agrupamento: 'monthly' | 'weekly' | 'annual',
   filtros?: FinanceiroFiltros,
 ): Promise<FinanceiroProducao[]> {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
   const { inicio, fim } = resolverPeriodo(filtros)
 
@@ -163,6 +168,7 @@ export async function producaoFinanceira(
 // ─── SEÇÃO 4: Ranking Financeiro ─────────────────────────────────────────────
 
 export async function rankingFinanceiro(filtros?: FinanceiroFiltros): Promise<FinanceiroRankingItem[]> {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
   const { inicio, fim } = resolverPeriodo(filtros)
 
@@ -223,6 +229,7 @@ export async function rankingFinanceiro(filtros?: FinanceiroFiltros): Promise<Fi
 export async function empreendimentosFinanceiro(
   filtros?: FinanceiroFiltros,
 ): Promise<FinanceiroEmpreendimento[]> {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
   const { inicio, fim } = resolverPeriodo(filtros)
 
@@ -269,6 +276,7 @@ export async function empreendimentosFinanceiro(
 export async function previsaoComissoes(
   filtros?: FinanceiroFiltros,
 ): Promise<FinanceiroPrevisao> {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
   const now = new Date()
   const mais7 = new Date(now.getTime() + 7 * 86400000).toISOString().slice(0, 10)
@@ -312,6 +320,7 @@ export async function atualizarComissacao(
   novoStatus: ComissaoStatus,
   dataRecebimento?: string,
 ): Promise<{ success: boolean; error?: string }> {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
 
   const update: any = { comissao_status: novoStatus }
@@ -325,6 +334,14 @@ export async function atualizarComissacao(
     .eq('id', clienteId)
 
   if (error) return { success: false, error: error.message }
+
+  if (novoStatus === 'RECEBIDA') {
+    dispatchAutomation('comissao_recebida', 'cliente', clienteId, {
+      cliente_id: clienteId,
+      data_recebimento: dataRecebimento || hoje(),
+    })
+  }
+
   return { success: true }
 }
 
@@ -344,6 +361,7 @@ export interface FinanceiroDadosCompletos {
 export async function financeiroDadosIniciais(
   filtros?: FinanceiroFiltros,
 ): Promise<FinanceiroDadosCompletos> {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
 
   const [

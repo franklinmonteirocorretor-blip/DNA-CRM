@@ -112,7 +112,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Cards de métricas */}
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 xs:grid-cols-2 md:grid-cols-4">
         <KpiCard label="Ligações" value={hojeStats?.ligacoes ?? 0} color="blue" size="lg" padding="normal" />
         <KpiCard label="WhatsApp" value={hojeStats?.whatsapp ?? 0} color="green" size="lg" padding="normal" />
         <KpiCard label="Agendamentos" value={hojeStats?.agendamentos ?? 0} color="purple" size="lg" padding="normal" />
@@ -120,7 +120,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Acesso rápido */}
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
+      <div className="grid grid-cols-1 gap-4 xs:grid-cols-2 md:grid-cols-5">
         <Link
           href="/dashboard/clientes"
           className="rounded-lg border border-blue-100 bg-blue-50 p-4 shadow-sm hover:bg-blue-100 transition"
@@ -178,7 +178,7 @@ export default async function DashboardPage() {
                     month: '2-digit',
                   })}
                 </span>
-                <span className="text-gray-500">
+                <span className="text-gray-500 truncate hidden xs:inline">
                   {dia.ligacoes} ligações · {dia.whatsapp} WhatsApp · {dia.agendamentos} agend.
                 </span>
                 <span className="font-bold text-blue-600">

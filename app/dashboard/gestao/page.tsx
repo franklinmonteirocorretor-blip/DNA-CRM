@@ -10,9 +10,8 @@ import {
 } from './actions'
 import ResumoOperacao from '@/src/components/gestao/ResumoOperacao'
 import TabelaKPIs from '@/src/components/gestao/TabelaKPIs'
-import Ranking from '@/src/components/gestao/Ranking'
+import { LazyRanking, LazyProdutividade } from '@/src/components/lazy'
 import FunilGerencial from '@/src/components/gestao/FunilGerencial'
-import Produtividade from '@/src/components/gestao/Produtividade'
 import AlertasGestao from '@/src/components/gestao/AlertasGestao'
 import SecaoMetas from '@/src/components/gestao/SecaoMetas'
 
@@ -65,13 +64,13 @@ export default async function GestaoPage() {
       <TabelaKPIs kpis={kpis} />
 
       {/* Seção 3: Ranking */}
-      <Ranking itens={ranking} />
+      <LazyRanking itens={ranking} />
 
       {/* Seção 4: Funil Gerencial */}
       <FunilGerencial etapas={funil} />
 
       {/* Seção 5: Produtividade */}
-      <Produtividade series={producao} agrupamento="daily" />
+      <LazyProdutividade series={producao} agrupamento="daily" />
 
       {/* Seção 6: Alertas */}
       <AlertasGestao dados={alertas} />

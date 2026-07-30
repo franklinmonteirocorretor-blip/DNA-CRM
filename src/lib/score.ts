@@ -3,6 +3,7 @@
 
 import { ALERTA_THRESHOLDS } from '@/src/config/alertas'
 import { ETAPA_ORDEM } from '@/src/config/pipeline'
+import type { EtapaFunil } from '@/src/types'
 
 /**
  * Calcula a probabilidade de fechamento de um cliente (0–100)
@@ -17,7 +18,7 @@ export function calcularProbabilidadeFechamento(params: {
   totalComparecimentos: number
 }): number {
   let score = 0
-  const idx = ETAPA_ORDEM.indexOf(params.etapaAtual as any)
+  const idx = ETAPA_ORDEM.indexOf(params.etapaAtual as EtapaFunil)
 
   // Base: posição no funil (cada etapa = ~9%, máximo 90%)
   score += Math.min(idx * 9, 90)
@@ -58,7 +59,7 @@ export function calcularScoreCliente(params: {
   let score = 50 // base neutra
 
   // Avanço no funil = +score
-  const idx = ETAPA_ORDEM.indexOf(params.etapaAtual as any)
+  const idx = ETAPA_ORDEM.indexOf(params.etapaAtual as EtapaFunil)
   score += Math.min(idx * 4, 40)
 
   // Documentos completos = +score

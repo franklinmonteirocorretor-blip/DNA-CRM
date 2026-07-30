@@ -1,5 +1,6 @@
 'use server'
 
+import { requireAuth } from '@/src/lib/auth/guards'
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
 import {
   PipelineClienteCard,
@@ -15,6 +16,7 @@ import { ETAPA_LABEL_SINGULAR, ETAPA_ORDEM } from '@/src/config/pipeline'
 // ─── Listar clientes do pipeline por etapa ───────────────────────────────────
 
 export async function listarClientesPipeline(filtros?: PipelineFiltros): Promise<Record<EtapaFunil, PipelineClienteCard[]>> {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
 
   let query = supabase.from('clientes')
@@ -88,6 +90,7 @@ export async function listarClientesPipeline(filtros?: PipelineFiltros): Promise
 // ─── Mover cliente entre etapas ─────────────────────────────────────────────
 
 export async function moverEtapa(clienteId: string, novaEtapa: EtapaFunil): Promise<{ success: boolean; error?: string }> {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
 
   // O trigger fn_pipeline_mudanca_etapa cuida de:
@@ -108,6 +111,7 @@ export async function moverEtapa(clienteId: string, novaEtapa: EtapaFunil): Prom
 // ─── Buscar detalhes do cliente para painel lateral ─────────────────────────
 
 export async function buscarClienteDetalhe(id: string): Promise<PipelineClienteDetalhe | null> {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
 
   const { data: c } = await supabase
@@ -162,6 +166,7 @@ export async function buscarClienteDetalhe(id: string): Promise<PipelineClienteD
 // ─── KPIs do Pipeline ────────────────────────────────────────────────────────
 
 export async function pipelineKPIs(): Promise<PipelineKPIs> {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
 
   const [
@@ -216,6 +221,7 @@ export async function pipelineKPIs(): Promise<PipelineKPIs> {
 // ─── Alertas do Pipeline ─────────────────────────────────────────────────────
 
 export async function pipelineAlertas(): Promise<PipelineAlertas> {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
   const tresDias = new Date(Date.now() - 3 * 86400000).toISOString()
   const seteDias = new Date(Date.now() - 7 * 86400000).toISOString()

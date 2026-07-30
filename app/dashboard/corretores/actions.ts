@@ -1,5 +1,6 @@
 'use server'
 
+import { requireAuth } from '@/src/lib/auth/guards'
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
 import { revalidatePath } from 'next/cache'
 import {
@@ -14,6 +15,7 @@ import {
 // ─── Lista de corretores (página principal) ──────────────────────────────────
 
 export async function listarCorretores(filtros?: CorretoresFiltros): Promise<CorretorGestao[]> {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
 
   let query = supabase.from('usuarios')
@@ -196,6 +198,7 @@ export async function criarCorretor(dados: {
   equipe_id?: string
   supervisor_id?: string
 }): Promise<{ success: boolean; error?: string; id?: string }> {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
 
   // Cria usuário no auth (senha temporária)
@@ -255,13 +258,13 @@ export async function editarCorretor(
     status_usuario: string
   }>
 ): Promise<{ success: boolean; error?: string }> {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
 
   const { error } = await supabase
     .from('usuarios')
     .update(dados)
     .eq('id', id)
-
   if (error) {
     return { success: false, error: error.message }
   }

@@ -1,9 +1,11 @@
 'use server'
 
+import { requireAuth } from '@/src/lib/auth/guards'
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
 import { revalidatePath } from 'next/cache'
 import { Cliente, Conjuge, Documento, TipoDocumento, EtapaFunil, CHECKLIST_OBRIGATORIO, Cliente360Evento } from '@/src/types'
 import { ETAPA_LABEL_SINGULAR, ETAPA_ORDEM } from '@/src/config/pipeline'
+import { dispatchAutomation } from '@/src/lib/automation/engine'
 
 interface RegistrarAtividadeInput {
   cliente_id: string
@@ -68,6 +70,7 @@ export interface EditarClienteInput {
 }
 
 export async function agendarVisita(input: AgendarVisitaInput) {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
 
   const {
@@ -91,17 +94,26 @@ export async function agendarVisita(input: AgendarVisitaInput) {
     return { erro: 'A data deve ser no futuro.' }
   }
 
-  const { error } = await supabase.from('agendamentos').insert({
+  const { error, data: agendamentoCriado } = await supabase.from('agendamentos').insert({
     cliente_id: input.cliente_id,
     corretor_id: user.id,
     data_hora: data.toISOString(),
     empreendimento_id: input.empreendimento_id || null,
     status: 'AGENDADO',
-  })
+  }).select('id').single()
 
   if (error) {
     return { erro: error.message }
   }
+
+  const agendamentoId = agendamentoCriado?.id
+
+  dispatchAutomation('agendamento_criado', 'agendamento', agendamentoId ?? '', {
+    agendamento_id: agendamentoId,
+    cliente_id: input.cliente_id,
+    data_hora: data.toISOString(),
+    empreendimento_id: input.empreendimento_id || null,
+  })
 
   // Também registra uma atividade automaticamente ("Agendou visita")
   await supabase.from('atividades').insert({
@@ -121,6 +133,7 @@ export async function agendarVisita(input: AgendarVisitaInput) {
 }
 
 export async function registrarAtividade(input: RegistrarAtividadeInput) {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
 
   const {
@@ -157,6 +170,7 @@ export async function registrarAtividade(input: RegistrarAtividadeInput) {
 }
 
 export async function uploadDocumento(input: UploadDocumentoInput) {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
 
   const {
@@ -201,17 +215,26 @@ export async function uploadDocumento(input: UploadDocumentoInput) {
   const arquivoUrl = urlData?.signedUrl ?? caminho
 
   // Registra na tabela documentos
-  const { error: insertError } = await supabase.from('documentos').insert({
+  const { error: insertError, data: docCriado } = await supabase.from('documentos').insert({
     cliente_id: input.cliente_id,
     tipo: input.tipo,
     arquivo_url: arquivoUrl,
     status_validacao: 'PENDENTE',
     enviado_por: user.id,
-  })
+  }).select('id').single()
 
   if (insertError) {
     return { erro: insertError.message }
   }
+
+  const documentoId = docCriado?.id
+
+  dispatchAutomation('novo_documento', 'documento', documentoId ?? '', {
+    documento_id: documentoId,
+    cliente_id: input.cliente_id,
+    tipo: input.tipo,
+    status_validacao: 'PENDENTE',
+  })
 
   // Registra atividade automática
   const labelDoc: Record<string, string> = {
@@ -233,6 +256,7 @@ export async function uploadDocumento(input: UploadDocumentoInput) {
 }
 
 export async function registrarComparecimento(input: RegistrarComparecimentoInput) {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
 
   const {
@@ -248,12 +272,12 @@ export async function registrarComparecimento(input: RegistrarComparecimentoInpu
   }
 
   // Insere o comparecimento (1:1 com agendamento — unique constraint do banco garante)
-  const { error } = await supabase.from('comparecimentos').insert({
+  const { error, data: compCriado } = await supabase.from('comparecimentos').insert({
     agendamento_id: input.agendamento_id,
     resultado: input.resultado,
     motivo_ausencia: input.resultado === 'NAO_COMPARECEU' ? (input.motivo_ausencia?.trim() || null) : null,
     observacao: input.observacao.trim() || null,
-  })
+  }).select('id').single()
 
   if (error) {
     if (error.message.includes('unique') || error.code === '23505') {
@@ -261,6 +285,15 @@ export async function registrarComparecimento(input: RegistrarComparecimentoInpu
     }
     return { erro: error.message }
   }
+
+  const comparecimentoId = compCriado?.id
+
+  dispatchAutomation('comparecimento', 'comparecimento', comparecimentoId ?? '', {
+    comparecimento_id: comparecimentoId,
+    cliente_id: input.cliente_id,
+    agendamento_id: input.agendamento_id,
+    resultado: input.resultado,
+  })
 
   // Registra atividade automática
   const label = input.resultado === 'COMPARECEU' ? 'Cliente compareceu' : 'Cliente não compareceu'
@@ -283,6 +316,7 @@ export async function registrarComparecimento(input: RegistrarComparecimentoInpu
 }
 
 export async function registrarAnalise(input: RegistrarAnaliseInput) {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
 
   const {
@@ -296,6 +330,15 @@ export async function registrarAnalise(input: RegistrarAnaliseInput) {
   if (!input.resultado) {
     return { erro: 'Selecione o resultado da análise.' }
   }
+
+  // Busca etapa anterior para o dispatch de automação
+  const { data: clienteAntesAnalise } = await supabase
+    .from('clientes')
+    .select('etapa_atual')
+    .eq('id', input.cliente_id)
+    .single()
+
+  const etapaAnteriorAnalise = (clienteAntesAnalise?.etapa_atual as string) ?? null
 
   // Atualiza o cliente: resultado_analise + etapa_atual = ANÁLISE (se ainda não avançou)
   const { error } = await supabase
@@ -311,6 +354,12 @@ export async function registrarAnalise(input: RegistrarAnaliseInput) {
   if (error) {
     return { erro: error.message }
   }
+
+  dispatchAutomation('mudanca_etapa', 'cliente', input.cliente_id, {
+    etapa_anterior: etapaAnteriorAnalise,
+    etapa_nova: 'ANALISE',
+    resultado_analise: input.resultado,
+  })
 
   // Registra atividade automática
   const labels: Record<string, string> = {
@@ -334,6 +383,7 @@ export async function registrarAnalise(input: RegistrarAnaliseInput) {
 }
 
 export async function registrarFechamento(input: RegistrarFechamentoInput) {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
 
   const {
@@ -343,6 +393,15 @@ export async function registrarFechamento(input: RegistrarFechamentoInput) {
   if (!user) {
     return { erro: 'Você precisa estar logado.' }
   }
+
+  // Busca etapa anterior para o dispatch de automação
+  const { data: clienteAntesFech } = await supabase
+    .from('clientes')
+    .select('etapa_atual, nome, vgv, comissao_valor')
+    .eq('id', input.cliente_id)
+    .single()
+
+  const etapaAnteriorFech = (clienteAntesFech?.etapa_atual as string) ?? null
 
   // Atualiza ficha_proposta_assinada = true.
   // O trigger cliente_fechamento (before update) do banco intercepta e seta:
@@ -356,6 +415,17 @@ export async function registrarFechamento(input: RegistrarFechamentoInput) {
   if (error) {
     return { erro: error.message }
   }
+
+  dispatchAutomation('mudanca_etapa', 'cliente', input.cliente_id, {
+    etapa_anterior: etapaAnteriorFech,
+    etapa_nova: 'FECHAMENTOS',
+  })
+
+  dispatchAutomation('venda', 'cliente', input.cliente_id, {
+    vgv: clienteAntesFech?.vgv ?? null,
+    comissao_valor: clienteAntesFech?.comissao_valor,
+    nome: clienteAntesFech?.nome,
+  })
 
   // Registra atividade automática
   await supabase.from('atividades').insert({
@@ -372,6 +442,7 @@ export async function registrarFechamento(input: RegistrarFechamentoInput) {
 }
 
 export async function registrarPosVenda(input: RegistrarPosVendaInput) {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
 
   const {
@@ -381,6 +452,15 @@ export async function registrarPosVenda(input: RegistrarPosVendaInput) {
   if (!user) {
     return { erro: 'Você precisa estar logado.' }
   }
+
+  // Busca etapa anterior para o dispatch de automação
+  const { data: clienteAntesPos } = await supabase
+    .from('clientes')
+    .select('etapa_atual')
+    .eq('id', input.cliente_id)
+    .single()
+
+  const etapaAnteriorPos = (clienteAntesPos?.etapa_atual as string) ?? null
 
   // Monta os campos a atualizar
   const updates: Record<string, unknown> = {
@@ -404,6 +484,11 @@ export async function registrarPosVenda(input: RegistrarPosVendaInput) {
     return { erro: error.message }
   }
 
+  dispatchAutomation('mudanca_etapa', 'cliente', input.cliente_id, {
+    etapa_anterior: etapaAnteriorPos,
+    etapa_nova: 'POS_VENDA',
+  })
+
   // Registra atividade automática
   const imovelEntregue = input.imovel_entregue_em
     ? `Imóvel entregue em ${new Date(input.imovel_entregue_em).toLocaleDateString('pt-BR')}`
@@ -425,6 +510,7 @@ export async function registrarPosVenda(input: RegistrarPosVendaInput) {
 // === SPRINT 1 — Feature 01: Edição de Cliente ===
 
 export async function editarCliente(input: EditarClienteInput) {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
 
   const {
@@ -496,6 +582,14 @@ export async function editarCliente(input: EditarClienteInput) {
     return { erros: [error.message] }
   }
 
+  dispatchAutomation('cliente_editado', 'cliente', input.cliente_id, {
+    nome: input.nome.trim(),
+    cpf: input.cpf,
+    telefone: input.telefone,
+    email: input.email?.trim() || null,
+    renda: input.renda,
+  })
+
   // Registra atividade automática de auditoria
   await supabase.from('atividades').insert({
     cliente_id: input.cliente_id,
@@ -515,6 +609,7 @@ export async function editarCliente(input: EditarClienteInput) {
 // ═══ Sprint 8: Central do Cliente 360º ═══
 
 export async function cliente360(id: string) {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
 
   const { data: cliente } = await supabase
@@ -527,12 +622,18 @@ export async function cliente360(id: string) {
 
   const { data: conjuge } = await supabase.from('conjuges').select('*').eq('cliente_id', id).maybeSingle()
 
+  const [agendamentosIds] = await Promise.all([
+    supabase.from('agendamentos').select('id').eq('cliente_id', id),
+  ])
+
+  const ids = agendamentosIds.data?.map(a => a.id) ?? []
+
   const [{ data: atividades }, { data: historico }, { data: docs }, { data: agendamentos }, { data: comparecimentos }] = await Promise.all([
     supabase.from('atividades').select('id, tipo, resultado, created_at, usuarios!inner(nome)').eq('cliente_id', id).order('created_at', { ascending: false }).limit(100),
     supabase.from('historico_acoes').select('*').eq('entidade_id', id).eq('entidade', 'clientes').order('created_at', { ascending: false }).limit(50),
     supabase.from('documentos').select('*').eq('cliente_id', id).is('deleted_at', null).order('created_at', { ascending: false }),
     supabase.from('agendamentos').select('id, data_hora, status, created_at, usuarios!inner(nome)').eq('cliente_id', id).order('data_hora', { ascending: false }),
-    supabase.from('comparecimentos').select('id, resultado, agendamento_id, created_at').in('agendamento_id', (await supabase.from('agendamentos').select('id').eq('cliente_id', id)).data?.map(a => a.id) ?? []),
+    supabase.from('comparecimentos').select('id, resultado, agendamento_id, created_at').in('agendamento_id', ids.length > 0 ? ids : ['00000000-0000-0000-0000-000000000000']),
   ])
 
   const timeline: Cliente360Evento[] = []

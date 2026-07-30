@@ -1,7 +1,5 @@
 // ─── Tipos Financeiro Comercial (Sprint 11) ───────────────────────────────────
 
-import type { EtapaFunil } from '@/src/types'
-
 /** Status de uma comissão */
 export type ComissaoStatus = 'PREVISTA' | 'RECEBIDA' | 'CANCELADA'
 

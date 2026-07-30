@@ -1,6 +1,6 @@
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
 import { pipelineKPIs, pipelineAlertas } from './actions'
-import PipelineBoard from '@/src/components/pipeline/PipelineBoard'
+import { LazyPipelineBoard } from '@/src/components/lazy'
 import PipelineKPIsSection from '@/src/components/pipeline/PipelineKPIsSection'
 import PipelineAlertas from '@/src/components/pipeline/PipelineAlertas'
 import Link from 'next/link'
@@ -48,7 +48,7 @@ export default async function PipelinePage() {
       {/* Board com Drag & Drop */}
       <section>
         <h2 className="text-lg font-semibold text-gray-900 mb-3">Kanban de Clientes</h2>
-        <PipelineBoard />
+        <LazyPipelineBoard />
       </section>
 
       {/* Alertas */}

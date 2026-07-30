@@ -1,14 +1,17 @@
 'use server'
 
+import { requireAuth } from '@/src/lib/auth/guards'
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
 import { revalidatePath } from 'next/cache'
 import { AgendaEvent, AgendaFiltros, AgendaResumo, StatusAgendamento, ResultadoComparecimento, EtapaFunil } from '@/src/types'
+import { dispatchAutomation } from '@/src/lib/automation/engine'
 
 /**
  * Busca todos os agendamentos enriquecidos para o calendário.
  * Aplica os filtros recebidos (corretor, empreendimento, status, período, cliente).
  */
 export async function listarAgendamentos(filtros: AgendaFiltros) {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
 
   const {
@@ -186,6 +189,7 @@ type AgendamentoJoinRow = {
  * Resumo para o card Agenda de Hoje no Dashboard.
  */
 export async function resumoAgendaHoje(): Promise<AgendaResumo> {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
 
   const {
@@ -260,6 +264,7 @@ export async function resumoAgendaHoje(): Promise<AgendaResumo> {
  * Confirma um agendamento (status CONFIRMADO).
  */
 export async function confirmarAgendamento(agendamentoId: string) {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -281,6 +286,11 @@ export async function confirmarAgendamento(agendamentoId: string) {
 
   if (error) return { erro: error.message }
 
+  dispatchAutomation('agendamento_confirmado', 'agendamento', agendamentoId, {
+    agendamento_id: agendamentoId,
+    cliente_id: ag.cliente_id,
+  })
+
   // Atividade automática
   await supabase.from('atividades').insert({
     cliente_id: ag.cliente_id,
@@ -299,6 +309,7 @@ export async function confirmarAgendamento(agendamentoId: string) {
  * Cancela um agendamento.
  */
 export async function cancelarAgendamento(agendamentoId: string) {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -340,6 +351,7 @@ export async function reagendarVisita(input: {
   novaDataHora: string
   observacao: string | null
 }) {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -365,16 +377,27 @@ export async function reagendarVisita(input: {
     .eq('id', input.agendamentoId)
 
   // Cria novo
-  const { error } = await supabase.from('agendamentos').insert({
+  const { error, data: novoAg } = await supabase.from('agendamentos').insert({
     cliente_id: ag.cliente_id,
     corretor_id: user.id,
     data_hora: data.toISOString(),
     empreendimento_id: ag.empreendimento_id,
     status: 'REMARCADO',
     observacao: input.observacao?.trim() || null,
-  })
+  }).select('id').single()
 
   if (error) return { erro: error.message }
+
+  const novoAgendamentoId = novoAg?.id
+
+  dispatchAutomation('agendamento_criado', 'agendamento', novoAgendamentoId ?? '', {
+    agendamento_id: novoAgendamentoId,
+    cliente_id: ag.cliente_id,
+    data_hora: data.toISOString(),
+    empreendimento_id: ag.empreendimento_id,
+    status: 'REMARCADO',
+    reagendado_de: input.agendamentoId,
+  })
 
   await supabase.from('atividades').insert({
     cliente_id: ag.cliente_id,
@@ -400,18 +423,19 @@ export async function confirmarComparecimentoAgenda(input: {
   motivoAusencia: string | null
   observacao: string
 }) {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { erro: 'Você precisa estar logado.' }
 
   // Insere comparecimento (1:1 com agendamento)
-  const { error } = await supabase.from('comparecimentos').insert({
+  const { error, data: compCriadoAgenda } = await supabase.from('comparecimentos').insert({
     agendamento_id: input.agendamentoId,
     resultado: input.resultado,
     motivo_ausencia: input.resultado === 'NAO_COMPARECEU' ? (input.motivoAusencia?.trim() || null) : null,
     observacao: input.observacao.trim() || null,
-  })
+  }).select('id').single()
 
   if (error) {
     if (error.message.includes('unique') || error.code === '23505') {
@@ -419,6 +443,15 @@ export async function confirmarComparecimentoAgenda(input: {
     }
     return { erro: error.message }
   }
+
+  const comparecimentoIdAgenda = compCriadoAgenda?.id
+
+  dispatchAutomation('comparecimento', 'comparecimento', comparecimentoIdAgenda ?? '', {
+    comparecimento_id: comparecimentoIdAgenda,
+    cliente_id: input.clienteId,
+    agendamento_id: input.agendamentoId,
+    resultado: input.resultado,
+  })
 
   // Atividade automática
   const label = input.resultado === 'COMPARECEU' ? 'Cliente compareceu' : 'Cliente não compareceu'
@@ -446,6 +479,7 @@ export async function confirmarComparecimentoAgenda(input: {
  * Busca dados completos do cliente para o painel lateral.
  */
 export async function buscarDetalhesClientePainel(clienteId: string) {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -487,6 +521,7 @@ export async function buscarDetalhesClientePainel(clienteId: string) {
  * Busca corretores e empreendimentos para os filtros (dropdowns).
  */
 export async function buscarOpcoesFiltros() {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
 
   const [corretoresRes, empreendimentosRes] = await Promise.all([

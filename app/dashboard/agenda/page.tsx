@@ -1,4 +1,4 @@
-import CalendarioAgenda from '@/src/components/agenda/CalendarioAgenda'
+import { LazyCalendarioAgenda } from '@/src/components/lazy'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,7 +12,7 @@ export default function AgendaPage() {
         </p>
       </div>
 
-      <CalendarioAgenda />
+      <LazyCalendarioAgenda />
     </div>
   )
 }

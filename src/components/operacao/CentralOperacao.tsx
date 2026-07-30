@@ -2,13 +2,18 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/src/lib/supabase'
-import { operacaoDadosIniciais, OperacaoDadosIniciais } from '@/app/dashboard/operacao/actions'
+import { useAuth } from '@/src/hooks/useAuth'
+import { operacaoDadosIniciais, type OperacaoDadosIniciais, type FilaTrabalhoItem, queryFilaTrabalho } from '@/app/dashboard/operacao/actions'
 import {
-  GestaoResumoOperacao,
-  GestaoKPI,
-  GestaoRankingItem,
+  type GestaoResumoOperacao,
+  type GestaoKPI,
+  type GestaoRankingItem,
 } from '@/src/types'
 import Link from 'next/link'
+import HeatmapProducao from './HeatmapProducao'
+import ProdutividadeChart from './ProdutividadeChart'
+import FilaTrabalho from './FilaTrabalho'
+import BuscaGlobal from './BuscaGlobal'
 
 // ─── Tipos locais para Realtime ───
 interface AtividadeRealtime {
@@ -30,6 +35,8 @@ export default function CentralOperacao({ dadosIniciais }: { dadosIniciais: Oper
   const [resumo, setResumo] = useState<GestaoResumoOperacao>(dadosIniciais.resumo)
   const [corretores, setCorretores] = useState(dadosIniciais.corretoresMonitor)
   const [pulso, setPulso] = useState(0) // força re-render periódico para "tempo desde última atividade"
+  const [filaTrabalho, setFilaTrabalho] = useState<FilaTrabalhoItem[]>([])
+  const { user } = useAuth()
 
   // ─── Realtime: atividades (INSERT) ───
   useEffect(() => {
@@ -106,6 +113,12 @@ export default function CentralOperacao({ dadosIniciais }: { dadosIniciais: Oper
     return () => clearInterval(timer)
   }, [])
 
+  // ─── Fila de trabalho: carrega client-side quando user está disponível ───
+  useEffect(() => {
+    if (!user?.id) return
+    queryFilaTrabalho(user.id).then(setFilaTrabalho)
+  }, [user?.id])
+
   // ─── Full refresh manual (fallback) ───
   const recarregar = useCallback(async () => {
     const fresh = await operacaoDadosIniciais()
@@ -121,9 +134,12 @@ export default function CentralOperacao({ dadosIniciais }: { dadosIniciais: Oper
           <h1 className="text-2xl font-bold text-gray-900">Central de Operações</h1>
           <p className="mt-1 text-sm text-gray-500">Atualização em tempo real via Supabase Realtime.</p>
         </div>
-        <button onClick={recarregar} className="rounded-md border border-gray-300 px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50">
-          ↻ Atualizar
-        </button>
+        <div className="flex items-center gap-2">
+          <BuscaGlobal />
+          <button onClick={recarregar} className="rounded-md border border-gray-300 px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50 shrink-0">
+            ↻ Atualizar
+          </button>
+        </div>
       </div>
 
       {/* ════ Seção 1: Visão Geral ════ */}
@@ -139,6 +155,13 @@ export default function CentralOperacao({ dadosIniciais }: { dadosIniciais: Oper
           <MCard l="VGV Mês" v={resumo.vgvMes} c="cyan" m />
           <MCard l="Comissão Prev." v={resumo.comissaoPrevista} c="rose" m />
         </div>
+      </section>
+
+      {/* ════ Seção Intermediária: Fila de Trabalho ════ */}
+      <section>
+        <h2 className="text-lg font-semibold text-gray-900">Fila de Trabalho — Suas Próximas Ações</h2>
+        <p className="text-xs text-gray-400 mb-2">Priorizado por urgência: clientes sem contato e prazos vencidos primeiro.</p>
+        <FilaTrabalho acoes={filaTrabalho} />
       </section>
 
       {/* ════ Seção 2: Atividade ao Vivo ════ */}
@@ -291,6 +314,26 @@ export default function CentralOperacao({ dadosIniciais }: { dadosIniciais: Oper
           ))}
         </div>
       </section>
+
+      {/* ════ Seção 8: Alertas (Painel Vermelho) ════ */}
+
+      {/* ════ Seção 8A: Heatmap de Produção ════ */}
+      {dados.heatmap.length > 0 && (
+        <section>
+          <h2 className="text-lg font-semibold text-gray-900">Heatmap de Produção (7 dias)</h2>
+          <p className="text-xs text-gray-400 mb-2">Intensidade de atividade por corretor × hora do dia.</p>
+          <HeatmapProducao dados={dados.heatmap} />
+        </section>
+      )}
+
+      {/* ════ Seção 8B: Produtividade por Equipe ════ */}
+      {dados.produtividadeEquipe.length > 0 && (
+        <section>
+          <h2 className="text-lg font-semibold text-gray-900">Produtividade por Equipe (30 dias)</h2>
+          <p className="text-xs text-gray-400 mb-2">Tendência de atividades por equipe ao longo do mês.</p>
+          <ProdutividadeChart series={dados.produtividadeEquipe} />
+        </section>
+      )}
 
       {/* ════ Seção 8: Alertas (Painel Vermelho) ════ */}
       <section>

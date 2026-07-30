@@ -1,5 +1,6 @@
 'use server'
 
+import { requireAuth } from '@/src/lib/auth/guards'
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
 import { hoje, inicioDoMes, ultimoDiaDoMes, diasRestantesNoMes } from '@/src/lib/analytics'
 import { queryResumoOperacao, queryKPIsDiarios, queryRanking, queryFunilGerencial, queryAlertas, queryMetas } from '@/src/lib/server/queries-compartilhadas'
@@ -41,6 +42,7 @@ function aplicarFiltrosPeriodo(filtros?: GestaoFiltros): { dataInicio: string; d
 // ─── Seção 1: Resumo da Operação ─────────────────────────────────────────────
 
 export async function resumoOperacao(filtros?: GestaoFiltros): Promise<GestaoResumoOperacao> {
+  await requireAuth()
   const { dataInicio, dataFim } = aplicarFiltrosPeriodo(filtros)
   return queryResumoOperacao({ inicio: dataInicio, fim: dataFim })
 }
@@ -48,6 +50,7 @@ export async function resumoOperacao(filtros?: GestaoFiltros): Promise<GestaoRes
 // ─── Seção 2: KPIs Diários ───────────────────────────────────────────────────
 
 export async function kpisDiarios(filtros?: GestaoFiltros): Promise<GestaoKPI[]> {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -71,6 +74,7 @@ export async function kpisDiarios(filtros?: GestaoFiltros): Promise<GestaoKPI[]>
 // ─── Seção 3: Ranking ────────────────────────────────────────────────────────
 
 export async function rankingGestao(filtros?: GestaoFiltros): Promise<GestaoRankingItem[]> {
+  await requireAuth()
   const { dataInicio, dataFim } = aplicarFiltrosPeriodo(filtros)
   return queryRanking({ dataInicio, dataFim })
 }
@@ -78,6 +82,7 @@ export async function rankingGestao(filtros?: GestaoFiltros): Promise<GestaoRank
 // ─── Seção 4: Funil Gerencial ────────────────────────────────────────────────
 
 export async function funilGerencial(filtros?: GestaoFiltros): Promise<GestaoFunilEtapa[]> {
+  await requireAuth()
   return queryFunilGerencial({
     corretorId: filtros?.corretorId ?? null,
     empreendimentoId: filtros?.empreendimentoId ?? null,
@@ -90,6 +95,7 @@ export async function producaoGestao(
   agrupamento: 'daily' | 'weekly' | 'monthly',
   filtros?: GestaoFiltros
 ): Promise<GestaoProducaoSerie[]> {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
   const { dataInicio, dataFim } = aplicarFiltrosPeriodo(filtros)
   const corretorFiltro = filtros?.corretorId
@@ -152,12 +158,14 @@ export async function producaoGestao(
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function alertasGestao(filtros?: GestaoFiltros): Promise<GestaoAlertas> {
+  await requireAuth()
   return queryAlertas()
 }
 
 // ─── Seção 7: Metas ──────────────────────────────────────────────────────────
 
 export async function metasGestao(filtros?: GestaoFiltros): Promise<GestaoMeta> {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
   const { dataInicio, dataFim } = aplicarFiltrosPeriodo(filtros)
 

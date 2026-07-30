@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
+import { PROTECTED_ROUTES, PUBLIC_ROUTES, ADMIN_ROUTES, DASHBOARD_ROUTES } from '@/src/config/routes'
 
 // Middleware de autenticação do Supabase.
 //
@@ -9,13 +10,12 @@ import { createServerClient } from '@supabase/ssr'
 //    redireciona para /login
 // 3. Se o usuário ESTÁ logado e tenta acessar /login,
 //    redireciona para /dashboard
+// 4. Restrição de rotas admin (apenas perfil ADMINISTRADOR)
+// 5. Todas as rotas do dashboard são protegidas
 //
-// Para adicionar mais rotas protegidas, edite a lista PROTECTED_ROUTES abaixo.
-// Para liberar uma rota (ex: /, /sobre), adicione em PUBLIC_ROUTES.
+// As listas de rotas ficam em src/config/routes.ts (single source of truth).
 
-const PROTECTED_ROUTES = ['/dashboard', '/clientes', '/agenda', '/documentos', '/ranking']
-
-const PUBLIC_ROUTES = ['/', '/login', '/auth/callback', '/test-supabase']
+const allProtected = [...PROTECTED_ROUTES, ...DASHBOARD_ROUTES]
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -37,14 +37,14 @@ export async function proxy(request: NextRequest) {
           })
         },
       },
-    }
+    },
   )
 
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const isProtected = PROTECTED_ROUTES.some((route) => pathname.startsWith(route))
+  const isProtected = allProtected.some((route) => pathname.startsWith(route))
   const isPublic = PUBLIC_ROUTES.some((route) => pathname === route || pathname.startsWith(route + '/'))
 
   if (!user && isProtected) {
@@ -57,6 +57,27 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
+  // Admin routes — only ADMINISTRADOR
+  const isAdminRoute = ADMIN_ROUTES.some((route) => pathname.startsWith(route))
+
+  if (isAdminRoute && user) {
+    try {
+      const { data: profile } = await supabase
+        .from('usuarios')
+        .select('perfil')
+        .eq('id', user.id)
+        .single()
+
+      if (!profile || profile.perfil !== 'ADMINISTRADOR') {
+        return NextResponse.redirect(new URL('/dashboard', request.url))
+      }
+    } catch {
+      return NextResponse.redirect(new URL('/dashboard', request.url))
+    }
+  }
+
+  // Fallback: qualquer rota não pública que não seja explicitamente protegida
+  // também é bloqueada por segurança
   if (!user && !isPublic && !isProtected) {
     const loginUrl = new URL('/login', request.url)
     loginUrl.searchParams.set('redirect', pathname)

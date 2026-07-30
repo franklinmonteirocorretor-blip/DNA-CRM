@@ -2,6 +2,7 @@
 
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
 import { redirect } from 'next/navigation'
+import { dispatchAutomation } from '@/src/lib/automation/engine'
 
 // Action do Servidor — executada quando o formulário de novo cliente é enviado.
 // O Next.js chama esta função com os dados do FormData automaticamente.
@@ -51,7 +52,7 @@ export async function cadastrarCliente(formData: FormData) {
   const renda = rendaStr ? parseFloat(rendaStr) : null
   const dependentes = dependentesStr ? parseInt(dependentesStr) : 0
 
-  const { error } = await supabase.from('clientes').insert({
+  const { error, data: clienteCriado } = await supabase.from('clientes').insert({
     nome: nome.trim(),
     cpf,
     telefone,
@@ -61,11 +62,22 @@ export async function cadastrarCliente(formData: FormData) {
     empreendimento_id: empreendimento || null,
     observacoes: observacoes?.trim() || null,
     corretor_responsavel_id: user.id,
-  })
+  }).select('id').single()
 
   if (error) {
     return { erros: [error.message] }
   }
+
+  const novoClienteId = clienteCriado?.id
+
+  dispatchAutomation('cliente_criado', 'cliente', novoClienteId ?? '', {
+    nome: nome.trim(),
+    cpf,
+    telefone,
+    email,
+    corretor_id: user.id,
+    empreendimento_id: empreendimento || null,
+  })
 
   // 5. Sucesso → redireciona para a lista de clientes
   redirect('/dashboard/clientes')

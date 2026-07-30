@@ -1,5 +1,6 @@
 'use server'
 
+import { requireAuth } from '@/src/lib/auth/guards'
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
 import { FollowUpItem, FollowUpProximaAcao, FollowUpSugestao, FollowUpData, EtapaFunil } from '@/src/types'
 import { ETAPA_LABEL_SINGULAR } from '@/src/config/pipeline'
@@ -51,6 +52,7 @@ function calcularPrioridade(item: {
 }
 
 export async function followupData() {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
 
   // Obtém perfil do usuário logado

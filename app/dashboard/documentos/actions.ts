@@ -1,5 +1,6 @@
 'use server'
 
+import { requireAuth } from '@/src/lib/auth/guards'
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
 import { revalidatePath } from 'next/cache'
 import {
@@ -10,10 +11,12 @@ import {
   StatusValidacaoDoc,
   CHECKLIST_OBRIGATORIO,
 } from '@/src/types'
+import { dispatchAutomation } from '@/src/lib/automation/engine'
 
 // ─── Painel gerencial de documentos ──────────────────────────────────────────
 
 export async function painelDocumentos(): Promise<PainelDocumentos> {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
 
   // Todos os clientes ativos
@@ -88,6 +91,7 @@ export async function painelDocumentos(): Promise<PainelDocumentos> {
 // ─── Dossiê completo de um cliente ──────────────────────────────────────────
 
 export async function clienteDossie(clienteId: string): Promise<ClienteDossie | null> {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
 
   const { data: cliente } = await supabase
@@ -132,12 +136,28 @@ export async function clienteDossie(clienteId: string): Promise<ClienteDossie | 
 // ─── Aprovar documento ───────────────────────────────────────────────────────
 
 export async function aprovarDocumento(docId: string, observacoes?: string): Promise<{ success: boolean; error?: string }> {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
+
+  // Busca dados do documento para o dispatch
+  const { data: docAntes } = await supabase
+    .from('documentos')
+    .select('cliente_id, tipo')
+    .eq('id', docId)
+    .single()
+
   const { error } = await supabase
     .from('documentos')
     .update({ status_validacao: 'VALIDADO' as StatusValidacaoDoc, observacoes: observacoes ?? null, data_aprovacao: new Date().toISOString() })
     .eq('id', docId)
   if (error) return { success: false, error: error.message }
+
+  dispatchAutomation('documento_aprovado', 'documento', docId, {
+    documento_id: docId,
+    cliente_id: docAntes?.cliente_id ?? null,
+    tipo: docAntes?.tipo ?? null,
+  })
+
   revalidatePath('/dashboard/documentos')
   return { success: true }
 }
@@ -145,12 +165,29 @@ export async function aprovarDocumento(docId: string, observacoes?: string): Pro
 // ─── Rejeitar documento ──────────────────────────────────────────────────────
 
 export async function rejeitarDocumento(docId: string, observacoes: string): Promise<{ success: boolean; error?: string }> {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
+
+  // Busca dados do documento para o dispatch
+  const { data: docAntes } = await supabase
+    .from('documentos')
+    .select('cliente_id, tipo')
+    .eq('id', docId)
+    .single()
+
   const { error } = await supabase
     .from('documentos')
     .update({ status_validacao: 'REJEITADO' as StatusValidacaoDoc, observacoes })
     .eq('id', docId)
   if (error) return { success: false, error: error.message }
+
+  dispatchAutomation('documento_rejeitado', 'documento', docId, {
+    documento_id: docId,
+    cliente_id: docAntes?.cliente_id ?? null,
+    tipo: docAntes?.tipo ?? null,
+    motivo: observacoes,
+  })
+
   revalidatePath('/dashboard/documentos')
   return { success: true }
 }
@@ -158,6 +195,7 @@ export async function rejeitarDocumento(docId: string, observacoes: string): Pro
 // ─── Reenviar documento (upload de nova versão) ──────────────────────────────
 
 export async function reenviarDocumento(docId: string, novaUrl: string): Promise<{ success: boolean; error?: string }> {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
   const { error } = await supabase
     .from('documentos')
@@ -171,6 +209,7 @@ export async function reenviarDocumento(docId: string, novaUrl: string): Promise
 // ─── Verificar checklist obrigatório (para bloqueio no Pipeline) ─────────────
 
 export async function verificarChecklist(clienteId: string, etapa: EtapaFunil): Promise<{ completo: boolean; faltantes: TipoDocumento[] }> {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
   const obrigatorios = CHECKLIST_OBRIGATORIO[etapa] ?? []
 

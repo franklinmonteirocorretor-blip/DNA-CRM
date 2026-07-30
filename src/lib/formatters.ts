@@ -2,6 +2,19 @@
 // Sprint 10 Fase 4 — centraliza todos os formatadores de moeda, horas, data e data/hora
 // antes espalhados em diversos componentes
 
+// ── Constantes ─────────────────────────────────────────────────────────────────
+
+/** Threshold para formatação de milhão (valor >= 1M) */
+const MILHAS = 1_000_000
+/** Threshold para formatação de milhar (valor >= 1k) */
+const MILHAR = 1_000
+/** Horas em 1 dia */
+const HORAS_POR_DIA = 24
+/** Horas em 1 semana (7 dias) */
+const HORAS_POR_SEMANA = 168
+/** Dias em 1 mês (aproximado) */
+const DIAS_POR_MES = 30
+
 /** Formata valor como moeda BRL completa (ex: R$ 1.500,00) */
 export function formatarMoeda(valor: number): string {
   return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -9,26 +22,25 @@ export function formatarMoeda(valor: number): string {
 
 /** Formata valor compacto (ex: R$ 1.5M, R$ 200k, R$ 500) */
 export function formatarMoedaCompacta(valor: number): string {
-  if (valor >= 1000000) return `R$ ${(valor / 1000000).toFixed(1)}M`
-  if (valor >= 1000) return `R$ ${(valor / 1000).toFixed(0)}k`
+  if (valor >= MILHAS) return `R$ ${(valor / MILHAS).toFixed(1)}M`
+  if (valor >= MILHAR) return `R$ ${(valor / MILHAR).toFixed(0)}k`
   return `R$ ${valor}`
 }
 
 /** Formata horas em formato curto (ex: 36h, 3 dias, 2 sem) */
 export function formatarHoras(horas: number): string {
-  if (horas < 24) return `${horas}h`
-  if (horas < 168) return `${Math.round(horas / 24)} dias`
-  return `${Math.round(horas / 168)} sem`
+  if (horas < HORAS_POR_DIA) return `${horas}h`
+  if (horas < HORAS_POR_SEMANA) return `${Math.round(horas / HORAS_POR_DIA)} dias`
+  return `${Math.round(horas / HORAS_POR_SEMANA)} sem`
 }
 
 /** Formata horas em formato extenso (ex: 36h, 3 dias, 2 meses) */
 export function formatarHorasExtenso(horas: number): string {
-  const dias = Math.floor(horas / 24)
-  if (dias >= 30) return `${Math.floor(dias / 30)} meses`
+  const dias = Math.floor(horas / HORAS_POR_DIA)
+  if (dias >= DIAS_POR_MES) return `${Math.floor(dias / DIAS_POR_MES)} meses`
   if (dias >= 1) return `${dias} dias`
   return `${horas}h`
 }
-
 /** Formata uma data YYYY-MM-DD conforme o agrupamento (daily/weekly/monthly) */
 export function formatarData(data: string, agrupamento: 'daily' | 'weekly' | 'monthly'): string {
   if (agrupamento === 'monthly') {
