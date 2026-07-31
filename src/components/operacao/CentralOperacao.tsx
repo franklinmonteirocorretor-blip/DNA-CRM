@@ -134,12 +134,12 @@ export default function CentralOperacao({ dadosIniciais }: { dadosIniciais: Oper
       {/* Cabeçalho */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Central de Operações</h1>
-          <p className="mt-1 text-sm text-gray-500">Atualização em tempo real via Supabase Realtime.</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Central de Operações</h1>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Atualização em tempo real via Supabase Realtime.</p>
         </div>
         <div className="flex items-center gap-2">
           <BuscaGlobal />
-          <button onClick={recarregar} className="rounded-md border border-gray-300 px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50 shrink-0">
+          <button onClick={recarregar} className="rounded-md border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-xs text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 shrink-0">
             ↻ Atualizar
           </button>
         </div>
@@ -179,33 +179,33 @@ export default function CentralOperacao({ dadosIniciais }: { dadosIniciais: Oper
 
       {/* ════ Seção 3: Monitor da Equipe ════ */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-900">Monitor da Equipe</h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Monitor da Equipe</h2>
         <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {corretores.map((c) => {
             return (
-              <div key={c.id} className="rounded-lg border border-gray-200 bg-white p-4">
+              <div key={c.id} className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4">
                 <div className="flex items-center gap-2">
                   <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-xs font-bold">{c.nome.charAt(0)}</div>
                   <div>
-                    <p className="text-sm font-semibold text-gray-900">{c.nome}</p>
-                    <p className="text-[10px] text-gray-400">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{c.nome}</p>
+                    <p className="text-[10px] text-gray-400 dark:text-gray-500">
                       {c.minutosSemAtividade < 15 ? '🟢 Produzindo' : c.minutosSemAtividade < 60 ? '🟡 Baixa atividade' : '🔴 Sem atividade'} · {formatarMoedain(c.minutosSemAtividade)}
                     </p>
                   </div>
                 </div>
                 <div className="mt-2 grid grid-cols-3 gap-1 text-[10px]">
-                  <span className="text-gray-400">📞 {c.ligacoes}</span>
-                  <span className="text-gray-400">💬 {c.whatsapps}</span>
-                  <span className="text-gray-400">🔄 {c.followUps}</span>
-                  <span className="text-gray-400">📅 {c.agendamentos}</span>
-                  <span className="text-gray-400">🏠 {c.comparecimentos}</span>
-                  <span className="text-gray-400">📁 {c.pastas}</span>
+                  <span className="text-gray-400 dark:text-gray-500">📞 {c.ligacoes}</span>
+                  <span className="text-gray-400 dark:text-gray-500">💬 {c.whatsapps}</span>
+                  <span className="text-gray-400 dark:text-gray-500">🔄 {c.followUps}</span>
+                  <span className="text-gray-400 dark:text-gray-500">📅 {c.agendamentos}</span>
+                  <span className="text-gray-400 dark:text-gray-500">🏠 {c.comparecimentos}</span>
+                  <span className="text-gray-400 dark:text-gray-500">📁 {c.pastas}</span>
                 </div>
                 <div className="mt-2 flex items-center gap-2">
-                  <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                     <div className={`h-full rounded-full ${c.percentualMeta >= 100 ? 'bg-emerald-500' : c.percentualMeta >= 70 ? 'bg-amber-500' : 'bg-red-500'}`} style={{ width: `${c.percentualMeta}%` }} />
                   </div>
-                  <span className="text-xs font-bold text-gray-700">{c.percentualMeta}%</span>
+                  <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{c.percentualMeta}%</span>
                 </div>
               </div>
             )
@@ -215,7 +215,7 @@ export default function CentralOperacao({ dadosIniciais }: { dadosIniciais: Oper
 
       {/* ════ Seção 4: Clientes Prioritários ════ */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-900">Clientes Prioritários</h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Clientes Prioritários</h2>
         <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
           <AlertaPainel titulo="Sem contato +3d" icone="📞" cor="red" itens={dados.alertas.clientesSemContato3dias.map(c => ({ id: c.clienteId, nome: c.nome, subtitulo: `${c.diasSemContato}d sem contato · ${c.corretorNome}` }))} vazio="Todos contatados." />
           <AlertaPainel titulo="Doc. pendentes" icone="📄" cor="amber" itens={dados.alertas.pendenciasDocumentais.map(c => ({ id: c.clienteId, nome: c.clienteNome, subtitulo: `${c.qtdDocumentosPendentes} docs · ${c.etapa}` }))} vazio="Nenhum pendente." />
@@ -226,46 +226,46 @@ export default function CentralOperacao({ dadosIniciais }: { dadosIniciais: Oper
 
       {/* ════ Seção 5: Metas ════ */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-900">Metas da Empresa</h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Metas da Empresa</h2>
         <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 text-xs">
           {(['vendas', 'aprovacoes', 'agendamentos', 'comparecimentos', 'pastas'] as const).map((k) => {
             const meta = dados.metas.metaEquipe[k]; const real = dados.metas.realizadoEquipe[k]
             const pct = meta > 0 ? Math.min(100, Math.round((real / meta) * 100)) : 0
             return (
-              <div key={k} className="rounded-lg border border-gray-200 bg-white p-3 text-center">
-                <p className="text-gray-400 capitalize">{k}</p>
-                <p className="text-lg font-bold text-gray-700">{real}<span className="text-xs text-gray-400">/{meta}</span></p>
-                <div className="mt-1 h-1.5 bg-gray-100 rounded-full overflow-hidden"><div className={`h-full rounded-full ${pct >= 100 ? 'bg-emerald-500' : pct >= 70 ? 'bg-amber-500' : 'bg-red-500'}`} style={{ width: `${pct}%` }} /></div>
-                <p className="mt-0.5 text-[10px] text-gray-400">{pct}%</p>
+              <div key={k} className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3 text-center">
+                <p className="text-gray-400 dark:text-gray-500 capitalize">{k}</p>
+                <p className="text-lg font-bold text-gray-700 dark:text-gray-200">{real}<span className="text-xs text-gray-400 dark:text-gray-500">/{meta}</span></p>
+                <div className="mt-1 h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden"><div className={`h-full rounded-full ${pct >= 100 ? 'bg-emerald-500' : pct >= 70 ? 'bg-amber-500' : 'bg-red-500'}`} style={{ width: `${pct}%` }} /></div>
+                <p className="mt-0.5 text-[10px] text-gray-400 dark:text-gray-500">{pct}%</p>
               </div>
             )
           })}
-          <div className="rounded-lg border border-gray-200 bg-white p-3 text-center">
-            <p className="text-gray-400">VGV</p>
-            <p className="text-lg font-bold text-gray-700">{formatarMoeda(resumo.vgvMes)}</p>
-            <p className="text-[10px] text-gray-400">{dados.metas.diasRestantes}d restantes</p>
+          <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3 text-center">
+            <p className="text-gray-400 dark:text-gray-500">VGV</p>
+            <p className="text-lg font-bold text-gray-700 dark:text-gray-200">{formatarMoeda(resumo.vgvMes)}</p>
+            <p className="text-[10px] text-gray-400 dark:text-gray-500">{dados.metas.diasRestantes}d restantes</p>
           </div>
         </div>
       </section>
 
       {/* ════ Seção 6: Ranking ao Vivo ════ */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-900">Ranking ao Vivo — Top 10</h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Ranking ao Vivo — Top 10</h2>
         <div className="mt-3 overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
-              <tr className="border-b border-gray-200 text-left text-[10px] font-medium uppercase tracking-wide text-gray-400">
+              <tr className="border-b border-gray-200 dark:border-gray-700 text-left text-[10px] font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">
                 <th className="pb-2 w-8">#</th><th className="pb-2">Corretor</th><th className="pb-2 text-right">Pontos</th><th className="pb-2 text-right">Vendas</th><th className="pb-2 text-right">Aprovações</th>
               </tr>
             </thead>
             <tbody>
               {ranking.slice(0, 10).map((r) => (
-                <tr key={r.usuarioId} className="border-b border-gray-100">
-                  <td className="py-2 font-bold text-gray-700">{r.posicao === 1 ? '🥇' : r.posicao === 2 ? '🥈' : r.posicao === 3 ? '🥉' : `${r.posicao}º`}</td>
-                  <td className="py-2 text-gray-900">{r.nome}</td>
-                  <td className="py-2 text-right tabular-nums font-semibold text-blue-600">{r.pontuacao.toLocaleString('pt-BR')}</td>
-                  <td className="py-2 text-right tabular-nums text-teal-600">{r.vendas}</td>
-                  <td className="py-2 text-right tabular-nums text-indigo-600">{r.aprovacoes}</td>
+                <tr key={r.usuarioId} className="border-b border-gray-100 dark:border-gray-800">
+                  <td className="py-2 font-bold text-gray-700 dark:text-gray-300">{r.posicao === 1 ? '🥇' : r.posicao === 2 ? '🥈' : r.posicao === 3 ? '🥉' : `${r.posicao}º`}</td>
+                  <td className="py-2 text-gray-900 dark:text-gray-200">{r.nome}</td>
+                  <td className="py-2 text-right tabular-nums font-semibold text-blue-600 dark:text-blue-400">{r.pontuacao.toLocaleString('pt-BR')}</td>
+                  <td className="py-2 text-right tabular-nums text-teal-600 dark:text-teal-400">{r.vendas}</td>
+                  <td className="py-2 text-right tabular-nums text-indigo-600 dark:text-indigo-400">{r.aprovacoes}</td>
                 </tr>
               ))}
             </tbody>
@@ -275,16 +275,16 @@ export default function CentralOperacao({ dadosIniciais }: { dadosIniciais: Oper
 
       {/* ════ Seção 7: Mapa do Pipeline ════ */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-900">Mapa do Pipeline</h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Mapa do Pipeline</h2>
         <div className="mt-3 space-y-1.5">
           {dados.funil.map((e) => (
             <div key={e.etapa} className="flex items-center gap-3 text-xs">
-              <span className="w-28 shrink-0 text-gray-500">{e.label}</span>
-              <div className="flex-1 h-5 bg-gray-100 rounded overflow-hidden">
-                <div className="h-full bg-blue-400 rounded" style={{ width: `${Math.max(1, e.percentual)}%` }} />
+              <span className="w-28 shrink-0 text-gray-500 dark:text-gray-400">{e.label}</span>
+              <div className="flex-1 h-5 bg-gray-100 dark:bg-gray-800 rounded overflow-hidden">
+                <div className="h-full bg-blue-400 dark:bg-blue-600 rounded" style={{ width: `${Math.max(1, e.percentual)}%` }} />
               </div>
-              <span className="w-10 text-right font-semibold text-gray-700">{e.quantidade}</span>
-              {e.taxaConversao !== null && <span className="w-14 text-right text-[10px] text-gray-400">{e.taxaConversao}% conv.</span>}
+              <span className="w-10 text-right font-semibold text-gray-700 dark:text-gray-300">{e.quantidade}</span>
+              {e.taxaConversao !== null && <span className="w-14 text-right text-[10px] text-gray-400 dark:text-gray-500">{e.taxaConversao}% conv.</span>}
             </div>
           ))}
         </div>
