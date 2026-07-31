@@ -1,6 +1,7 @@
 'use client'
 
 import type { BIFunilEtapa } from '@/src/types/bi'
+import { formatarMoeda } from '@/src/lib/formatters'
 import {
   BarChart,
   Bar,
@@ -35,10 +36,6 @@ function corPorEtapa(etapa: string): string {
 function formatarPercentual(valor: number | null): string {
   if (valor === null || valor === undefined) return '—'
   return Math.round(valor) + '%'
-}
-
-function formatoBrl(valor: number): string {
-  return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
 
 interface CustomBarLabelProps {
@@ -88,7 +85,7 @@ function CustomTooltipContent({
       <p className="text-gray-600 mt-1">Quantidade: {d.quantidade}</p>
       <p className="text-gray-600">Conversão: {d.conversao !== null ? formatarPercentual(d.conversao) : '—'}</p>
       <p className="text-gray-600">Perda: {d.perda}</p>
-      <p className="text-gray-600">VGV: {formatoBrl(d.vgv)}</p>
+      <p className="text-gray-600">VGV: {formatarMoeda(d.vgv)}</p>
       <p className="text-gray-600">Tempo médio: {d.tempoMedioDias} dias</p>
     </div>
   )

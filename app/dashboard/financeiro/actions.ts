@@ -313,9 +313,10 @@ export async function previsaoComissoes(
   return { proximos7Dias: p7, proximos30Dias: p30, proximos90Dias: p90, detalhes }
 }
 
-// ─── Mutação: Atualizar status da comissão ───────────────────────────────────
+// ─── Mutação: Atualizar status da comissão (legado, mantido para compatibilidade) ─
 
-export async function atualizarComissacao(
+/** @deprecated Use registrarRecebimento, cancelarComissao ou reativarComissao */
+export async function atualizarComissao(
   clienteId: string,
   novoStatus: ComissaoStatus,
   dataRecebimento?: string,
@@ -343,6 +344,54 @@ export async function atualizarComissacao(
   }
 
   return { success: true }
+}
+
+// ─── SEÇÃO 8: Ações de Gestão (Sprint 13) ────────────────────────────────────
+
+import { gestaoComissaoDB } from '@/src/services/financeiro'
+
+type GestaoResultado = { sucesso: boolean; erro?: string }
+
+export async function registrarRecebimento(
+  clienteId: string,
+  _observacao?: string,
+): Promise<GestaoResultado> {
+  await requireAuth()
+
+  const resultado = await gestaoComissaoDB(clienteId, 'RECEBIDA')
+  if (!resultado.sucesso) return resultado
+
+  // Gatilho de automação
+  dispatchAutomation('comissao_recebida', 'cliente', clienteId, {
+    cliente_id: clienteId,
+    data_recebimento: new Date().toISOString().slice(0, 10),
+  })
+
+  return { sucesso: true }
+}
+
+export async function cancelarComissao(
+  clienteId: string,
+  _observacao?: string,
+): Promise<GestaoResultado> {
+  await requireAuth()
+
+  const resultado = await gestaoComissaoDB(clienteId, 'CANCELADA')
+  if (!resultado.sucesso) return resultado
+
+  return { sucesso: true }
+}
+
+export async function reativarComissao(
+  clienteId: string,
+  _observacao?: string,
+): Promise<GestaoResultado> {
+  await requireAuth()
+
+  const resultado = await gestaoComissaoDB(clienteId, 'REATIVADA')
+  if (!resultado.sucesso) return resultado
+
+  return { sucesso: true }
 }
 
 // ─── Dados completos do dashboard ─────────────────────────────────────────────

@@ -1,13 +1,10 @@
 'use client'
 
 import type { BIResumoExecutivo } from '@/src/types/bi'
+import { formatarMoeda } from '@/src/lib/formatters'
 
 interface Props {
   resumo: BIResumoExecutivo
-}
-
-function formatoMoeda(valor: number): string {
-  return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
 
 function formatoPercentual(valor: number): string {
@@ -49,10 +46,10 @@ function KpiCard({
 }
 
 export default function ResumoExecutivoBI({ resumo }: { resumo: BIResumoExecutivo }) {
-  const vgv = formatoMoeda(resumo.vgvMes)
-  const comissao = formatoMoeda(resumo.comissaoPrevista)
+  const vgv = formatarMoeda(resumo.vgvMes)
+  const comissao = formatarMoeda(resumo.comissaoPrevista)
   const conversao = formatoPercentual(resumo.conversaoGeral)
-  const ticket = formatoMoeda(resumo.ticketMedio)
+  const ticket = formatarMoeda(resumo.ticketMedio)
 
   const metaPct = resumo.percentualMeta
   const vgvTendencia: Tendencia = metaPct >= 80 ? 'up' : metaPct >= 60 ? 'neutral' : 'down'

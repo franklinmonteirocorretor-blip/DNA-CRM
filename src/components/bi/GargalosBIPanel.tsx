@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import type { BIGargalos, BIGargaloItem } from '@/src/types/bi'
+import { formatarMoeda } from '@/src/lib/formatters'
 
 const ABAS = [
   { label: 'Etapas congestionadas', key: 'etapasCongestionadas' as const },
@@ -24,13 +25,6 @@ const LABEL_SEVERIDADE: Record<string, string> = {
   baixa: 'Baixa',
 }
 
-function formatarValor(valor: number): string {
-  if (valor >= 1000) {
-    return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-  }
-  return String(valor)
-}
-
 function GargaloItem({ item }: { item: BIGargaloItem }) {
   return (
     <div className="flex items-start justify-between rounded-lg bg-white p-3 border border-gray-100">
@@ -44,7 +38,7 @@ function GargaloItem({ item }: { item: BIGargaloItem }) {
         <p className="mt-1 text-xs text-gray-500">{item.descricao}</p>
       </div>
       <span className="ml-3 text-sm font-semibold text-gray-800 whitespace-nowrap">
-        {formatarValor(item.valor)}
+        {formatarMoeda(item.valor)}
       </span>
     </div>
   )

@@ -1,10 +1,7 @@
 'use client'
 
 import type { BIEmpreendimento } from '@/src/types/bi'
-
-function formatoMoeda(valor: number): string {
-  return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-}
+import { formatarMoeda } from '@/src/lib/formatters'
 
 function formatoPercentual(valor: number): string {
   return Math.round(valor) + '%'
@@ -42,7 +39,7 @@ export default function EmpreendimentosBICard({
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">VGV</span>
-                  <span className="font-medium text-gray-800">{formatoMoeda(emp.vgv)}</span>
+                  <span className="font-medium text-gray-800">{formatarMoeda(emp.vgv)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Conversão</span>
@@ -52,11 +49,11 @@ export default function EmpreendimentosBICard({
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Comissão</span>
-                  <span className="font-medium text-gray-800">{formatoMoeda(emp.comissao)}</span>
+                  <span className="font-medium text-gray-800">{formatarMoeda(emp.comissao)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Ticket Médio</span>
-                  <span className="font-medium text-gray-800">{formatoMoeda(emp.ticketMedio)}</span>
+                  <span className="font-medium text-gray-800">{formatarMoeda(emp.ticketMedio)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Tempo Médio</span>

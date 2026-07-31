@@ -1,13 +1,10 @@
 'use client'
 
 import type { BITimelineEvento } from '@/src/types/bi'
+import { formatarMoeda } from '@/src/lib/formatters'
 
 function formatarData(iso: string): string {
   return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
-}
-
-function formatoMoeda(valor: number): string {
-  return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
 
 const ICONES_TIPO: Record<string, string> = {
@@ -52,7 +49,7 @@ function TimelineItem({ evento }: { evento: BITimelineEvento }) {
           <p className="mt-1 text-xs text-gray-600">{evento.descricao}</p>
           {evento.valor != null && (
             <p className="mt-1 text-xs font-medium text-gray-800">
-              {formatoMoeda(evento.valor)}
+              {formatarMoeda(evento.valor)}
             </p>
           )}
         </div>

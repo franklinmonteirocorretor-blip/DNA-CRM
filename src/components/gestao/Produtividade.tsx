@@ -1,18 +1,5 @@
 import { GestaoProducaoSerie } from '@/src/types'
-
-function formatarData(data: string, agrupamento: 'daily' | 'weekly' | 'monthly'): string {
-  if (agrupamento === 'monthly') {
-    const [ano, mes] = data.split('-')
-    const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
-    return `${meses[Number(mes) - 1]} ${ano}`
-  }
-  if (agrupamento === 'weekly') {
-    return `Sem. ${data.slice(5)}`
-  }
-  // daily
-  const d = new Date(data + 'T00:00:00')
-  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
-}
+import { formatarData } from '@/src/lib/formatters'
 
 function BarraHorizontal({
   valor,

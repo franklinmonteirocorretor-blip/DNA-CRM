@@ -30,6 +30,7 @@ export default async function DashboardLayout({
     .single()
 
   const ehGerente = usuario?.perfil === 'GERENTE' || usuario?.perfil === 'ADMINISTRADOR'
+  const podeVerFinanceiro = ehGerente || usuario?.perfil === 'SUPERVISOR'
 
   return (
     <div className="flex h-screen flex-col bg-gray-50">
@@ -71,6 +72,7 @@ export default async function DashboardLayout({
           <NavLink href="/dashboard/agenda">Agenda</NavLink>
           <NavLink href="/dashboard/gestao">Gestão</NavLink>
           <NavLink href="/dashboard/bi">BI</NavLink>
+          {podeVerFinanceiro && <NavLink href="/dashboard/financeiro">Financeiro</NavLink>}
           <NavLink href="/dashboard/funil">Funil</NavLink>
           <NavLink href="/dashboard/empreendimentos">Empreendimentos</NavLink>
           <NavLink href="/dashboard/rankings">Rankings</NavLink>

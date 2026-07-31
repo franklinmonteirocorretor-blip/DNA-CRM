@@ -1,10 +1,7 @@
 'use client'
 
 import type { BIPrevisao, BIHorizonteMeta, BIClientePrevisao } from '@/src/types/bi'
-
-function formatoMoeda(valor: number): string {
-  return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-}
+import { formatarMoeda } from '@/src/lib/formatters'
 
 function formatoPercentual(valor: number): string {
   return Math.round(valor) + '%'
@@ -36,7 +33,7 @@ function HorizonCard({ cenario }: { cenario: BIHorizonteMeta }) {
         </div>
         <div className="flex justify-between">
           <span className="text-gray-600">Ticket médio</span>
-          <span className="font-semibold text-gray-800">{formatoMoeda(cenario.ticketMedioNecessario)}</span>
+          <span className="font-semibold text-gray-800">{formatarMoeda(cenario.ticketMedioNecessario)}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-gray-600">Probabilidade</span>
@@ -60,7 +57,7 @@ function ClienteLinha({
       <td className="py-2 pr-3">{cliente.etapaLabel}</td>
       <td className="py-2 pr-3">{cliente.corretor}</td>
       <td className="py-2 pr-3 text-right">
-        {cliente.vgv != null ? formatoMoeda(cliente.vgv) : '—'}
+        {cliente.vgv != null ? formatarMoeda(cliente.vgv) : '—'}
       </td>
       <td className="py-2 pr-3 text-right font-medium">
         {formatoPercentual(cliente.probabilidade)}
@@ -91,9 +88,9 @@ export default function PrevisoesBIPanel({
       <div>
         <h3 className="text-sm font-semibold text-gray-900 mb-1">Previsões</h3>
         <div className="flex gap-2 text-xs text-gray-500">
-          <span>VGV esperado: {formatoMoeda(previsoes.vgvEsperado)}</span>
+          <span>VGV esperado: {formatarMoeda(previsoes.vgvEsperado)}</span>
           <span>|</span>
-          <span>Comissão: {formatoMoeda(previsoes.comissaoEsperada)}</span>
+          <span>Comissão: {formatarMoeda(previsoes.comissaoEsperada)}</span>
           <span>|</span>
           <span>Fechamentos: {previsoes.fechamentosEsperados} clientes</span>
         </div>

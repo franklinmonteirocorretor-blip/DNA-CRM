@@ -7,6 +7,7 @@ import { financeiroDadosIniciais } from './actions'
 import { FinanceiroFiltros } from '@/src/types/financeiro'
 import { formatarMoeda } from '@/src/lib/formatters'
 import KpiCard from '@/src/components/ui/KpiCard'
+import ComissaoAcoes from '@/src/components/financeiro/ComissaoAcoes'
 import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
@@ -76,12 +77,13 @@ export default async function FinanceiroPage({ searchParams }: Props) {
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3">Prevista</th>
                 <th className="px-4 py-3">Recebimento</th>
+                <th className="px-4 py-3">Ações</th>
               </tr>
             </thead>
             <tbody>
               {dados.comissoes.length === 0 && (
                 <tr>
-                  <td colSpan={9} className="px-4 py-8 text-center text-sm text-gray-400">
+                  <td colSpan={10} className="px-4 py-8 text-center text-sm text-gray-400">
                     Nenhuma comissão encontrada no período.
                   </td>
                 </tr>
@@ -101,6 +103,9 @@ export default async function FinanceiroPage({ searchParams }: Props) {
                   <td className="px-4 py-2.5"><StatusBadge status={item.status} /></td>
                   <td className="px-4 py-2.5 text-xs text-gray-500">{item.dataPrevista ? new Date(item.dataPrevista + 'T00:00:00').toLocaleDateString('pt-BR') : '—'}</td>
                   <td className="px-4 py-2.5 text-xs text-gray-500">{item.dataRecebimento ? new Date(item.dataRecebimento + 'T00:00:00').toLocaleDateString('pt-BR') : '—'}</td>
+                  <td className="px-4 py-2.5">
+                    <ComissaoAcoes clienteId={item.clienteId} statusAtual={item.status} />
+                  </td>
                 </tr>
               ))}
             </tbody>

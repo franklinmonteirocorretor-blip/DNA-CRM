@@ -79,3 +79,15 @@ export interface FinanceiroPrevisao {
     dataPrevista: string
   }[]
 }
+
+/** Dados completos do dashboard financeiro */
+export interface FinanceiroDados {
+  resumo: FinanceiroResumo
+  comissoes: ComissaoItem[]
+  producao: FinanceiroProducao[]
+  ranking: FinanceiroRankingItem[]
+  empreendimentos: FinanceiroEmpreendimento[]
+  previsao: FinanceiroPrevisao
+  corretores: { id: string; nome: string }[]
+  empreendimentosList: { id: string; nome: string }[]
+}

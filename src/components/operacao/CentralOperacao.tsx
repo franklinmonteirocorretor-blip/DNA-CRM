@@ -14,6 +14,7 @@ import HeatmapProducao from './HeatmapProducao'
 import ProdutividadeChart from './ProdutividadeChart'
 import FilaTrabalho from './FilaTrabalho'
 import BuscaGlobal from './BuscaGlobal'
+import { formatarMoeda } from '@/src/lib/formatters'
 
 // ─── Tipos locais para Realtime ───
 interface AtividadeRealtime {
@@ -23,8 +24,7 @@ interface AtividadeRealtime {
 }
 
 // ─── Helpers ───
-function fm(v: number): string { return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0 }) }
-function fmin(m: number): string { return m < 60 ? `${m}min` : m < 1440 ? `${Math.round(m / 60)}h` : `${Math.round(m / 1440)}d` }
+function formatarMoedain(m: number): string { return m < 60 ? `${m}min` : m < 1440 ? `${Math.round(m / 60)}h` : `${Math.round(m / 1440)}d` }
 
 // ─── Central de Operações ───
 export default function CentralOperacao({ dadosIniciais }: { dadosIniciais: OperacaoDadosIniciais }) {
@@ -214,7 +214,7 @@ export default function CentralOperacao({ dadosIniciais }: { dadosIniciais: Oper
                   <div>
                     <p className="text-sm font-semibold text-gray-900">{c.nome}</p>
                     <p className="text-[10px] text-gray-400">
-                      {c.minutosSemAtividade < 15 ? '🟢 Produzindo' : c.minutosSemAtividade < 60 ? '🟡 Baixa atividade' : '🔴 Sem atividade'} · {fmin(c.minutosSemAtividade)}
+                      {c.minutosSemAtividade < 15 ? '🟢 Produzindo' : c.minutosSemAtividade < 60 ? '🟡 Baixa atividade' : '🔴 Sem atividade'} · {formatarMoedain(c.minutosSemAtividade)}
                     </p>
                   </div>
                 </div>
@@ -267,7 +267,7 @@ export default function CentralOperacao({ dadosIniciais }: { dadosIniciais: Oper
           })}
           <div className="rounded-lg border border-gray-200 bg-white p-3 text-center">
             <p className="text-gray-400">VGV</p>
-            <p className="text-lg font-bold text-gray-700">{fm(resumo.vgvMes)}</p>
+            <p className="text-lg font-bold text-gray-700">{formatarMoeda(resumo.vgvMes)}</p>
             <p className="text-[10px] text-gray-400">{dados.metas.diasRestantes}d restantes</p>
           </div>
         </div>
@@ -388,7 +388,7 @@ export default function CentralOperacao({ dadosIniciais }: { dadosIniciais: Oper
 
 function MCard({ l, v, c, m }: { l: string; v: number; c: string; m?: boolean }) {
   const pals: Record<string, string> = { sky: 'bg-sky-50 text-sky-700 border-sky-200', violet: 'bg-violet-50 text-violet-700 border-violet-200', amber: 'bg-amber-50 text-amber-700 border-amber-200', emerald: 'bg-emerald-50 text-emerald-700 border-emerald-200', indigo: 'bg-indigo-50 text-indigo-700 border-indigo-200', teal: 'bg-teal-50 text-teal-700 border-teal-200', cyan: 'bg-cyan-50 text-cyan-700 border-cyan-200', rose: 'bg-rose-50 text-rose-700 border-rose-200' }
-  return <div className={`rounded-lg border p-3 ${pals[c]}`}><p className="text-[10px] font-medium uppercase tracking-wide opacity-70">{l}</p><p className="mt-0.5 text-lg font-bold">{m ? fm(v) : v.toLocaleString('pt-BR')}</p></div>
+  return <div className={`rounded-lg border p-3 ${pals[c]}`}><p className="text-[10px] font-medium uppercase tracking-wide opacity-70">{l}</p><p className="mt-0.5 text-lg font-bold">{m ? formatarMoeda(v) : v.toLocaleString('pt-BR')}</p></div>
 }
 
 function AlertaPainel({ titulo, icone, cor, itens, vazio }: { titulo: string; icone: string; cor: string; itens: { id: string; nome: string; subtitulo: string }[]; vazio: string }) {

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { formatarDataHora } from '@/src/lib/formatters'
 
 // ── Tipos das props ──────────────────────────────────────────────────────────
 // Cada tipo reflete exatamente o que a query do dashboard já busca.
@@ -48,20 +49,6 @@ function formatarDiasSemContato(dataISO: string): string {
   if (dias === 0) return 'hoje'
   if (dias === 1) return 'ontem'
   return `há ${dias} dias`
-}
-
-function formatarDataHora(dataISO: string): string {
-  const d = new Date(dataISO)
-  const hoje = new Date()
-  const amanha = new Date()
-  amanha.setDate(amanha.getDate() + 1)
-
-  const diaStr = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
-  const horaStr = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-
-  if (d.toDateString() === hoje.toDateString()) return `Hoje, ${horaStr}`
-  if (d.toDateString() === amanha.toDateString()) return `Amanhã, ${horaStr}`
-  return `${diaStr} às ${horaStr}`
 }
 
 function formatarPrazo(dataISO: string): string {

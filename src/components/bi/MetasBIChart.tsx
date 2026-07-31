@@ -1,10 +1,7 @@
 'use client'
 
 import type { BIMetas, BIMetaPadrao } from '@/src/types/bi'
-
-function formatoMoeda(valor: number): string {
-  return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-}
+import { formatarMoeda } from '@/src/lib/formatters'
 
 function formatoPontos(valor: number): string {
   return valor.toLocaleString('pt-BR', { maximumFractionDigits: 0 })
@@ -19,7 +16,7 @@ interface MetaItemConfig {
 const METAS_CONFIG: MetaItemConfig[] = [
   { key: 'diaria', label: 'Meta Diária', formatar: formatoPontos },
   { key: 'semanal', label: 'Meta Semanal', formatar: formatoPontos },
-  { key: 'mensal', label: 'Meta Mensal', formatar: formatoMoeda },
+  { key: 'mensal', label: 'Meta Mensal', formatar: formatarMoeda },
 ]
 
 function COR_DO_PROGRESSO(pct: number): string {

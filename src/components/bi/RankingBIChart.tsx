@@ -1,10 +1,7 @@
 'use client'
 
 import type { BIRankingItem } from '@/src/types/bi'
-
-function formatoMoeda(valor: number): string {
-  return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-}
+import { formatarMoeda } from '@/src/lib/formatters'
 
 function formatoPontuacao(valor: number): string {
   return valor.toLocaleString('pt-BR', { maximumFractionDigits: 0 })
@@ -47,11 +44,11 @@ function PodioItem({
       <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
         <span className="text-gray-500">VGV:</span>
         <span className="text-right font-medium text-gray-800">
-          {formatoMoeda(item.vgv)}
+          {formatarMoeda(item.vgv)}
         </span>
         <span className="text-gray-500">Comissão:</span>
         <span className="text-right font-medium text-gray-800">
-          {formatoMoeda(item.comissao)}
+          {formatarMoeda(item.comissao)}
         </span>
         <span className="text-gray-500">Conversão:</span>
         <span className="text-right font-medium text-gray-800">
@@ -97,8 +94,8 @@ export default function RankingBIChart({ items }: { items: BIRankingItem[] }) {
                   <td className="py-2 pr-3 font-medium">{item.rankingGeral}o</td>
                   <td className="py-2 pr-3">{item.nome}</td>
                   <td className="py-2 pr-3 text-right">{item.pontuacaoGeral.toLocaleString('pt-BR')}</td>
-                  <td className="py-2 pr-3 text-right">{formatoMoeda(item.vgv)}</td>
-                  <td className="py-2 pr-3 text-right">{formatoMoeda(item.comissao)}</td>
+                  <td className="py-2 pr-3 text-right">{formatarMoeda(item.vgv)}</td>
+                  <td className="py-2 pr-3 text-right">{formatarMoeda(item.comissao)}</td>
                   <td className="py-2 text-right">{formatoPercentual(item.conversao)}</td>
                 </tr>
               ))}
