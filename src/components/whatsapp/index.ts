@@ -1,0 +1,7 @@
+export { CaixaEntrada } from './CaixaEntrada'
+export { ChatPanel } from './ChatPanel'
+export { PainelCliente } from './PainelCliente'
+export { GerenciadorTemplates } from './Templates'
+export { WidgetMetricas } from './WidgetMetricas'
+export { CentroComandoWhatsApp } from './CentroComandoWhatsApp'
+export { HistoricoMensagens } from './HistoricoMensagens'
