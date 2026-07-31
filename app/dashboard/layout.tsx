@@ -76,6 +76,7 @@ export default async function DashboardLayout({
           <NavLink href="/dashboard/funil">Funil</NavLink>
           <NavLink href="/dashboard/empreendimentos">Empreendimentos</NavLink>
           <NavLink href="/dashboard/rankings">Rankings</NavLink>
+          <NavLink href="/dashboard/copiloto">Copiloto</NavLink>
           <NavLink href="/dashboard/whatsapp">WhatsApp</NavLink>
           <NavLink href="/dashboard/relatorios">Relatórios</NavLink>
           {ehGerente && <NavLink href="/dashboard/equipe">Equipe</NavLink>}

@@ -1,0 +1,5 @@
+export { CopilotResumo } from './CopilotoResumo'
+export { CopilotRecomendacoes } from './CopilotoRecomendacoes'
+export { CopilotPerguntas } from './CopilotoPerguntas'
+export { CopilotoComandos } from './CopilotoComandos'
+export { CopilotoInsights } from './CopilotoInsights'
