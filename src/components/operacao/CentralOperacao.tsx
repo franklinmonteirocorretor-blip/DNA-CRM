@@ -16,6 +16,7 @@ import FilaTrabalho from './FilaTrabalho'
 import BuscaGlobal from './BuscaGlobal'
 import KpiOperacaoCard from './KpiOperacaoCard'
 import CentroComando from './CentroComando'
+import TimelineGlobal from './TimelineGlobal'
 import { formatarMoeda } from '@/src/lib/formatters'
 
 // ─── Tipos locais para Realtime ───
@@ -173,43 +174,8 @@ export default function CentralOperacao({ dadosIniciais }: { dadosIniciais: Oper
       {/* ════ Seção 3: Centro de Comando ════ */}
       <CentroComando />
 
-      {/* ════ Seção 4: Atividade ao Vivo ════ */}
-      <section>
-        <h2 className="text-lg font-semibold text-gray-900">Atividade ao Vivo</h2>
-        <p className="text-xs text-gray-400 mb-2">
-          <span className="inline-block w-2 h-2 bg-emerald-500 rounded-full animate-pulse mr-1" />
-          Atualização automática — novas atividades aparecem em tempo real
-        </p>
-        <div className="rounded-lg border border-gray-200 bg-white overflow-hidden">
-          <div className="max-h-80 overflow-y-auto">
-            {atividades.length === 0 ? (
-              <p className="p-6 text-sm text-gray-400 text-center">Nenhuma atividade recente.</p>
-            ) : (
-              <div className="divide-y divide-gray-100">
-                {atividades.map((a) => (
-                  <div key={a.id} className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition text-xs">
-                    <span className="w-12 shrink-0 tabular-nums text-gray-400">
-                      {new Date(a.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                    <span className="w-20 shrink-0 font-medium text-gray-700 truncate">{a.usuarioNome.split(' ')[0]}</span>
-                    <span className="flex-1 text-gray-500">
-                      {a.tipo === 'LIGACAO' ? '📞 Ligou para' : a.tipo === 'WHATSAPP' ? '💬 WhatsApp para' : '🔄 Follow-up com'}{' '}
-                      <Link href={`/dashboard/clientes/${a.clienteId}`} className="font-medium text-blue-600 hover:underline">{a.clienteNome}</Link>
-                      {a.resultado && <span className="text-gray-400"> — {a.resultado}</span>}
-                    </span>
-                    {a.etapaAtual && (
-                      <span className="text-[9px] bg-gray-100 px-1.5 py-0.5 rounded text-gray-500 shrink-0">{a.etapaAtual}</span>
-                    )}
-                    {a.empreendimentoInteresse && (
-                      <span className="text-[9px] text-gray-400 shrink-0 max-w-[80px] truncate hidden sm:inline">{a.empreendimentoInteresse}</span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
+      {/* ════ Seção 4: Atividade ao Vivo / Timeline Global ════ */}
+      <TimelineGlobal eventosIniciais={atividades} />
 
       {/* ════ Seção 3: Monitor da Equipe ════ */}
       <section>
