@@ -54,17 +54,31 @@ async function _queryResumoOperacao(options?: {
     { count: agendamentosHoje },
     { count: comparecimentosHoje },
     { data: vendasMes },
+    // Sprint 14 — métricas diárias adicionais
+    { count: leadsHoje },
+    { data: comissaoRecebidaArr },
+    { data: prodHoje },
   ] = await Promise.all([
     supabase.from('clientes').select('*', { count: 'exact', head: true }).eq('etapa_atual', 'NOVO_LEAD').is('deleted_at', null).then(r => ({ ...r, count: r.count })),
     supabase.from('clientes').select('*', { count: 'exact', head: true }).in('etapa_atual', ['CONTATOS', 'AGENDAMENTO', 'COMPARECIMENTO', 'ANALISE', 'RESTRICOES', 'CONDICIONADOS', 'APROVADOS', 'FECHAMENTOS', 'POS_VENDA']).is('deleted_at', null).then(r => ({ ...r, count: r.count })),
     supabase.from('agendamentos').select('*', { count: 'exact', head: true }).gte('data_hora', `${hojeStr}T00:00:00`).lte('data_hora', `${hojeStr}T23:59:59`).then(r => ({ ...r, count: r.count })),
     supabase.from('comparecimentos').select('*', { count: 'exact', head: true }).eq('resultado', 'COMPARECEU').gte('created_at', `${hojeStr}T00:00:00`).lte('created_at', `${hojeStr}T23:59:59`).then(r => ({ ...r, count: r.count })),
     supabase.from('clientes').select('vgv, comissao_valor').eq('ficha_proposta_assinada', true).gte('data_fechamento', `${dataInicio}T00:00:00`).lte('data_fechamento', `${dataFim}T23:59:59`).is('deleted_at', null),
+    supabase.from('clientes').select('*', { count: 'exact', head: true }).gte('created_at', `${hojeStr}T00:00:00`).lte('created_at', `${hojeStr}T23:59:59`).is('deleted_at', null).then(r => ({ ...r, count: r.count })),
+    supabase.from('clientes').select('comissao_valor').eq('comissao_status', 'RECEBIDA').gte('comissao_data_recebimento', `${dataInicio}T00:00:00`).lte('comissao_data_recebimento', `${dataFim}T23:59:59`).is('deleted_at', null),
+    supabase.from('producao_diaria').select('ligacoes, whatsapp, follow_ups').eq('data', hojeStr),
   ])
 
   const vendasArr = vendasMes ?? []
   const vgvMes = vendasArr.reduce((s, v) => s + (v.vgv ?? 0), 0)
   const comissaoPrevista = vendasArr.reduce((s, v) => s + (v.comissao_valor ?? 0), 0)
+  const comissaoRecebida = (comissaoRecebidaArr ?? []).reduce((s, v) => s + (v.comissao_valor ?? 0), 0)
+
+  // Métricas diárias da produção
+  const prodDia = prodHoje ?? []
+  const ligacoesHoje = prodDia.reduce((s, p) => s + (p.ligacoes ?? 0), 0)
+  const whatsAppsHoje = prodDia.reduce((s, p) => s + (p.whatsapp ?? 0), 0)
+  const followUpsHoje = prodDia.reduce((s, p) => s + (p.follow_ups ?? 0), 0)
 
   const { data: prodMes } = await supabase.from('producao_diaria').select('aprovacoes, vendas').gte('data', dataInicio).lte('data', dataFim)
   const aprovacoes = (prodMes ?? []).reduce((s, p) => s + p.aprovacoes, 0)
@@ -79,6 +93,11 @@ async function _queryResumoOperacao(options?: {
     vendasMes: vendasCount,
     vgvMes,
     comissaoPrevista,
+    leadsHoje: leadsHoje ?? 0,
+    ligacoesHoje,
+    whatsAppsHoje,
+    followUpsHoje,
+    comissaoRecebida,
   }
 }
 

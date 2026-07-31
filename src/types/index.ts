@@ -293,6 +293,12 @@ export interface GestaoResumoOperacao {
   vendasMes: number
   vgvMes: number
   comissaoPrevista: number
+  // Sprint 14 — métricas diárias adicionais
+  leadsHoje: number
+  ligacoesHoje: number
+  whatsAppsHoje: number
+  followUpsHoje: number
+  comissaoRecebida: number
 }
 
 // Seção 2: KPIs Diários por corretor

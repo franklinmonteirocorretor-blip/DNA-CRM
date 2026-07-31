@@ -14,6 +14,8 @@ import HeatmapProducao from './HeatmapProducao'
 import ProdutividadeChart from './ProdutividadeChart'
 import FilaTrabalho from './FilaTrabalho'
 import BuscaGlobal from './BuscaGlobal'
+import KpiOperacaoCard from './KpiOperacaoCard'
+import CentroComando from './CentroComando'
 import { formatarMoeda } from '@/src/lib/formatters'
 
 // ─── Tipos locais para Realtime ───
@@ -142,18 +144,22 @@ export default function CentralOperacao({ dadosIniciais }: { dadosIniciais: Oper
         </div>
       </div>
 
-      {/* ════ Seção 1: Visão Geral ════ */}
+      {/* ════ Seção 1: KPIs em Tempo Real (12 cards) ════ */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-900">Visão Geral</h2>
-        <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-          <MCard l="Leads Ativos" v={resumo.leadsAtivos} c="sky" />
-          <MCard l="Em Atendimento" v={resumo.clientesAtendimento} c="violet" />
-          <MCard l="Agend. Hoje" v={resumo.agendamentosHoje} c="amber" />
-          <MCard l="Comparec. Hoje" v={resumo.comparecimentosHoje} c="emerald" />
-          <MCard l="Aprovações Mês" v={resumo.aprovacoesMes} c="indigo" />
-          <MCard l="Vendas Mês" v={resumo.vendasMes} c="teal" />
-          <MCard l="VGV Mês" v={resumo.vgvMes} c="cyan" m />
-          <MCard l="Comissão Prev." v={resumo.comissaoPrevista} c="rose" m />
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">KPIs em Tempo Real</h2>
+        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+          <KpiOperacaoCard label="Leads Hoje" value={resumo.leadsHoje} color="sky" />
+          <KpiOperacaoCard label="Ligações" value={resumo.ligacoesHoje} color="blue" />
+          <KpiOperacaoCard label="WhatsApp" value={resumo.whatsAppsHoje} color="green" />
+          <KpiOperacaoCard label="Follow-ups" value={resumo.followUpsHoje} color="orange" />
+          <KpiOperacaoCard label="Agend. Hoje" value={resumo.agendamentosHoje} color="amber" />
+          <KpiOperacaoCard label="Comparecimentos" value={resumo.comparecimentosHoje} color="emerald" />
+          <KpiOperacaoCard label="Aprovações Mês" value={resumo.aprovacoesMes} color="indigo" />
+          <KpiOperacaoCard label="Vendas Mês" value={resumo.vendasMes} color="teal" />
+          <KpiOperacaoCard label="VGV Mês" value={resumo.vgvMes} color="cyan" monetario />
+          <KpiOperacaoCard label="Comissão Prev." value={resumo.comissaoPrevista} color="rose" monetario />
+          <KpiOperacaoCard label="Comissão Rec." value={resumo.comissaoRecebida} color="green" monetario />
+          <KpiOperacaoCard label="Leads Ativos" value={resumo.leadsAtivos} color="violet" />
         </div>
       </section>
 
@@ -164,7 +170,10 @@ export default function CentralOperacao({ dadosIniciais }: { dadosIniciais: Oper
         <FilaTrabalho acoes={filaTrabalho} />
       </section>
 
-      {/* ════ Seção 2: Atividade ao Vivo ════ */}
+      {/* ════ Seção 3: Centro de Comando ════ */}
+      <CentroComando />
+
+      {/* ════ Seção 4: Atividade ao Vivo ════ */}
       <section>
         <h2 className="text-lg font-semibold text-gray-900">Atividade ao Vivo</h2>
         <p className="text-xs text-gray-400 mb-2">
@@ -385,11 +394,6 @@ export default function CentralOperacao({ dadosIniciais }: { dadosIniciais: Oper
 }
 
 // ─── Subcomponentes inline ───
-
-function MCard({ l, v, c, m }: { l: string; v: number; c: string; m?: boolean }) {
-  const pals: Record<string, string> = { sky: 'bg-sky-50 text-sky-700 border-sky-200', violet: 'bg-violet-50 text-violet-700 border-violet-200', amber: 'bg-amber-50 text-amber-700 border-amber-200', emerald: 'bg-emerald-50 text-emerald-700 border-emerald-200', indigo: 'bg-indigo-50 text-indigo-700 border-indigo-200', teal: 'bg-teal-50 text-teal-700 border-teal-200', cyan: 'bg-cyan-50 text-cyan-700 border-cyan-200', rose: 'bg-rose-50 text-rose-700 border-rose-200' }
-  return <div className={`rounded-lg border p-3 ${pals[c]}`}><p className="text-[10px] font-medium uppercase tracking-wide opacity-70">{l}</p><p className="mt-0.5 text-lg font-bold">{m ? formatarMoeda(v) : v.toLocaleString('pt-BR')}</p></div>
-}
 
 function AlertaPainel({ titulo, icone, cor, itens, vazio }: { titulo: string; icone: string; cor: string; itens: { id: string; nome: string; subtitulo: string }[]; vazio: string }) {
   const pals: Record<string, string> = { red: 'border-red-200 bg-red-50', amber: 'border-amber-200 bg-amber-50', purple: 'border-purple-200 bg-purple-50', orange: 'border-orange-200 bg-orange-50' }
