@@ -1,40 +1,60 @@
-// ─── Paletas de Cores Centralizadas ────────────────────────────────────────────
-// Sprint 10 — single source of truth para todas as paletas de cores Tailwind
-// Substitui os objetos "palettes", "colors", "pals" duplicados em 5+ componentes
+// ─── Paletas de Cores Centralizadas v2.0 ──────────────────────────────────────
+// Design System unificado — baseado em tokens CSS semânticos.
+// Referencias: Linear, Vercel, Stripe, Clerk, GitHub, Raycast.
+// Cores anteriormente: sky, amber, emerald, teal, cyan, rose, violet, indigo → agora 4 semânticas.
 
-/** Paleta completa para KPI cards (8 cores — usada no ResumoOperacao e Gestão) */
+/** 
+ * Paleta semântica para KPI cards (4 variantes máximas).
+ * Usa tokens do design system: accent, success, warning, danger, info.
+ * Compatível com o KpiCard existente — mapeia cores antigas para semânticas.
+ */
 export const PALETA_KPI_CARD: Record<string, string> = {
-  sky:     'bg-sky-50 text-sky-700 border-sky-200',
-  amber:   'bg-amber-50 text-amber-700 border-amber-200',
-  emerald: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  teal:    'bg-teal-50 text-teal-700 border-teal-200',
-  cyan:    'bg-cyan-50 text-cyan-700 border-cyan-200',
-  rose:    'bg-rose-50 text-rose-700 border-rose-200',
-  violet:  'bg-violet-50 text-violet-700 border-violet-200',
-  indigo:  'bg-indigo-50 text-indigo-700 border-indigo-200',
-  red:     'bg-red-50 text-red-700 border-red-200',
+  // ── Semânticas (novas) ──
+  accent:   'border-sky-200/40 bg-sky-50 dark:bg-sky-950/40 dark:border-sky-800/40 text-sky-700 dark:text-sky-300',
+  success:  'border-emerald-200/40 bg-emerald-50 dark:bg-emerald-950/40 dark:border-emerald-800/40 text-emerald-700 dark:text-emerald-300',
+  warning:  'border-amber-200/40 bg-amber-50 dark:bg-amber-950/40 dark:border-amber-800/40 text-amber-700 dark:text-amber-300',
+  danger:   'border-red-200/40 bg-red-50 dark:bg-red-950/40 dark:border-red-800/40 text-red-700 dark:text-red-300',
+  // ── Retro-compatibilidade (cores antigas mapeadas) ──
+  sky:      'border-sky-200/40 bg-sky-50 dark:bg-sky-950/40 dark:border-sky-800/40 text-sky-700 dark:text-sky-300',
+  blue:     'border-sky-200/40 bg-sky-50 dark:bg-sky-950/40 dark:border-sky-800/40 text-sky-700 dark:text-sky-300',
+  green:    'border-emerald-200/40 bg-emerald-50 dark:bg-emerald-950/40 dark:border-emerald-800/40 text-emerald-700 dark:text-emerald-300',
+  emerald:  'border-emerald-200/40 bg-emerald-50 dark:bg-emerald-950/40 dark:border-emerald-800/40 text-emerald-700 dark:text-emerald-300',
+  amber:    'border-amber-200/40 bg-amber-50 dark:bg-amber-950/40 dark:border-amber-800/40 text-amber-700 dark:text-amber-300',
+  red:      'border-red-200/40 bg-red-50 dark:bg-red-950/40 dark:border-red-800/40 text-red-700 dark:text-red-300',
+  rose:     'border-red-200/40 bg-red-50 dark:bg-red-950/40 dark:border-red-800/40 text-red-700 dark:text-red-300',
+  teal:     'border-sky-200/40 bg-sky-50 dark:bg-sky-950/40 dark:border-sky-800/40 text-sky-700 dark:text-sky-300',
+  cyan:     'border-sky-200/40 bg-sky-50 dark:bg-sky-950/40 dark:border-sky-800/40 text-sky-700 dark:text-sky-300',
+  violet:   'border-violet-200/40 bg-violet-50 dark:bg-violet-950/40 dark:border-violet-800/40 text-violet-700 dark:text-violet-300',
+  indigo:   'border-violet-200/40 bg-violet-50 dark:bg-violet-950/40 dark:border-violet-800/40 text-violet-700 dark:text-violet-300',
+  purple:   'border-violet-200/40 bg-violet-50 dark:bg-violet-950/40 dark:border-violet-800/40 text-violet-700 dark:text-violet-300',
+  orange:   'border-amber-200/40 bg-amber-50 dark:bg-amber-950/40 dark:border-amber-800/40 text-amber-700 dark:text-amber-300',
 }
 
-/** Paleta simplificada (4 cores) — usada no dashboard principal (MetricaCard) */
-export const PALETA_METRICA_SIMPLES: Record<string, string> = {
-  blue:   'bg-blue-50 text-blue-700 border-blue-200',
-  green:  'bg-green-50 text-green-700 border-green-200',
-  purple: 'bg-purple-50 text-purple-700 border-purple-200',
-  orange: 'bg-orange-50 text-orange-700 border-orange-200',
-}
+/**
+ * Paleta simplificada — alias backward-compatível para PALETA_KPI_CARD.
+ * O Dashboard principal passava 'blue', 'green', 'purple', 'orange'.
+ */
+export const PALETA_METRICA_SIMPLES = PALETA_KPI_CARD
 
-/** Paleta para blocos de alerta (PainelClientePipeline, Lembretes) */
+/**
+ * Paleta para blocos de alerta (PainelClientePipeline, Lembretes, SecaoAlertas).
+ * Backward-compatível: ainda aceita red, blue, amber, indigo.
+ */
 export const PALETA_ALERTA_BLOCO: Record<string, string> = {
-  red:    'border-red-200 bg-red-50/50',
-  blue:   'border-blue-200 bg-blue-50/50',
-  amber:  'border-amber-200 bg-amber-50/50',
-  indigo: 'border-indigo-200 bg-indigo-50/50',
+  red:    'border-red-200/40 bg-red-50/60 dark:bg-red-950/30 dark:border-red-800/40',
+  blue:   'border-sky-200/40 bg-sky-50/60 dark:bg-sky-950/30 dark:border-sky-800/40',
+  amber:  'border-amber-200/40 bg-amber-50/60 dark:bg-amber-950/30 dark:border-amber-800/40',
+  indigo: 'border-violet-200/40 bg-violet-50/60 dark:bg-violet-950/30 dark:border-violet-800/40',
+  purple: 'border-violet-200/40 bg-violet-50/60 dark:bg-violet-950/30 dark:border-violet-800/40',
+  orange: 'border-amber-200/40 bg-amber-50/60 dark:bg-amber-950/30 dark:border-amber-800/40',
 }
 
 /** Texto de título para blocos de alerta */
 export const PALETA_ALERTA_TITULO: Record<string, string> = {
-  red:    'text-red-800',
-  blue:   'text-blue-800',
-  amber:  'text-amber-800',
-  indigo: 'text-indigo-800',
+  red:    'text-red-800 dark:text-red-300',
+  blue:   'text-sky-800 dark:text-sky-300',
+  amber:  'text-amber-800 dark:text-amber-300',
+  indigo: 'text-violet-800 dark:text-violet-300',
+  purple: 'text-violet-800 dark:text-violet-300',
+  orange: 'text-amber-800 dark:text-amber-300',
 }

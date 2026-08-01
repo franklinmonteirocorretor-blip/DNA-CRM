@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Artefatos externos compilados (não fazem parte do DNA CRM):
+    "tools/fb-scraper/dist/**",
+    "coverage/**",
   ]),
 ]);
 

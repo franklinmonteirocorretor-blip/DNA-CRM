@@ -69,28 +69,28 @@ export interface PipelineEtapaFullConfig {
 }
 
 export const ETAPA_FULL_CONFIG: Record<EtapaFunil, PipelineEtapaFullConfig> = {
-  NOVO_LEAD:       { label: 'Novo Lead',      cor: '#6b7280', corBg: '#f3f4f6', icone: '🆕', desc: 'Leads recém-captados, sem contato ainda.' },
-  CONTATOS:        { label: 'Contatos',        cor: '#eab308', corBg: '#fef9c3', icone: '📞', desc: 'Primeiro contato realizado com sucesso.' },
-  AGENDAMENTO:     { label: 'Agendamento',     cor: '#3b82f6', corBg: '#dbeafe', icone: '📅', desc: 'Visita ao empreendimento agendada.' },
-  COMPARECIMENTO:  { label: 'Comparecimento',  cor: '#8b5cf6', corBg: '#ede9fe', icone: '🏠', desc: 'Cliente compareceu à visita.' },
-  ANALISE:         { label: 'Análise',         cor: '#f97316', corBg: '#ffedd5', icone: '🔍', desc: 'Análise financeira em andamento.' },
-  RESTRICOES:      { label: 'Restrições',      cor: '#ef4444', corBg: '#fee2e2', icone: '🚫', desc: 'Restrições encontradas na análise.' },
-  CONDICIONADOS:   { label: 'Condicionados',   cor: '#ec4899', corBg: '#fce7f3', icone: '⏳', desc: 'Aguardando aprovação condicional.' },
-  APROVADOS:       { label: 'Aprovados',       cor: '#14b8a6', corBg: '#ccfbf1', icone: '✅', desc: 'Crédito aprovado pelo banco.' },
-  FECHAMENTOS:     { label: 'Fechamentos',     cor: '#22c55e', corBg: '#dcfce7', icone: '📝', desc: 'Documentação e contrato em andamento.' },
-  POS_VENDA:       { label: 'Pós-Venda',       cor: '#6366f1', corBg: '#e0e7ff', icone: '🤝', desc: 'Cliente fechado. Pós-venda e fidelização.' },
+  NOVO_LEAD:       { label: 'Novo Lead',      cor: '#6B7280', corBg: '#F9FAFB', icone: '🆕', desc: 'Leads recém-captados, sem contato ainda.' },
+  CONTATOS:        { label: 'Contatos',        cor: '#D97706', corBg: '#FFFBEB', icone: '📞', desc: 'Primeiro contato realizado com sucesso.' },
+  AGENDAMENTO:     { label: 'Agendamento',     cor: '#2563EB', corBg: '#EFF6FF', icone: '📅', desc: 'Visita ao empreendimento agendada.' },
+  COMPARECIMENTO:  { label: 'Comparecimento',  cor: '#7C3AED', corBg: '#F5F3FF', icone: '🏠', desc: 'Cliente compareceu à visita.' },
+  ANALISE:         { label: 'Análise',         cor: '#F59E0B', corBg: '#FFFBEB', icone: '🔍', desc: 'Análise financeira em andamento.' },
+  RESTRICOES:      { label: 'Restrições',      cor: '#DC2626', corBg: '#FEF2F2', icone: '🚫', desc: 'Restrições encontradas na análise.' },
+  CONDICIONADOS:   { label: 'Condicionados',   cor: '#F59E0B', corBg: '#FFFBEB', icone: '⏳', desc: 'Aguardando aprovação condicional.' },
+  APROVADOS:       { label: 'Aprovados',       cor: '#059669', corBg: '#ECFDF5', icone: '✅', desc: 'Crédito aprovado pelo banco.' },
+  FECHAMENTOS:     { label: 'Fechamentos',     cor: '#059669', corBg: '#ECFDF5', icone: '📝', desc: 'Documentação e contrato em andamento.' },
+  POS_VENDA:       { label: 'Pós-Venda',       cor: '#2563EB', corBg: '#EFF6FF', icone: '🤝', desc: 'Cliente fechado. Pós-venda e fidelização.' },
 }
 
 /** Cores de badge Tailwind por etapa (usado em listagens como clientes/page.tsx) */
 export const ETAPA_BADGE_COLORS: Record<EtapaFunil, string> = {
-  NOVO_LEAD:       'bg-gray-100 text-gray-700',
-  CONTATOS:        'bg-yellow-100 text-yellow-700',
-  AGENDAMENTO:     'bg-blue-100 text-blue-700',
-  COMPARECIMENTO:  'bg-purple-100 text-purple-700',
-  ANALISE:         'bg-orange-100 text-orange-700',
-  RESTRICOES:      'bg-red-100 text-red-700',
-  CONDICIONADOS:   'bg-pink-100 text-pink-700',
-  APROVADOS:       'bg-teal-100 text-teal-700',
-  FECHAMENTOS:     'bg-green-100 text-green-700',
-  POS_VENDA:       'bg-indigo-100 text-indigo-700',
+  NOVO_LEAD:       'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300',
+  CONTATOS:        'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300',
+  AGENDAMENTO:     'bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300',
+  COMPARECIMENTO:  'bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300',
+  ANALISE:         'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300',
+  RESTRICOES:      'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300',
+  CONDICIONADOS:   'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300',
+  APROVADOS:       'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300',
+  FECHAMENTOS:     'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300',
+  POS_VENDA:       'bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300',
 }

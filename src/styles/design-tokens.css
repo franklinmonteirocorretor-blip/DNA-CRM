@@ -1,0 +1,114 @@
+/* ─── DNA CRM Design Tokens v2.0 ──────────────────────────────────────────────
+ * Single source of truth para cores, spacing, tipografia, shadows, borders.
+ * Referencias: Linear, Vercel Dashboard, Stripe Dashboard, Clerk, Raycast.
+ *
+ * Uso: var(--token-name)
+ * Exemplo: color: var(--color-text-primary);
+ */
+
+:root {
+  /* ═══ PALETA SEMANTICA (10 cores) ═══ */
+  --color-bg-primary:       #F9FAFB;     /* gray-50 */
+  --color-bg-surface:       #FFFFFF;     /* white */
+  --color-bg-raised:        #F3F4F6;     /* gray-100 */
+  --color-border-subtle:    #E5E7EB;     /* gray-200 */
+  --color-border-strong:    #D1D5DB;     /* gray-300 */
+  --color-text-primary:     #111827;     /* gray-900 */
+  --color-text-secondary:   #6B7280;     /* gray-500 */
+  --color-text-tertiary:    #9CA3AF;     /* gray-400 */
+  --color-accent:           #2563EB;     /* blue-600 */
+  --color-accent-hover:     #1D4ED8;     /* blue-700 */
+  --color-success:          #059669;     /* emerald-600 */
+  --color-warning:          #D97706;     /* amber-600 */
+  --color-danger:           #DC2626;     /* red-600 */
+  --color-info:             #7C3AED;     /* violet-600 */
+
+  /* ═══ SURFACE VARIANTS ═══ */
+  --color-bg-surface-hover: #F3F4F6;     /* gray-100 */
+  --color-bg-surface-alt:   #F9FAFB;     /* gray-50 */
+
+  /* ═══ TYPOGRAPHY ═══ */
+  --font-size-xs:           0.6875rem;   /* 11px */
+  --font-size-sm:           0.8125rem;   /* 13px */
+  --font-size-base:         0.875rem;    /* 14px */
+  --font-size-md:           0.9375rem;   /* 15px */
+  --font-size-lg:           1.125rem;    /* 18px */
+  --font-size-xl:           1.25rem;     /* 20px */
+  --font-size-2xl:          1.5rem;      /* 24px */
+
+  /* ═══ SPACING ═══ */
+  --spacing-1:  0.25rem;   /* 4px */
+  --spacing-2:  0.5rem;    /* 8px */
+  --spacing-3:  0.75rem;   /* 12px */
+  --spacing-4:  0.875rem;  /* 14px */
+  --spacing-5:  1rem;      /* 16px */
+  --spacing-6:  1.25rem;   /* 20px */
+  --spacing-8:  1.5rem;    /* 24px */
+  --spacing-10: 2rem;      /* 32px */
+
+  /* ═══ RADIUS ═══ */
+  --radius-none: 0;
+  --radius-sm:   0.25rem;    /* 4px  — inline codes */
+  --radius-md:   0.375rem;   /* 6px  — inputs, badges */
+  --radius-lg:   0.5rem;     /* 8px  — cards */
+  --radius-xl:   0.75rem;    /* 12px — modals */
+
+  /* ═══ SHADOWS ═══ */
+  --shadow-none:   none;
+  --shadow-xs:     0 1px 2px 0 rgb(0 0 0 / 0.03);
+  --shadow-sm:     0 1px 3px 0 rgb(0 0 0 / 0.04);
+  --shadow-md:     0 4px 6px -1px rgb(0 0 0 / 0.05);
+  --shadow-lg:     0 10px 15px -3px rgb(0 0 0 / 0.06);
+
+  /* ═══ TRANSITIONS ═══ */
+  --transition-fast:    120ms ease;
+  --transition-base:    200ms ease;
+  --transition-slow:    300ms ease;
+
+  /* ═══ LAYOUT ═══ */
+  --sidebar-width:          240px;
+  --sidebar-collapsed:      64px;
+  --header-height:          48px;
+
+  /* ═══ PIPELINE ETAPA SEMANTIC COLORS ═══ */
+  --pipeline-novo-lead:       #6B7280; /* gray-500 */
+  --pipeline-contato:         #D97706; /* warning (amber) */
+  --pipeline-agendamento:     #2563EB; /* accent (blue) */
+  --pipeline-comparecimento:  #7C3AED; /* info (violet) */
+  --pipeline-analise:         #F59E0B; /* amber-500 */
+  --pipeline-restricoes:      #DC2626; /* danger (red) */
+  --pipeline-condicionados:   #F59E0B; /* warning (amber) */
+  --pipeline-aprovados:       #059669; /* success (green) */
+  --pipeline-fechamentos:     #059669; /* success (green) */
+  --pipeline-posvenda:        #2563EB; /* accent (blue) */
+}
+
+/* ═══ DARK MODE ═══ */
+.dark {
+  --color-bg:            #0B1220;
+  --color-bg-surface:    #111827;     /* gray-900 */
+  --color-bg-raised:     #1F2937;     /* gray-800 */
+  --color-border-subtle: #1F2937;     /* gray-800 */
+  --color-border-strong: #374151;     /* gray-700 */
+  --color-text-primary:  #F3F4F6;     /* gray-100 */
+  --color-text-secondary:#9CA3AF;     /* gray-400 */
+  --color-text-tertiary: #6B7280;     /* gray-500 */
+  --color-accent:        #3B82F6;     /* blue-400 */
+  --color-accent-hover:  #60A5FA;     /* blue-300 */
+  --color-success:       #10B981;     /* emerald-400 */
+  --color-warning:       #F59E0B;     /* amber-300 */
+  --color-danger:        #EF4444;     /* red-400 */
+  --color-info:          #A78BFA;     /* violet-400 */
+
+  --color-bg-surface-hover:#1F2937;    /* gray-800 */
+  --color-bg-subtle:     #0B1220;
+
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.12);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.15);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.20);
+}
+
+/* ═══ Base ─────────────────────────────────────────────────────────────────── */
+* {
+  box-sizing: border-box;
+}
