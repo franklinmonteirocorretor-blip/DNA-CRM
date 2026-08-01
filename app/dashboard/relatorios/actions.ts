@@ -1,5 +1,6 @@
 'use server'
 
+import { requireAuth } from '@/src/lib/auth/guards'
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
 
 // ── Tipos ────────────────────────────────────────────────────────────────────
@@ -22,23 +23,7 @@ export async function gerarDadosRelatorio(
 ): Promise<DadosRelatorio> {
   const supabase = await createSupabaseServerClient()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    throw new Error('Usuário não autenticado.')
-  }
-
-  const { data: usuario } = await supabase
-    .from('usuarios')
-    .select('id, perfil, gerente_id')
-    .eq('id', user.id)
-    .single()
-
-  if (!usuario) {
-    throw new Error('Perfil não encontrado.')
-  }
+  const usuario = await requireAuth()
 
   const ehCorretor = usuario.perfil === 'CORRETOR'
   const ehGerente = usuario.perfil === 'GERENTE'

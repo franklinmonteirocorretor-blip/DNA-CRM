@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { requireAuth } from '@/src/lib/auth/guards'
 import { gerarDadosRelatorio } from '@/app/dashboard/relatorios/actions'
 
 // ── GET /api/relatorios/pdf?tipo=producao&dataInicio=...&dataFim=... ──────────
 export async function GET(request: NextRequest) {
+  await requireAuth()
   try {
     const { searchParams } = new URL(request.url)
     const tipo = searchParams.get('tipo') ?? 'producao'

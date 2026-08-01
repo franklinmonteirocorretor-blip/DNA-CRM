@@ -3,10 +3,12 @@
 // Chamar via cron job (ex: Vercel Cron ou pg_cron)
 
 import { NextResponse } from 'next/server'
+import { requireAuth } from '@/src/lib/auth/guards'
 import { dispatchProcessarFila } from '@/src/lib/automation/engine'
 import { logger } from '@/src/utils/logger'
 
 export async function POST() {
+  await requireAuth()
   try {
     const resultado = await dispatchProcessarFila()
     return NextResponse.json({

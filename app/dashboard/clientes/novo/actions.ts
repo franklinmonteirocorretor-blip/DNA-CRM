@@ -1,5 +1,6 @@
 'use server'
 
+import { requireAuth } from '@/src/lib/auth/guards'
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
 import { redirect } from 'next/navigation'
 import { dispatchAutomation } from '@/src/lib/automation/engine'
@@ -7,16 +8,9 @@ import { dispatchAutomation } from '@/src/lib/automation/engine'
 // Action do Servidor — executada quando o formulário de novo cliente é enviado.
 // O Next.js chama esta função com os dados do FormData automaticamente.
 export async function cadastrarCliente(formData: FormData) {
+  const usuario = await requireAuth()
+
   const supabase = await createSupabaseServerClient()
-
-  // 1. Quem está cadastrando? (pega o usuário logado)
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    throw new Error('Você precisa estar logado para cadastrar um cliente.')
-  }
 
   // 2. Extrai os campos do formulário
   const nome = formData.get('nome') as string
@@ -61,7 +55,7 @@ export async function cadastrarCliente(formData: FormData) {
     dependentes: dependentes >= 0 ? dependentes : 0,
     empreendimento_id: empreendimento || null,
     observacoes: observacoes?.trim() || null,
-    corretor_responsavel_id: user.id,
+    corretor_responsavel_id: usuario.id,
   }).select('id').single()
 
   if (error) {
@@ -75,7 +69,7 @@ export async function cadastrarCliente(formData: FormData) {
     cpf,
     telefone,
     email,
-    corretor_id: user.id,
+    corretor_id: usuario.id,
     empreendimento_id: empreendimento || null,
   })
 

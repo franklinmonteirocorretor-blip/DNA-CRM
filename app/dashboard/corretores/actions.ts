@@ -280,6 +280,7 @@ export async function alterarStatusCorretor(
   id: string,
   novoStatus: 'ATIVO' | 'DESLIGADO' | 'FERIAS' | 'AFASTADO'
 ): Promise<{ success: boolean; error?: string }> {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
 
   const { error } = await supabase
@@ -298,6 +299,7 @@ export async function alterarStatusCorretor(
 // ─── Transferir carteira de clientes ─────────────────────────────────────────
 
 export async function transferirCarteira(dados: TransferenciaCarteira): Promise<{ success: boolean; error?: string }> {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
 
   if (dados.transferirClientes) {
@@ -326,6 +328,7 @@ export async function transferirCarteira(dados: TransferenciaCarteira): Promise<
 // ─── Perfil completo do corretor ─────────────────────────────────────────────
 
 export async function perfilCorretor(id: string): Promise<PerfilCorretor | null> {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
 
   const { data: usuario } = await supabase
@@ -469,6 +472,7 @@ export async function perfilCorretor(id: string): Promise<PerfilCorretor | null>
 // ─── Listar equipes (para selects/filtros) ───────────────────────────────────
 
 export async function listarEquipes(): Promise<Equipe[]> {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
   const { data } = await supabase
     .from('equipes')
@@ -481,6 +485,7 @@ export async function listarEquipes(): Promise<Equipe[]> {
 // ─── Listar supervisores/gerentes (para selects) ─────────────────────────────
 
 export async function listarSupervisores(): Promise<{ id: string; nome: string }[]> {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
   const { data } = await supabase
     .from('usuarios')
@@ -499,6 +504,7 @@ export async function resumoEquipeDashboard(): Promise<{
   corretoresOnline: number
   producaoDia: { ligacoes: number; whatsapps: number; agendamentos: number; comparecimentos: number }
 }> {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
   const hojeStr = new Date().toISOString().slice(0, 10)
 

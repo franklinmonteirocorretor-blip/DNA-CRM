@@ -144,6 +144,7 @@ export interface ProdutividadeSeries {
  * Query do heatmap: produção por corretor × hora do dia (últimos 7 dias)
  */
 export async function queryHeatmapProducao(): Promise<HeatmapDados[]> {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
   const seteDiasAtras = new Date(Date.now() - 7 * 86400000).toISOString()
 
@@ -187,6 +188,7 @@ export async function queryHeatmapProducao(): Promise<HeatmapDados[]> {
  * Fila de trabalho inteligente — clientes prioritários para o corretor logado
  */
 export async function queryFilaTrabalho(corretorId: string): Promise<FilaTrabalhoItem[]> {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
 
   const { data: clientes } = await supabase
@@ -253,6 +255,7 @@ export async function queryFilaTrabalho(corretorId: string): Promise<FilaTrabalh
  * Produtividade por equipe/turno — séries temporais dos últimos 30 dias
  */
 export async function queryProdutividadeEquipe(): Promise<ProdutividadeSeries[]> {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
   const dias30Atras = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10)
 

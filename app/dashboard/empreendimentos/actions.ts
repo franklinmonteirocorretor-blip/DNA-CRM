@@ -1,19 +1,14 @@
 'use server'
 
+import { requireAuth } from '@/src/lib/auth/guards'
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
 export async function criarEmpreendimento(formData: FormData) {
+  await requireAuth()
+
   const supabase = await createSupabaseServerClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    throw new Error('Você precisa estar logado.')
-  }
 
   const nome = (formData.get('nome') as string).trim()
   const endereco = (formData.get('endereco') as string)?.trim() || null
@@ -50,15 +45,9 @@ export async function criarEmpreendimento(formData: FormData) {
 }
 
 export async function editarEmpreendimento(id: string, formData: FormData) {
+  await requireAuth()
+
   const supabase = await createSupabaseServerClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    throw new Error('Você precisa estar logado.')
-  }
 
   const nome = (formData.get('nome') as string).trim()
   const endereco = (formData.get('endereco') as string)?.trim() || null
@@ -94,15 +83,9 @@ export async function editarEmpreendimento(id: string, formData: FormData) {
 }
 
 export async function alternarAtivoEmpreendimento(id: string, ativo: boolean) {
+  await requireAuth()
+
   const supabase = await createSupabaseServerClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { erro: 'Você precisa estar logado.' }
-  }
 
   const { error } = await supabase
     .from('empreendimentos')

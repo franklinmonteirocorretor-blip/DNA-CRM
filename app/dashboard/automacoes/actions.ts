@@ -3,6 +3,7 @@
 // DNA CRM — Sprint 13: Server Actions para CRUD de Automações
 // Permite criar, editar, ativar/desativar e excluir regras de automação.
 
+import { requireAuth } from '@/src/lib/auth/guards'
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
 import { revalidatePath } from 'next/cache'
 import type { AutomationEvent, AutomationCondition, AutomationActionSpec } from '@/src/lib/automation/types'
@@ -25,6 +26,7 @@ export interface EditarAutomacaoInput extends Partial<NovaAutomacaoInput> {
  * Cria uma nova regra de automação.
  */
 export async function criarAutomacao(input: NovaAutomacaoInput) {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
 
   if (!input.nome || !input.evento) {
@@ -55,6 +57,7 @@ export async function criarAutomacao(input: NovaAutomacaoInput) {
  * Atualiza uma automação existente.
  */
 export async function editarAutomacao(input: EditarAutomacaoInput) {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
 
   const update: Record<string, unknown> = { atualizado_em: new Date().toISOString() }
@@ -80,6 +83,7 @@ export async function editarAutomacao(input: EditarAutomacaoInput) {
  * Altera o status de uma automação (ATIVA/INATIVA).
  */
 export async function alterarStatusAutomacao(id: string, novoStatus: 'ATIVA' | 'INATIVA') {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
 
   const { error } = await supabase
@@ -97,6 +101,7 @@ export async function alterarStatusAutomacao(id: string, novoStatus: 'ATIVA' | '
  * Exclusão lógica de uma automação.
  */
 export async function excluirAutomacao(id: string) {
+  await requireAuth()
   const supabase = await createSupabaseServerClient()
 
   const { error } = await supabase
@@ -114,6 +119,7 @@ export async function excluirAutomacao(id: string) {
  * Processa a fila manualmente (dispara o motor).
  */
 export async function processarFilaAgora() {
+  await requireAuth()
   const { dispatchProcessarFila } = await import('@/src/lib/automation/engine')
 
   try {
