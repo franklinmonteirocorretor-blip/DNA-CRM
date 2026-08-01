@@ -15,13 +15,14 @@ export async function POST() {
       erros: resultado.erros,
       timestamp: new Date().toISOString(),
     })
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Erro interno'
     logger.error('Erro ao processar fila de automações', {
-      error: err?.message ?? 'Erro interno',
-      stack: err?.stack,
+      error: message,
+      stack: err instanceof Error ? err.stack : undefined,
     })
     return NextResponse.json(
-      { sucesso: false, erro: err?.message ?? 'Erro interno' },
+      { sucesso: false, erro: message },
       { status: 500 },
     )
   }

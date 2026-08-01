@@ -17,11 +17,11 @@ export default function RootError({
   }, [error])
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-4 bg-gray-50">
+    <div className="flex flex-col items-center justify-center min-h-screen px-4 bg-gray-50 dark:bg-gray-950">
       <div className="text-center space-y-4 max-w-md">
         <div className="text-6xl">⚠️</div>
-        <h1 className="text-2xl font-bold text-gray-900">Erro inesperado</h1>
-        <p className="text-sm text-gray-500">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Erro inesperado</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
           {error.message || 'Ocorreu um erro ao carregar a aplicação.'}
         </p>
         <button

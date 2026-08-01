@@ -112,7 +112,7 @@ function TituloSecao({ icone, texto, cor, count }: { icone: string; texto: strin
       <span className="text-lg">{icone}</span>
       <h3 className={`text-sm font-semibold ${cor}`}>{texto}</h3>
       {count > 0 && (
-        <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-bold text-gray-600">
+        <span className="rounded-full bg-gray-100 dark:bg-gray-800 px-2 py-0.5 text-xs font-bold text-gray-600 dark:text-gray-400">
           {count}
         </span>
       )}
@@ -153,11 +153,11 @@ export default function SecaoAlertas({
               <li key={c.id}>
                 <Link
                   href={`/dashboard/clientes/${c.id}`}
-                  className="flex items-center justify-between rounded-lg border border-red-200 bg-white px-4 py-2.5 transition hover:bg-red-100"
+                  className="flex items-center justify-between rounded-lg border border-red-200 bg-white dark:bg-gray-800 px-4 py-2.5 transition hover:bg-red-100"
                 >
                   <div>
-                    <span className="text-sm font-semibold text-gray-900">{c.nome}</span>
-                    <span className="ml-2 text-xs text-gray-500">
+                    <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{c.nome}</span>
+                    <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
                       {labelEtapa(c.etapa_atual)}
                     </span>
                   </div>
@@ -194,14 +194,14 @@ export default function SecaoAlertas({
               <li key={a.id}>
                 <Link
                   href={`/dashboard/clientes/${a.cliente_id}`}
-                  className="flex items-center justify-between rounded-lg border border-blue-200 bg-white px-4 py-2.5 transition hover:bg-blue-100"
+                  className="flex items-center justify-between rounded-lg border border-blue-200 bg-white dark:bg-gray-800 px-4 py-2.5 transition hover:bg-blue-100"
                 >
                   <div>
-                    <span className="text-sm font-semibold text-gray-900">
+                    <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                       {a.clientes.nome}
                     </span>
                     {a.empreendimento_interesse && (
-                      <span className="ml-2 text-xs text-gray-500">
+                      <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
                         — {a.empreendimento_interesse}
                       </span>
                     )}
@@ -231,9 +231,9 @@ export default function SecaoAlertas({
               <li key={d.id}>
                 <Link
                   href={`/dashboard/clientes/${d.cliente_id}`}
-                  className="flex items-center justify-between rounded-lg border border-amber-200 bg-white px-4 py-2.5 transition hover:bg-amber-100"
+                  className="flex items-center justify-between rounded-lg border border-amber-200 bg-white dark:bg-gray-800 px-4 py-2.5 transition hover:bg-amber-100"
                 >
-                  <span className="text-sm font-medium text-gray-900">
+                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
                     {labelTipoDocumento(d.tipo)}
                   </span>
                   <Badge cor="amarelo">Pendente</Badge>
@@ -261,12 +261,12 @@ export default function SecaoAlertas({
               <li key={pv.id}>
                 <Link
                   href={`/dashboard/clientes/${pv.id}`}
-                  className="flex items-center justify-between rounded-lg border border-purple-200 bg-white px-4 py-2.5 transition hover:bg-purple-100"
+                  className="flex items-center justify-between rounded-lg border border-purple-200 bg-white dark:bg-gray-800 px-4 py-2.5 transition hover:bg-purple-100"
                 >
                   <div>
-                    <span className="text-sm font-semibold text-gray-900">{pv.nome}</span>
+                    <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{pv.nome}</span>
                     {pv.proxima_acao && (
-                      <span className="ml-2 text-xs text-gray-500">
+                      <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
                         — {pv.proxima_acao}
                       </span>
                     )}
@@ -283,9 +283,9 @@ export default function SecaoAlertas({
 
       {/* ── Estado vazio ─────────────────────────────────────────────────── */}
       {!temAlgumAlerta && (
-        <div className="rounded-xl border border-gray-200 bg-gray-50 p-8 text-center shadow-sm">
+        <div className="rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-8 text-center shadow-sm">
           <span className="text-3xl">✅</span>
-          <p className="mt-2 text-sm font-medium text-gray-600">
+          <p className="mt-2 text-sm font-medium text-gray-600 dark:text-gray-400">
             Tudo em dia! Nenhum alerta no momento.
           </p>
         </div>

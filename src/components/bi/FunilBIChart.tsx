@@ -80,13 +80,13 @@ function CustomTooltipContent({
   if (!active || !payload || payload.length === 0) return null
   const d = payload[0].payload
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-3 shadow-lg text-xs">
-      <p className="font-semibold text-gray-900">{d.label}</p>
-      <p className="text-gray-600 mt-1">Quantidade: {d.quantidade}</p>
-      <p className="text-gray-600">Conversão: {d.conversao !== null ? formatarPercentual(d.conversao) : '—'}</p>
-      <p className="text-gray-600">Perda: {d.perda}</p>
-      <p className="text-gray-600">VGV: {formatarMoeda(d.vgv)}</p>
-      <p className="text-gray-600">Tempo médio: {d.tempoMedioDias} dias</p>
+    <div className="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 p-3 shadow-lg text-xs">
+      <p className="font-semibold text-gray-900 dark:text-gray-100">{d.label}</p>
+      <p className="text-gray-600 dark:text-gray-400 mt-1">Quantidade: {d.quantidade}</p>
+      <p className="text-gray-600 dark:text-gray-400">Conversão: {d.conversao !== null ? formatarPercentual(d.conversao) : '—'}</p>
+      <p className="text-gray-600 dark:text-gray-400">Perda: {d.perda}</p>
+      <p className="text-gray-600 dark:text-gray-400">VGV: {formatarMoeda(d.vgv)}</p>
+      <p className="text-gray-600 dark:text-gray-400">Tempo médio: {d.tempoMedioDias} dias</p>
     </div>
   )
 }
@@ -102,8 +102,8 @@ export default function FunilBIChart({ etapas }: { etapas: BIFunilEtapa[] }) {
   }))
 
   return (
-    <div className="rounded-xl bg-white shadow-sm border p-5">
-      <h3 className="text-sm font-semibold text-gray-900 mb-4">Funil Executivo</h3>
+    <div className="rounded-xl bg-white dark:bg-gray-800 shadow-sm border p-5">
+      <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">Funil Executivo</h3>
       <div className="h-[340px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart

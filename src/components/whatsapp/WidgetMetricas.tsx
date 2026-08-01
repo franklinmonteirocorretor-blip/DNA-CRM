@@ -23,7 +23,7 @@ export function WidgetMetricas({ metricas }: MetricasProps) {
   return (
     <div className="flex flex-col">
       <div className="border-b px-4 py-3">
-        <h3 className="text-sm font-semibold text-gray-900">Métricas</h3>
+        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Métricas</h3>
       </div>
 
       <div className="grid grid-cols-2 gap-2 p-4">
@@ -38,12 +38,12 @@ export function WidgetMetricas({ metricas }: MetricasProps) {
       {/* Templates mais usados */}
       {metricas.templatesMaisUsados.length > 0 && (
         <div className="border-t px-4 py-3">
-          <p className="text-xs font-medium text-gray-500 mb-2">Templates mais usados</p>
+          <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Templates mais usados</p>
           <div className="space-y-1">
             {metricas.templatesMaisUsados.map(t => (
               <div key={t.nome} className="flex justify-between text-xs">
-                <span className="text-gray-700">{t.nome}</span>
-                <span className="font-medium text-gray-500">{t.contagem}</span>
+                <span className="text-gray-700 dark:text-gray-300">{t.nome}</span>
+                <span className="font-medium text-gray-500 dark:text-gray-400">{t.contagem}</span>
               </div>
             ))}
           </div>
@@ -52,7 +52,7 @@ export function WidgetMetricas({ metricas }: MetricasProps) {
 
       {/* Status das conversas */}
       <div className="border-t px-4 py-3">
-        <p className="text-xs font-medium text-gray-500 mb-2">Status das Conversas</p>
+        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Status das Conversas</p>
         <div className="space-y-1 text-xs">
           <StatusBar
             label="Abertas"
@@ -83,10 +83,10 @@ function StatusBar({ label, value, max, cor }: { label: string; value: number; m
   return (
     <div>
       <div className="flex items-center justify-between">
-        <span className="text-[10px] text-gray-500">{label}</span>
-        <span className="text-[10px] font-medium text-gray-700">{value}</span>
+        <span className="text-[10px] text-gray-500 dark:text-gray-400">{label}</span>
+        <span className="text-[10px] font-medium text-gray-700 dark:text-gray-300">{value}</span>
       </div>
-      <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-gray-200">
+      <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-600">
         <div className={`h-full rounded-full ${cor}`} style={{ width: `${pct}%` }} />
       </div>
     </div>

@@ -92,9 +92,9 @@ export default function FormAnalise({
   const opcaoAtual = jaAnalisado ? OPCOES.find((o) => o.valor === resultadoAtual) : null
 
   return (
-    <div className="rounded-lg bg-white p-5 shadow-sm space-y-4">
+    <div className="rounded-lg bg-white dark:bg-gray-800 p-5 shadow-sm space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
           Análise de Crédito
         </h2>
 
@@ -123,11 +123,7 @@ export default function FormAnalise({
 
       {feedback && (
         <div
-          className={`rounded-md px-3 py-2 text-xs font-medium ${
-            feedback.tipo === 'sucesso'
-              ? 'bg-green-100 text-green-700'
-              : 'bg-red-100 text-red-700'
-          }`}
+          className={`rounded-md px-3 py-2 text-xs font-medium ${ feedback.tipo === 'sucesso' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }`}
         >
           {feedback.msg}
         </div>
@@ -136,7 +132,7 @@ export default function FormAnalise({
       {expandido && !jaAnalisado && (
         <form onSubmit={handleSubmit} className="space-y-4 border-t pt-4">
           <div>
-            <p className="text-xs font-medium text-gray-500 mb-2">
+            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
               Resultado da análise
             </p>
             <div className="grid grid-cols-2 gap-2">
@@ -159,7 +155,7 @@ export default function FormAnalise({
                     >
                       {opcao.label}
                     </span>
-                    <span className="mt-0.5 text-[11px] leading-tight text-gray-400">
+                    <span className="mt-0.5 text-[11px] leading-tight text-gray-400 dark:text-gray-500">
                       {opcao.descricao}
                     </span>
                   </button>
@@ -169,7 +165,7 @@ export default function FormAnalise({
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-400 mb-1">
+            <label className="block text-xs font-medium text-gray-400 dark:text-gray-500 mb-1">
               Observação / Motivo <span className="font-normal">(opcional)</span>
             </label>
             <textarea
@@ -184,7 +180,7 @@ export default function FormAnalise({
                     ? 'Ex: Precisa comprovar mais R$ 500 de renda...'
                     : 'Detalhes da análise...'
               }
-              className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="block w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
 
@@ -201,7 +197,7 @@ export default function FormAnalise({
       )}
 
       {jaAnalisado && (
-        <p className="text-xs text-gray-400">
+        <p className="text-xs text-gray-400 dark:text-gray-500">
           A análise de crédito já foi registrada.{' '}
           <button
             type="button"
@@ -215,11 +211,11 @@ export default function FormAnalise({
 
       {expandido && jaAnalisado && (
         <form onSubmit={handleSubmit} className="space-y-4 border-t pt-4">
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-gray-400 dark:text-gray-500">
             Você está alterando o resultado de uma análise já registrada.
           </p>
           <div>
-            <p className="text-xs font-medium text-gray-500 mb-2">Novo resultado</p>
+            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Novo resultado</p>
             <div className="grid grid-cols-2 gap-2">
               {OPCOES.filter((o) => o.valor !== resultadoAtual).map((opcao) => {
                 const ativo = selecionado === opcao.valor
@@ -252,7 +248,7 @@ export default function FormAnalise({
               rows={2}
               maxLength={500}
               placeholder="Motivo da reavaliação..."
-              className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="block w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
           <div className="flex justify-end">

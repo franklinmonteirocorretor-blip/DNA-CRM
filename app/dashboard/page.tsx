@@ -105,8 +105,8 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h1>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Bem-vindo ao DNA CRM. Aqui está seu resumo de hoje.
         </p>
       </div>
@@ -162,23 +162,23 @@ export default async function DashboardPage() {
       />
 
       {/* Produção da semana */}
-      <div className="rounded-lg bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-gray-900">Últimos 7 dias</h2>
+      <div className="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-sm">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Últimos 7 dias</h2>
         {producao && producao.length > 0 ? (
           <div className="mt-4 space-y-2">
             {producao.map((dia) => (
               <div
                 key={dia.data}
-                className="flex items-center justify-between rounded-md bg-gray-50 px-4 py-2 text-sm"
+                className="flex items-center justify-between rounded-md bg-gray-50 dark:bg-gray-700 px-4 py-2 text-sm"
               >
-                <span className="font-medium text-gray-700">
+                <span className="font-medium text-gray-700 dark:text-gray-300">
                   {new Date(dia.data + 'T00:00:00').toLocaleDateString('pt-BR', {
                     weekday: 'short',
                     day: '2-digit',
                     month: '2-digit',
                   })}
                 </span>
-                <span className="text-gray-500 truncate hidden xs:inline">
+                <span className="text-gray-500 dark:text-gray-400 truncate hidden xs:inline">
                   {dia.ligacoes} ligações · {dia.whatsapp} WhatsApp · {dia.agendamentos} agend.
                 </span>
                 <span className="font-bold text-blue-600">
@@ -188,7 +188,7 @@ export default async function DashboardPage() {
             ))}
           </div>
         ) : (
-          <p className="mt-4 text-sm text-gray-400">
+          <p className="mt-4 text-sm text-gray-400 dark:text-gray-500">
             Nenhuma atividade registrada nos últimos 7 dias.
           </p>
         )}

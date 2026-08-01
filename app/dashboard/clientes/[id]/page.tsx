@@ -97,8 +97,8 @@ export default async function CentralClientePage({ params }: Props) {
 
       {/* Renda e informações da análise financeira */}
       {analiseFinanceira.renda && (
-        <div className="rounded-lg bg-white p-5 shadow-sm">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400">Detalhes da Análise</h2>
+        <div className="rounded-lg bg-white dark:bg-gray-800 p-5 shadow-sm">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Detalhes da Análise</h2>
           <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
             <CardAnalise label="Renda" value={rendaFormatada} />
             <CardAnalise label="Dependentes" value={`${analiseFinanceira.dependentes}`} />
@@ -156,8 +156,8 @@ export default async function CentralClientePage({ params }: Props) {
 
 function CardAnalise({ label, value, destaque }: { label: string; value: string; destaque?: string }) {
   return (
-    <div className="rounded-md bg-gray-50 p-3">
-      <span className="text-[11px] font-medium uppercase text-gray-400">{label}</span>
+    <div className="rounded-md bg-gray-50 dark:bg-gray-700 p-3">
+      <span className="text-[11px] font-medium uppercase text-gray-400 dark:text-gray-500">{label}</span>
       <p className={`mt-1 text-sm font-semibold ${destaque ?? 'text-gray-900'}`}>{value}</p>
     </div>
   )

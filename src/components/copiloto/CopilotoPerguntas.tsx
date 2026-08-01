@@ -51,8 +51,8 @@ export function CopilotPerguntas({ perguntasSugeridas, onPerguntar, historico }:
   }
 
   return (
-    <section className="rounded-lg border bg-white p-5 shadow-sm">
-      <h3 className="text-sm font-semibold text-gray-900">❓ Pergunte ao Copiloto</h3>
+    <section className="rounded-lg border bg-white dark:bg-gray-800 p-5 shadow-sm">
+      <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">❓ Pergunte ao Copiloto</h3>
 
       {/* Sugestões */}
       <div className="mt-3 flex flex-wrap gap-1">
@@ -75,7 +75,7 @@ export function CopilotPerguntas({ perguntasSugeridas, onPerguntar, historico }:
           value={pergunta}
           onChange={(e) => setPergunta(e.target.value)}
           placeholder="Digite sua pergunta..."
-          className="flex-1 rounded-md border border-gray-200 px-3 py-2 text-sm placeholder-gray-400 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+          className="flex-1 rounded-md border border-gray-200 dark:border-gray-600 px-3 py-2 text-sm placeholder-gray-400 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400"
           disabled={carregando}
         />
         <button
@@ -90,19 +90,19 @@ export function CopilotPerguntas({ perguntasSugeridas, onPerguntar, historico }:
       {/* Resposta */}
       {resposta && (
         <div className="mt-4 rounded-lg bg-indigo-50 border border-indigo-100 p-4">
-          <p className="text-sm text-gray-900 whitespace-pre-wrap">{resposta}</p>
+          <p className="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap">{resposta}</p>
         </div>
       )}
 
       {/* Histórico recente */}
       {historico.length > 0 && (
         <div className="mt-4 border-t pt-3">
-          <p className="mb-2 text-xs font-medium text-gray-400 uppercase">Histórico recente</p>
+          <p className="mb-2 text-xs font-medium text-gray-400 dark:text-gray-500 uppercase">Histórico recente</p>
           <div className="space-y-1">
             {historico.slice(0, 5).map((h) => (
-              <div key={h.id} className="rounded bg-gray-50 px-3 py-2">
-                <p className="text-xs font-medium text-gray-700">{h.pergunta}</p>
-                <p className="mt-0.5 text-[11px] text-gray-500 line-clamp-2">{h.resposta}</p>
+              <div key={h.id} className="rounded bg-gray-50 dark:bg-gray-700 px-3 py-2">
+                <p className="text-xs font-medium text-gray-700 dark:text-gray-300">{h.pergunta}</p>
+                <p className="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400 line-clamp-2">{h.resposta}</p>
               </div>
             ))}
           </div>

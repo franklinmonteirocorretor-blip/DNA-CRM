@@ -15,8 +15,8 @@ function formatarMinutos(minutos: number): string {
 /** Seção 6 — Painel do Corretor (visão pessoal) */
 export default function FollowUpPainelCorretor({ painel }: Props) {
   return (
-    <div className="rounded-lg bg-white p-5 shadow-sm">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400">Meu Painel</h2>
+    <div className="rounded-lg bg-white dark:bg-gray-800 p-5 shadow-sm">
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Meu Painel</h2>
       <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-5">
         <Card label="Minhas tarefas" value={`${painel.minhasTarefas}`} />
         <Card label="Meus clientes" value={`${painel.meusClientes}`} />
@@ -30,8 +30,8 @@ export default function FollowUpPainelCorretor({ painel }: Props) {
 
 function Card({ label, value, destaque }: { label: string; value: string; destaque?: string }) {
   return (
-    <div className="rounded-md bg-gray-50 p-3">
-      <span className="text-[11px] font-medium uppercase text-gray-400">{label}</span>
+    <div className="rounded-md bg-gray-50 dark:bg-gray-700 p-3">
+      <span className="text-[11px] font-medium uppercase text-gray-400 dark:text-gray-500">{label}</span>
       <p className={`mt-1 text-sm font-semibold ${destaque ?? 'text-gray-900'}`}>{value}</p>
     </div>
   )

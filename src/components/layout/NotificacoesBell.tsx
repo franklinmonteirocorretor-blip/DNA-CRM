@@ -52,7 +52,7 @@ export default function NotificacoesBell({ usuarioId }: { usuarioId: string }) {
       {/* Botão do sino */}
       <button
         onClick={() => setAberto(!aberto)}
-        className="relative rounded-md p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition"
+        className="relative rounded-md p-1.5 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 transition"
         title="Notificações"
       >
         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -73,10 +73,10 @@ export default function NotificacoesBell({ usuarioId }: { usuarioId: string }) {
 
       {/* Dropdown */}
       {aberto && (
-        <div className="absolute right-0 top-full mt-2 w-80 rounded-xl border border-gray-200 bg-white shadow-lg z-50">
+        <div className="absolute right-0 top-full mt-2 w-80 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-lg z-50">
           {/* Cabeçalho */}
           <div className="flex items-center justify-between border-b px-4 py-3">
-            <h3 className="text-sm font-semibold text-gray-900">Notificações</h3>
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Notificações</h3>
             {naoLidas > 0 && (
               <button
                 onClick={marcarTodasComoLidas}
@@ -90,11 +90,11 @@ export default function NotificacoesBell({ usuarioId }: { usuarioId: string }) {
           {/* Lista */}
           <div className="max-h-[360px] overflow-y-auto">
             {carregando ? (
-              <p className="px-4 py-8 text-center text-sm text-gray-400">
+              <p className="px-4 py-8 text-center text-sm text-gray-400 dark:text-gray-500">
                 Carregando notificações...
               </p>
             ) : notificacoes.length === 0 ? (
-              <p className="px-4 py-8 text-center text-sm text-gray-400">
+              <p className="px-4 py-8 text-center text-sm text-gray-400 dark:text-gray-500">
                 Nenhuma notificação no momento.
               </p>
             ) : (
@@ -132,9 +132,7 @@ function NotificacaoItem({
 
   const conteudo = (
     <div
-      className={`flex gap-3 border-l-4 px-4 py-3 transition hover:bg-gray-50 cursor-pointer ${
-        notificacao.lida ? 'opacity-60' : 'bg-blue-50/30'
-      } ${cor}`}
+      className={`flex gap-3 border-l-4 px-4 py-3 transition hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer ${ notificacao.lida ? 'opacity-60' : 'bg-blue-50/30' } ${cor}`}
       onClick={async () => {
         if (!notificacao.lida) {
           await onMarcarLida(notificacao.id)
@@ -144,13 +142,13 @@ function NotificacaoItem({
     >
       <span className="text-lg shrink-0 mt-0.5">{icone}</span>
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium text-gray-900 truncate">
+        <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
           {notificacao.titulo}
         </p>
-        <p className="mt-0.5 text-xs text-gray-500 line-clamp-2">
+        <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
           {notificacao.mensagem}
         </p>
-        <p className="mt-1 text-[11px] text-gray-400">{tempoRelativo}</p>
+        <p className="mt-1 text-[11px] text-gray-400 dark:text-gray-500">{tempoRelativo}</p>
       </div>
       {!notificacao.lida && (
         <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-blue-500" />

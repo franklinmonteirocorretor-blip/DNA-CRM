@@ -120,29 +120,29 @@ export default function BuscaGlobal() {
           if (resultado.length > 0) setAberto(true)
         }}
         placeholder="Buscar clientes, corretores..."
-        className="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-1.5 text-xs text-gray-700 placeholder-gray-400 focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-400 transition"
+        className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 px-3 py-1.5 text-xs text-gray-700 dark:text-gray-300 placeholder-gray-400 focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-400 transition"
       />
 
       {aberto && (carregando || resultado.length > 0) && (
-        <div className="absolute left-0 right-0 top-full mt-1 z-50 rounded-lg border border-gray-200 bg-white shadow-lg max-h-72 overflow-y-auto">
+        <div className="absolute left-0 right-0 top-full mt-1 z-50 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-lg max-h-72 overflow-y-auto">
           {carregando ? (
-            <div className="px-3 py-2 text-[11px] text-gray-400">Buscando...</div>
+            <div className="px-3 py-2 text-[11px] text-gray-400 dark:text-gray-500">Buscando...</div>
           ) : (
             <>
               {clientes.length > 0 && (
                 <div>
-                  <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-gray-400 bg-gray-50 border-b border-gray-100">
+                  <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-700 border-b border-gray-100 dark:border-gray-700">
                     Clientes
                   </div>
                   {clientes.map((c) => (
                     <button
                       key={`cliente-${c.id}`}
                       onClick={() => handleClick(c)}
-                      className="flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-blue-50 transition-colors border-b border-gray-50"
+                      className="flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-blue-50 transition-colors border-b border-gray-50 dark:border-gray-700"
                     >
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-gray-900 truncate">{c.nome}</p>
-                        <p className="text-[10px] text-gray-400">{c.subtitulo}</p>
+                        <p className="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">{c.nome}</p>
+                        <p className="text-[10px] text-gray-400 dark:text-gray-500">{c.subtitulo}</p>
                       </div>
                     </button>
                   ))}
@@ -151,17 +151,17 @@ export default function BuscaGlobal() {
 
               {corretores.length > 0 && (
                 <div>
-                  <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-gray-400 bg-gray-50 border-b border-gray-100">
+                  <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-700 border-b border-gray-100 dark:border-gray-700">
                     Corretores
                   </div>
                   {corretores.map((c) => (
                     <button
                       key={`corretor-${c.id}`}
                       onClick={() => handleClick(c)}
-                      className="block w-full items-center gap-2 px-3 py-2 text-left hover:bg-blue-50 transition-colors border-b border-gray-50"
+                      className="block w-full items-center gap-2 px-3 py-2 text-left hover:bg-blue-50 transition-colors border-b border-gray-50 dark:border-gray-700"
                     >
-                      <p className="text-xs font-medium text-gray-900 truncate">{c.nome}</p>
-                      <p className="text-[10px] text-gray-400">{c.subtitulo}</p>
+                      <p className="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">{c.nome}</p>
+                      <p className="text-[10px] text-gray-400 dark:text-gray-500">{c.subtitulo}</p>
                     </button>
                   ))}
                 </div>

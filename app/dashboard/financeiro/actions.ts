@@ -38,6 +38,7 @@ function resolverPeriodo(filtros?: FinanceiroFiltros): { inicio: string; fim: st
   return { inicio: inicioDoMes(), fim: ultimoDiaDoMes() }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Supabase query builder type
 function aplicarFiltrosBase(query: any, filtros?: FinanceiroFiltros) {
   if (filtros?.corretorId) query = query.eq('corretor_responsavel_id', filtros.corretorId)
   if (filtros?.empreendimentoId) query = query.eq('empreendimento_id', filtros.empreendimentoId)
@@ -103,19 +104,26 @@ export async function listarComissoes(filtros?: FinanceiroFiltros): Promise<Comi
   query = aplicarFiltrosBase(query, filtros)
   const { data } = await query
 
-  return (data ?? []).map((c: any) => ({
-    clienteId: c.id,
-    clienteNome: c.nome,
-    empreendimentoNome: c.empreendimentos?.nome ?? null,
-    corretorNome: c.usuarios?.nome ?? '',
-    vgv: c.vgv ?? 0,
-    percentual: c.comissao_percentual ?? null,
-    valor: c.comissao_valor ?? null,
-    status: c.comissao_status ?? 'PREVISTA',
-    dataPrevista: c.comissao_data_prevista ?? null,
-    dataRecebimento: c.comissao_data_recebimento ?? null,
-    dataFechamento: c.data_fechamento ?? null,
-  }))
+  return (data ?? []).map((c) => {
+    const item = c as unknown as {
+      id: string; nome: string; vgv: number; comissao_percentual: number | null; comissao_valor: number | null;
+      comissao_status: ComissaoStatus; comissao_data_prevista: string | null; comissao_data_recebimento: string | null;
+      data_fechamento: string | null; empreendimentos: { nome: string } | null; usuarios: { nome: string } | null
+    }
+    return {
+      clienteId: item.id,
+      clienteNome: item.nome,
+      empreendimentoNome: item.empreendimentos?.nome ?? null,
+      corretorNome: item.usuarios?.nome ?? '',
+      vgv: item.vgv ?? 0,
+      percentual: item.comissao_percentual ?? null,
+      valor: item.comissao_valor ?? null,
+      status: item.comissao_status,
+      dataPrevista: item.comissao_data_prevista ?? null,
+      dataRecebimento: item.comissao_data_recebimento ?? null,
+      dataFechamento: item.data_fechamento ?? null,
+    }
+  })
 }
 
 // ─── SEÇÃO 3: Produção Financeira ─────────────────────────────────────────────
@@ -250,7 +258,7 @@ export async function empreendimentosFinanceiro(
     const eid = c.empreendimento_id ?? CHAVE_SEM_EMPREENDIMENTO
     if (!porEmpreendimento[eid]) {
       porEmpreendimento[eid] = {
-        nome: (c.empreendimentos as any)?.nome ?? 'Sem empreendimento',
+        nome: ((c.empreendimentos as unknown) as { nome: string })?.nome ?? 'Sem empreendimento',
         vgv: 0, comissoes: 0, clientes: new Set(),
       }
     }
@@ -324,7 +332,7 @@ export async function atualizarComissao(
   await requireAuth()
   const supabase = await createSupabaseServerClient()
 
-  const update: any = { comissao_status: novoStatus }
+  const update: Record<string, string | null> = { comissao_status: novoStatus }
   if (novoStatus === 'RECEBIDA') {
     update.comissao_data_recebimento = dataRecebimento || hoje()
   }
@@ -440,7 +448,7 @@ export async function financeiroDadosIniciais(
     ranking,
     empreendimentos,
     previsao,
-    corretores: (corretores ?? []).map((c: any) => ({ id: c.id, nome: c.nome })),
-    empreendimentosList: (emps ?? []).map((e: any) => ({ id: e.id, nome: e.nome })),
+    corretores: (corretores ?? []).map((c: { id: string; nome: string }) => ({ id: c.id, nome: c.nome })),
+    empreendimentosList: (emps ?? []).map((e: { id: string; nome: string }) => ({ id: e.id, nome: e.nome })),
   }
 }

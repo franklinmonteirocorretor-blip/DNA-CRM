@@ -92,7 +92,7 @@ export default function AutomacoesClient({
 
   async function processar() {
     const r = await processarFilaAgora()
-    setMsg(r.sucesso ? `Fila processada: ${(r as any).processados ?? 0} itens` : r.erro ?? 'Erro ao processar fila')
+    setMsg(r.sucesso ? `Fila processada: ${(r as Record<string, unknown>).processados ?? 0} itens` : r.erro ?? 'Erro ao processar fila')
   }
 
   function fmtData(iso: string) {
@@ -108,7 +108,7 @@ export default function AutomacoesClient({
       )}
 
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Motor de Automacoes</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Motor de Automacoes</h1>
         <div className="flex gap-3">
           <button
             onClick={processar}
@@ -133,10 +133,10 @@ export default function AutomacoesClient({
       </div>
 
       <div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-3">Automacoes</h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">Automacoes</h2>
         <div className="overflow-x-auto border rounded-lg">
           <table className="min-w-full text-sm">
-            <thead className="bg-gray-50 text-gray-600">
+            <thead className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-400">
               <tr>
                 <th className="text-left px-4 py-3 font-medium">Nome</th>
                 <th className="text-left px-4 py-3 font-medium">Evento</th>
@@ -145,22 +145,18 @@ export default function AutomacoesClient({
                 <th className="text-left px-4 py-3 font-medium">Acoes</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
               {automacoes.map((a) => (
-                <tr key={a.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 font-medium text-gray-900">{a.nome}</td>
-                  <td className="px-4 py-3 text-gray-600">{a.evento}</td>
-                  <td className="px-4 py-3 text-gray-600">#{a.condicoes.length}</td>
+                <tr key={a.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                  <td className="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">{a.nome}</td>
+                  <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{a.evento}</td>
+                  <td className="px-4 py-3 text-gray-600 dark:text-gray-400">#{a.condicoes.length}</td>
                   <td className="px-4 py-3"><StatusPill status={a.status} /></td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => toggleStatus(a.id, a.status)}
-                        className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
-                          a.status === 'ATIVA'
-                            ? 'bg-amber-100 text-amber-700 hover:bg-amber-200'
-                            : 'bg-green-100 text-green-700 hover:bg-green-200'
-                        }`}
+                        className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${ a.status === 'ATIVA' ? 'bg-amber-100 text-amber-700 hover:bg-amber-200' : 'bg-green-100 text-green-700 hover:bg-green-200' }`}
                       >
                         {a.status === 'ATIVA' ? 'Desativar' : 'Ativar'}
                       </button>
@@ -176,7 +172,7 @@ export default function AutomacoesClient({
               ))}
               {automacoes.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-gray-400">
+                  <td colSpan={5} className="px-4 py-8 text-center text-gray-400 dark:text-gray-500">
                     Nenhuma automacao cadastrada
                   </td>
                 </tr>
@@ -187,10 +183,10 @@ export default function AutomacoesClient({
       </div>
 
       <div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-3">Ultimas Execucoes</h2>
-        <div className="overflow-x-auto border border-gray-200 rounded-lg">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">Ultimas Execucoes</h2>
+        <div className="overflow-x-auto border border-gray-200 dark:border-gray-600 rounded-lg">
           <table className="min-w-full text-sm">
-            <thead className="bg-gray-50 text-gray-600">
+            <thead className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-400">
               <tr>
                 <th className="text-left px-4 py-3 font-medium">Automacao</th>
                 <th className="text-left px-4 py-3 font-medium">Evento</th>
@@ -200,26 +196,24 @@ export default function AutomacoesClient({
                 <th className="text-left px-4 py-3 font-medium">Data</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
               {logsRecentes.map((log) => (
-                <tr key={log.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 font-mono text-xs text-gray-500">{log.automacao_id.slice(0, 8)}</td>
-                  <td className="px-4 py-3 text-gray-700">{log.evento_disparador}</td>
+                <tr key={log.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                  <td className="px-4 py-3 font-mono text-xs text-gray-500 dark:text-gray-400">{log.automacao_id.slice(0, 8)}</td>
+                  <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{log.evento_disparador}</td>
                   <td className="px-4 py-3">
-                    <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
-                      log.condicoes_atendidas ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                    }`}>
+                    <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${ log.condicoes_atendidas ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }`}>
                       {log.condicoes_atendidas ? 'OK' : 'N/A'}
                     </span>
                   </td>
                   <td className="px-4 py-3"><StatusPill status={log.status} /></td>
-                  <td className="px-4 py-3 text-gray-600">{log.duracao_ms != null ? `${log.duracao_ms}ms` : '-'}</td>
-                  <td className="px-4 py-3 text-gray-500">{fmtData(log.criado_em)}</td>
+                  <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{log.duracao_ms != null ? `${log.duracao_ms}ms` : '-'}</td>
+                  <td className="px-4 py-3 text-gray-500 dark:text-gray-400">{fmtData(log.criado_em)}</td>
                 </tr>
               ))}
               {logsRecentes.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
+                  <td colSpan={6} className="px-4 py-8 text-center text-gray-400 dark:text-gray-500">
                     Nenhuma execucao recente
                   </td>
                 </tr>
@@ -230,10 +224,10 @@ export default function AutomacoesClient({
       </div>
 
       <div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-3">Fila</h2>
-        <div className="overflow-x-auto border border-gray-200 rounded-lg">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">Fila</h2>
+        <div className="overflow-x-auto border border-gray-200 dark:border-gray-600 rounded-lg">
           <table className="min-w-full text-sm">
-            <thead className="bg-gray-50 text-gray-600">
+            <thead className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-400">
               <tr>
                 <th className="text-left px-4 py-3 font-medium">Evento</th>
                 <th className="text-left px-4 py-3 font-medium">Prioridade</th>
@@ -242,19 +236,19 @@ export default function AutomacoesClient({
                 <th className="text-left px-4 py-3 font-medium">Criado em</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
               {fila.map((item) => (
-                <tr key={item.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 text-gray-700">{item.evento}</td>
-                  <td className="px-4 py-3 text-gray-600">{item.prioridade}</td>
-                  <td className="px-4 py-3 text-gray-600">{item.tentativas}/{item.max_tentativas}</td>
+                <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                  <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{item.evento}</td>
+                  <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{item.prioridade}</td>
+                  <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{item.tentativas}/{item.max_tentativas}</td>
                   <td className="px-4 py-3"><StatusPill status={item.status} /></td>
-                  <td className="px-4 py-3 text-gray-500">{fmtData(item.criado_em)}</td>
+                  <td className="px-4 py-3 text-gray-500 dark:text-gray-400">{fmtData(item.criado_em)}</td>
                 </tr>
               ))}
               {fila.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-gray-400">
+                  <td colSpan={5} className="px-4 py-8 text-center text-gray-400 dark:text-gray-500">
                     Fila vazia
                   </td>
                 </tr>

@@ -56,33 +56,33 @@ export function ChatPanel({
       <div className="flex h-full items-center justify-center">
         <div className="text-center">
           <div className="text-4xl mb-3">💬</div>
-          <p className="text-sm text-gray-500">Selecione uma conversa</p>
-          <p className="text-xs text-gray-400 mt-1">para começar a enviar mensagens</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Selecione uma conversa</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">para começar a enviar mensagens</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="col-span-6 flex flex-col h-full border-x">
+    <div className="flex flex-col h-full">
       {/* Cabeçalho do chat */}
-      <div className="border-b bg-white px-4 py-3 flex items-center justify-between">
+      <div className="border-b bg-white dark:bg-gray-800 px-4 py-3 flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-semibold text-gray-900">{conversa.cliente.nome}</h3>
-          <p className="text-xs text-gray-500">{conversa.cliente.telefone}</p>
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{conversa.cliente.nome}</h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{conversa.cliente.telefone}</p>
         </div>
         <div className="flex items-center gap-2">
           <span className="rounded bg-green-100 px-2 py-0.5 text-[10px] font-medium text-green-700">
             {conversa.cliente.etapa_atual}
           </span>
-          <span className="text-xs text-gray-400">{conversa.cliente.corretor_nome}</span>
+          <span className="text-xs text-gray-400 dark:text-gray-500">{conversa.cliente.corretor_nome}</span>
         </div>
       </div>
 
       {/* Histórico de mensagens */}
-      <div ref={ref} className="flex-1 overflow-y-auto bg-gray-50 p-4 space-y-3">
+      <div ref={ref} className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-700 p-4 space-y-3">
         {mensagensOrdenadas.length === 0 && (
-          <p className="text-center text-sm text-gray-400 py-8">Nenhuma mensagem ainda.</p>
+          <p className="text-center text-sm text-gray-400 dark:text-gray-500 py-8">Nenhuma mensagem ainda.</p>
         )}
         {mensagensOrdenadas.map((m: WhatsAppMensagem) => {
           const isUser = m.remetente === 'usuario' || m.remetente === 'sistema'
@@ -111,14 +111,14 @@ export function ChatPanel({
 
       {/* Input de mensagem */}
       {conversa.conversa.status === 'aberta' ? (
-        <form onSubmit={handleSubmit} className="border-t bg-white px-4 py-3">
+        <form onSubmit={handleSubmit} className="border-t bg-white dark:bg-gray-800 px-4 py-3">
           <div className="flex items-center gap-2">
             <input
               type="text"
               value={texto}
               onChange={e => setTexto(e.target.value)}
               placeholder="Digite sua mensagem..."
-              className="flex-1 rounded-md border border-gray-200 px-3 py-2 text-sm placeholder-gray-400 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400"
+              className="flex-1 rounded-md border border-gray-200 dark:border-gray-600 px-3 py-2 text-sm placeholder-gray-400 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400"
               autoFocus
             />
             <button
@@ -131,8 +131,8 @@ export function ChatPanel({
           </div>
         </form>
       ) : (
-        <div className="border-t bg-gray-100 px-4 py-3">
-          <p className="text-xs text-center text-gray-500">
+        <div className="border-t bg-gray-100 dark:bg-gray-800 px-4 py-3">
+          <p className="text-xs text-center text-gray-500 dark:text-gray-400">
             Conversa {conversa.conversa.status === 'finalizada' ? 'finalizada' : 'arquivada'} — envio bloqueado.
           </p>
         </div>

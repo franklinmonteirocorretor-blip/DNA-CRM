@@ -52,23 +52,21 @@ function MetaBar({
 
   return (
     <div
-      className={`rounded-xl border-2 ${COR_DA_BORDA(pct)} bg-white p-4 shadow-sm`}
+      className={`rounded-xl border-2 ${COR_DA_BORDA(pct)} bg-white dark:bg-gray-800 p-4 shadow-sm`}
     >
-      <p className="text-xs font-medium uppercase tracking-wide text-gray-500">{label}</p>
+      <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">{label}</p>
 
       <div className="mt-2 flex items-baseline justify-between">
         <div>
-          <span className="text-xl font-bold text-gray-900">
+          <span className="text-xl font-bold text-gray-900 dark:text-gray-100">
             {formatar(realizado)}
           </span>
-          <span className="ml-1 text-xs text-gray-400">
+          <span className="ml-1 text-xs text-gray-400 dark:text-gray-500">
             / {formatar(meta)}
           </span>
         </div>
         <span
-          className={`text-sm font-bold ${
-            pct >= 80 ? 'text-emerald-700' : pct >= 60 ? 'text-yellow-700' : 'text-red-600'
-          }`}
+          className={`text-sm font-bold ${ pct >= 80 ? 'text-emerald-700' : pct >= 60 ? 'text-yellow-700' : 'text-red-600' }`}
         >
           {Math.round(pct)}%
         </span>

@@ -166,8 +166,8 @@ export default function CentralOperacao({ dadosIniciais }: { dadosIniciais: Oper
 
       {/* ════ Seção Intermediária: Fila de Trabalho ════ */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-900">Fila de Trabalho — Suas Próximas Ações</h2>
-        <p className="text-xs text-gray-400 mb-2">Priorizado por urgência: clientes sem contato e prazos vencidos primeiro.</p>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Fila de Trabalho — Suas Próximas Ações</h2>
+        <p className="text-xs text-gray-400 dark:text-gray-500 mb-2">Priorizado por urgência: clientes sem contato e prazos vencidos primeiro.</p>
         <FilaTrabalho acoes={filaTrabalho} />
       </section>
 
@@ -295,8 +295,8 @@ export default function CentralOperacao({ dadosIniciais }: { dadosIniciais: Oper
       {/* ════ Seção 8A: Heatmap de Produção ════ */}
       {dados.heatmap.length > 0 && (
         <section>
-          <h2 className="text-lg font-semibold text-gray-900">Heatmap de Produção (7 dias)</h2>
-          <p className="text-xs text-gray-400 mb-2">Intensidade de atividade por corretor × hora do dia.</p>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Heatmap de Produção (7 dias)</h2>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mb-2">Intensidade de atividade por corretor × hora do dia.</p>
           <HeatmapProducao dados={dados.heatmap} />
         </section>
       )}
@@ -304,15 +304,15 @@ export default function CentralOperacao({ dadosIniciais }: { dadosIniciais: Oper
       {/* ════ Seção 8B: Produtividade por Equipe ════ */}
       {dados.produtividadeEquipe.length > 0 && (
         <section>
-          <h2 className="text-lg font-semibold text-gray-900">Produtividade por Equipe (30 dias)</h2>
-          <p className="text-xs text-gray-400 mb-2">Tendência de atividades por equipe ao longo do mês.</p>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Produtividade por Equipe (30 dias)</h2>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mb-2">Tendência de atividades por equipe ao longo do mês.</p>
           <ProdutividadeChart series={dados.produtividadeEquipe} />
         </section>
       )}
 
       {/* ════ Seção 8: Alertas (Painel Vermelho) ════ */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-900">⚠️ Alertas</h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">⚠️ Alertas</h2>
         <div className="mt-3 rounded-lg border-2 border-red-300 bg-red-50 p-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
             <div>
@@ -352,7 +352,7 @@ export default function CentralOperacao({ dadosIniciais }: { dadosIniciais: Oper
       </section>
 
       {/* Rodapé: status da conexão */}
-      <p className="text-center text-[10px] text-gray-300">
+      <p className="text-center text-[10px] text-gray-300 dark:text-gray-600">
         Supabase Realtime ativo · Última atualização: {new Date().toLocaleTimeString('pt-BR')} · Pulso #{pulso}
       </p>
     </div>
@@ -367,8 +367,8 @@ function AlertaPainel({ titulo, icone, cor, itens, vazio }: { titulo: string; ic
   return (
     <div className={`rounded-lg border p-3 ${pals[cor] ?? ''}`}>
       <div className="flex items-center justify-between mb-1.5"><h3 className="text-xs font-semibold text-gray-800"><span className="mr-1">{icone}</span>{titulo}</h3>{itens.length > 0 && <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-bold ${bgs[cor] ?? ''}`}>{itens.length}</span>}</div>
-      {itens.length === 0 ? <p className="text-[10px] text-gray-400">{vazio}</p> : itens.slice(0, 8).map(i => (
-        <p key={i.id} className="text-[10px]"><Link href={`/dashboard/clientes/${i.id}`} className="text-gray-700 hover:text-blue-600">{i.nome}</Link><span className="ml-1.5 text-gray-400">{i.subtitulo}</span></p>
+      {itens.length === 0 ? <p className="text-[10px] text-gray-400 dark:text-gray-500">{vazio}</p> : itens.slice(0, 8).map(i => (
+        <p key={i.id} className="text-[10px]"><Link href={`/dashboard/clientes/${i.id}`} className="text-gray-700 dark:text-gray-300 hover:text-blue-600">{i.nome}</Link><span className="ml-1.5 text-gray-400 dark:text-gray-500">{i.subtitulo}</span></p>
       ))}
     </div>
   )

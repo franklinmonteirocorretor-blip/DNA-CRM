@@ -30,7 +30,7 @@ export default function FormEmpreendimento({
   }
 
   return (
-    <div className="rounded-lg bg-white p-6 shadow-sm">
+    <div className="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-sm">
       {/* Erros */}
       {erros.length > 0 && (
         <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
@@ -49,7 +49,7 @@ export default function FormEmpreendimento({
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {/* Nome */}
           <div>
-            <label htmlFor="nome" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="nome" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Nome *
             </label>
             <input
@@ -60,14 +60,14 @@ export default function FormEmpreendimento({
               maxLength={200}
               defaultValue={empreendimento?.nome ?? ''}
               placeholder="Ex: Villa Europa, Green Park..."
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
 
           {/* Endereço */}
           <div>
-            <label htmlFor="endereco" className="block text-sm font-medium text-gray-700">
-              Endereço <span className="text-xs font-normal text-gray-400">(opcional)</span>
+            <label htmlFor="endereco" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Endereço <span className="text-xs font-normal text-gray-400 dark:text-gray-500">(opcional)</span>
             </label>
             <input
               id="endereco"
@@ -76,13 +76,13 @@ export default function FormEmpreendimento({
               maxLength={300}
               defaultValue={empreendimento?.endereco ?? ''}
               placeholder="Ex: Av. Principal, 123 - Centro"
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
 
           {/* Vagas */}
           <div>
-            <label htmlFor="vagas" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="vagas" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Número de vagas
             </label>
             <input
@@ -92,18 +92,18 @@ export default function FormEmpreendimento({
               min={0}
               max={9999}
               defaultValue={empreendimento?.vagas ?? 0}
-              className="mt-1 block w-full max-w-[200px] rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="mt-1 block w-full max-w-[200px] rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
 
           {/* Status (só na edição) */}
           {isEdicao && (
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Status
               </label>
               <div className="mt-2 flex items-center gap-4">
-                <label className="flex items-center gap-2 text-sm text-gray-700">
+                <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
                   <input
                     type="radio"
                     name="ativo"
@@ -113,7 +113,7 @@ export default function FormEmpreendimento({
                   />
                   Ativo
                 </label>
-                <label className="flex items-center gap-2 text-sm text-gray-700">
+                <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
                   <input
                     type="radio"
                     name="ativo"
@@ -132,7 +132,7 @@ export default function FormEmpreendimento({
         <div className="flex items-center justify-end gap-3 border-t pt-4">
           <Link
             href="/dashboard/empreendimentos"
-            className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
+            className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700"
           >
             Cancelar
           </Link>

@@ -7,8 +7,8 @@ export default function DashboardNotFound() {
     <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
       <div className="text-center space-y-4 max-w-md">
         <div className="text-8xl">🔍</div>
-        <h2 className="text-xl font-bold text-gray-900">Página não encontrada</h2>
-        <p className="text-sm text-gray-500">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Página não encontrada</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
           O recurso que você procura não existe ou foi removido.
         </p>
         <Link

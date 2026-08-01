@@ -39,8 +39,8 @@ export default async function FinanceiroPage({ searchParams }: Props) {
       {/* Cabeçalho */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Financeiro Comercial</h1>
-          <p className="mt-1 text-sm text-gray-500">Comissões, VGV e previsão de recebimento</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Financeiro Comercial</h1>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Comissões, VGV e previsão de recebimento</p>
         </div>
       </div>
 
@@ -49,7 +49,7 @@ export default async function FinanceiroPage({ searchParams }: Props) {
 
       {/* SEÇÃO 1: Resumo */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-900">Resumo Financeiro</h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Resumo Financeiro</h2>
         <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-6">
           <KpiCard label="VGV do mês" value={formatarMoeda(dados.resumo.vgvMes)} color="sky" size="md" padding="normal" />
           <KpiCard label="Comissão prevista" value={formatarMoeda(dados.resumo.comissaoPrevista)} color="amber" size="md" padding="normal" />
@@ -62,12 +62,12 @@ export default async function FinanceiroPage({ searchParams }: Props) {
 
       {/* SEÇÃO 2: Tabela de Comissões */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-900">Comissões</h2>
-        <p className="text-sm text-gray-500">{dados.comissoes.length} vendas com comissão</p>
-        <div className="mt-3 overflow-x-auto rounded-lg border border-gray-200 bg-white">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Comissões</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{dados.comissoes.length} vendas com comissão</p>
+        <div className="mt-3 overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-200 bg-gray-50 text-left text-[10px] font-medium uppercase tracking-wide text-gray-400">
+              <tr className="border-b border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-left text-[10px] font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">
                 <th className="px-4 py-3">Cliente</th>
                 <th className="px-4 py-3">Empreendimento</th>
                 <th className="px-4 py-3">Corretor</th>
@@ -83,26 +83,26 @@ export default async function FinanceiroPage({ searchParams }: Props) {
             <tbody>
               {dados.comissoes.length === 0 && (
                 <tr>
-                  <td colSpan={10} className="px-4 py-8 text-center text-sm text-gray-400">
+                  <td colSpan={10} className="px-4 py-8 text-center text-sm text-gray-400 dark:text-gray-500">
                     Nenhuma comissão encontrada no período.
                   </td>
                 </tr>
               )}
               {dados.comissoes.map((item) => (
-                <tr key={item.clienteId} className="border-b border-gray-50 hover:bg-gray-50 transition">
+                <tr key={item.clienteId} className="border-b border-gray-50 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
                   <td className="px-4 py-2.5">
                     <Link href={`/dashboard/clientes/${item.clienteId}`} className="font-medium text-blue-600 hover:underline">
                       {item.clienteNome}
                     </Link>
                   </td>
-                  <td className="px-4 py-2.5 text-gray-500">{item.empreendimentoNome ?? '—'}</td>
-                  <td className="px-4 py-2.5 text-gray-500">{item.corretorNome}</td>
-                  <td className="px-4 py-2.5 text-right tabular-nums text-gray-700">{formatarMoeda(item.vgv)}</td>
-                  <td className="px-4 py-2.5 text-right tabular-nums text-gray-500">{item.percentual ? `${item.percentual}%` : '—'}</td>
+                  <td className="px-4 py-2.5 text-gray-500 dark:text-gray-400">{item.empreendimentoNome ?? '—'}</td>
+                  <td className="px-4 py-2.5 text-gray-500 dark:text-gray-400">{item.corretorNome}</td>
+                  <td className="px-4 py-2.5 text-right tabular-nums text-gray-700 dark:text-gray-300">{formatarMoeda(item.vgv)}</td>
+                  <td className="px-4 py-2.5 text-right tabular-nums text-gray-500 dark:text-gray-400">{item.percentual ? `${item.percentual}%` : '—'}</td>
                   <td className="px-4 py-2.5 text-right tabular-nums font-semibold text-gray-800">{item.valor ? formatarMoeda(item.valor) : '—'}</td>
                   <td className="px-4 py-2.5"><StatusBadge status={item.status} /></td>
-                  <td className="px-4 py-2.5 text-xs text-gray-500">{item.dataPrevista ? new Date(item.dataPrevista + 'T00:00:00').toLocaleDateString('pt-BR') : '—'}</td>
-                  <td className="px-4 py-2.5 text-xs text-gray-500">{item.dataRecebimento ? new Date(item.dataRecebimento + 'T00:00:00').toLocaleDateString('pt-BR') : '—'}</td>
+                  <td className="px-4 py-2.5 text-xs text-gray-500 dark:text-gray-400">{item.dataPrevista ? new Date(item.dataPrevista + 'T00:00:00').toLocaleDateString('pt-BR') : '—'}</td>
+                  <td className="px-4 py-2.5 text-xs text-gray-500 dark:text-gray-400">{item.dataRecebimento ? new Date(item.dataRecebimento + 'T00:00:00').toLocaleDateString('pt-BR') : '—'}</td>
                   <td className="px-4 py-2.5">
                     <ComissaoAcoes clienteId={item.clienteId} statusAtual={item.status} />
                   </td>
@@ -115,11 +115,11 @@ export default async function FinanceiroPage({ searchParams }: Props) {
 
       {/* SEÇÃO 3: Produção Financeira (VGV + Comissões) - gráfico textual */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-900">Produção Financeira</h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Produção Financeira</h2>
         <div className="mt-3 grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* VGV ao longo do tempo */}
-          <div className="rounded-lg border border-gray-200 bg-white p-4">
-            <h3 className="text-sm font-medium text-gray-500">VGV Mensal</h3>
+          <div className="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 p-4">
+            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">VGV Mensal</h3>
             <div className="mt-2 space-y-1.5">
               {dados.producao.slice(-12).map((p) => {
                 const maxVgv = Math.max(...dados.producao.map((x) => x.vgv), 1)
@@ -128,14 +128,14 @@ export default async function FinanceiroPage({ searchParams }: Props) {
                 const label = meses[Number(mes) - 1] ?? p.periodo
                 return (
                   <div key={p.periodo} className="flex items-center gap-2 text-xs">
-                    <span className="w-12 text-right text-gray-400">{label}</span>
-                    <div className="flex-1 h-5 bg-gray-50 rounded overflow-hidden">
+                    <span className="w-12 text-right text-gray-400 dark:text-gray-500">{label}</span>
+                    <div className="flex-1 h-5 bg-gray-50 dark:bg-gray-700 rounded overflow-hidden">
                       <div
                         className="h-full bg-sky-400 rounded transition-all"
                         style={{ width: `${(p.vgv / maxVgv) * 100}%` }}
                       />
                     </div>
-                    <span className="w-28 text-right tabular-nums text-gray-600">{formatarMoeda(p.vgv)}</span>
+                    <span className="w-28 text-right tabular-nums text-gray-600 dark:text-gray-400">{formatarMoeda(p.vgv)}</span>
                   </div>
                 )
               })}
@@ -143,8 +143,8 @@ export default async function FinanceiroPage({ searchParams }: Props) {
           </div>
 
           {/* Comissões ao longo do tempo */}
-          <div className="rounded-lg border border-gray-200 bg-white p-4">
-            <h3 className="text-sm font-medium text-gray-500">Comissões Mensais</h3>
+          <div className="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 p-4">
+            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Comissões Mensais</h3>
             <div className="mt-2 space-y-1.5">
               {dados.producao.slice(-12).map((p) => {
                 const maxCom = Math.max(...dados.producao.map((x) => x.comissoes), 1)
@@ -153,14 +153,14 @@ export default async function FinanceiroPage({ searchParams }: Props) {
                 const label = meses[Number(mes) - 1] ?? p.periodo
                 return (
                   <div key={p.periodo} className="flex items-center gap-2 text-xs">
-                    <span className="w-14 text-right text-gray-400">{label}</span>
-                    <div className="flex-1 h-5 bg-gray-50 rounded overflow-hidden">
+                    <span className="w-14 text-right text-gray-400 dark:text-gray-500">{label}</span>
+                    <div className="flex-1 h-5 bg-gray-50 dark:bg-gray-700 rounded overflow-hidden">
                       <div
                         className="h-full bg-emerald-400 rounded transition-all"
                         style={{ width: `${(p.comissoes / maxCom) * 100}%` }}
                       />
                     </div>
-                    <span className="w-28 text-right tabular-nums text-gray-600">{formatarMoeda(p.comissoes)}</span>
+                    <span className="w-28 text-right tabular-nums text-gray-600 dark:text-gray-400">{formatarMoeda(p.comissoes)}</span>
                   </div>
                 )
               })}
@@ -171,11 +171,11 @@ export default async function FinanceiroPage({ searchParams }: Props) {
 
       {/* SEÇÃO 4: Ranking Financeiro */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-900">Ranking Financeiro</h2>
-        <div className="mt-3 overflow-x-auto rounded-lg border border-gray-200 bg-white">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Ranking Financeiro</h2>
+        <div className="mt-3 overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-100 bg-gray-50 text-left text-[10px] font-medium uppercase tracking-wide text-gray-400">
+              <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-left text-[10px] font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">
                 <th className="px-4 py-3 w-10">#</th>
                 <th className="px-4 py-3">Corretor</th>
                 <th className="px-4 py-3 text-right">VGV</th>
@@ -188,24 +188,24 @@ export default async function FinanceiroPage({ searchParams }: Props) {
             <tbody>
               {dados.ranking.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-sm text-gray-400">
+                  <td colSpan={7} className="px-4 py-8 text-center text-sm text-gray-400 dark:text-gray-500">
                     Nenhum corretor com vendas no período.
                   </td>
                 </tr>
               )}
               {dados.ranking.map((item, idx) => (
-                <tr key={item.corretorId} className="border-b border-gray-50 hover:bg-gray-50 transition">
-                  <td className="px-4 py-2.5 text-center font-bold text-gray-400">{idx + 1}</td>
+                <tr key={item.corretorId} className="border-b border-gray-50 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                  <td className="px-4 py-2.5 text-center font-bold text-gray-400 dark:text-gray-500">{idx + 1}</td>
                   <td className="px-4 py-2.5 font-medium text-gray-800">{item.corretorNome}</td>
-                  <td className="px-4 py-2.5 text-right tabular-nums font-semibold text-gray-700">{formatarMoeda(item.vgv)}</td>
+                  <td className="px-4 py-2.5 text-right tabular-nums font-semibold text-gray-700 dark:text-gray-300">{formatarMoeda(item.vgv)}</td>
                   <td className="px-4 py-2.5 text-right tabular-nums text-emerald-600">{formatarMoeda(item.comissoes)}</td>
-                  <td className="px-4 py-2.5 text-right tabular-nums text-gray-500">{formatarMoeda(item.ticketMedio)}</td>
+                  <td className="px-4 py-2.5 text-right tabular-nums text-gray-500 dark:text-gray-400">{formatarMoeda(item.ticketMedio)}</td>
                   <td className="px-4 py-2.5 text-right tabular-nums">
                     <span className={item.conversao >= 50 ? 'text-emerald-600 font-semibold' : item.conversao >= 25 ? 'text-amber-600' : 'text-red-500'}>
                       {item.conversao}%
                     </span>
                   </td>
-                  <td className="px-4 py-2.5 text-right tabular-nums text-gray-600">{item.vendas}</td>
+                  <td className="px-4 py-2.5 text-right tabular-nums text-gray-600 dark:text-gray-400">{item.vendas}</td>
                 </tr>
               ))}
             </tbody>
@@ -215,11 +215,11 @@ export default async function FinanceiroPage({ searchParams }: Props) {
 
       {/* SEÇÃO 5: Empreendimentos */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-900">Empreendimentos</h2>
-        <div className="mt-3 overflow-x-auto rounded-lg border border-gray-200 bg-white">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Empreendimentos</h2>
+        <div className="mt-3 overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-100 bg-gray-50 text-left text-[10px] font-medium uppercase tracking-wide text-gray-400">
+              <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-left text-[10px] font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">
                 <th className="px-4 py-3">Empreendimento</th>
                 <th className="px-4 py-3 text-right">VGV</th>
                 <th className="px-4 py-3 text-right">Comissões</th>
@@ -229,17 +229,17 @@ export default async function FinanceiroPage({ searchParams }: Props) {
             <tbody>
               {dados.empreendimentos.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-4 py-8 text-center text-sm text-gray-400">
+                  <td colSpan={4} className="px-4 py-8 text-center text-sm text-gray-400 dark:text-gray-500">
                     Nenhum dado por empreendimento.
                   </td>
                 </tr>
               )}
               {dados.empreendimentos.map((item) => (
-                <tr key={item.empreendimentoId ?? '__sem'} className="border-b border-gray-50 hover:bg-gray-50 transition">
+                <tr key={item.empreendimentoId ?? '__sem'} className="border-b border-gray-50 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
                   <td className="px-4 py-2.5 font-medium text-gray-800">{item.empreendimentoNome}</td>
-                  <td className="px-4 py-2.5 text-right tabular-nums font-semibold text-gray-700">{formatarMoeda(item.vgv)}</td>
+                  <td className="px-4 py-2.5 text-right tabular-nums font-semibold text-gray-700 dark:text-gray-300">{formatarMoeda(item.vgv)}</td>
                   <td className="px-4 py-2.5 text-right tabular-nums text-emerald-600">{formatarMoeda(item.comissoes)}</td>
-                  <td className="px-4 py-2.5 text-right tabular-nums text-gray-500">{item.clientes}</td>
+                  <td className="px-4 py-2.5 text-right tabular-nums text-gray-500 dark:text-gray-400">{item.clientes}</td>
                 </tr>
               ))}
             </tbody>
@@ -249,7 +249,7 @@ export default async function FinanceiroPage({ searchParams }: Props) {
 
       {/* SEÇÃO 6: Previsão */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-900">Previsão de Recebimento</h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Previsão de Recebimento</h2>
         <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
             <p className="text-xs font-medium uppercase tracking-wide text-amber-600">Próximos 7 dias</p>
@@ -266,10 +266,10 @@ export default async function FinanceiroPage({ searchParams }: Props) {
         </div>
 
         {dados.previsao.detalhes.length > 0 && (
-          <div className="mt-4 overflow-x-auto rounded-lg border border-gray-200 bg-white">
+          <div className="mt-4 overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50 text-left text-[10px] font-medium uppercase tracking-wide text-gray-400">
+                <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-left text-[10px] font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">
                   <th className="px-4 py-3">Cliente</th>
                   <th className="px-4 py-3 text-right">Valor Previsto</th>
                   <th className="px-4 py-3 text-right">Data Prevista</th>
@@ -277,14 +277,14 @@ export default async function FinanceiroPage({ searchParams }: Props) {
               </thead>
               <tbody>
                 {dados.previsao.detalhes.slice(0, 15).map((d) => (
-                  <tr key={d.clienteId} className="border-b border-gray-50 hover:bg-gray-50 transition">
+                  <tr key={d.clienteId} className="border-b border-gray-50 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
                     <td className="px-4 py-2.5">
                       <Link href={`/dashboard/clientes/${d.clienteId}`} className="font-medium text-blue-600 hover:underline">
                         {d.clienteNome}
                       </Link>
                     </td>
-                    <td className="px-4 py-2.5 text-right tabular-nums text-gray-600">{formatarMoeda(d.valor)}</td>
-                    <td className="px-4 py-2.5 text-right text-xs text-gray-500">
+                    <td className="px-4 py-2.5 text-right tabular-nums text-gray-600 dark:text-gray-400">{formatarMoeda(d.valor)}</td>
+                    <td className="px-4 py-2.5 text-right text-xs text-gray-500 dark:text-gray-400">
                       {new Date(d.dataPrevista + 'T00:00:00').toLocaleDateString('pt-BR')}
                     </td>
                   </tr>
@@ -324,18 +324,18 @@ function FiltrosBarra({
   empreendimentos: { id: string; nome: string }[]
 }) {
   return (
-    <form className="flex flex-wrap gap-3 items-end rounded-lg border border-gray-200 bg-white p-4">
+    <form className="flex flex-wrap gap-3 items-end rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 p-4">
       <div>
-        <label className="block text-[10px] font-medium uppercase text-gray-400 mb-1">Período</label>
-        <select name="periodo" defaultValue={filtros.periodo ?? 'mes'} className="rounded-md border border-gray-300 px-3 py-1.5 text-sm">
+        <label className="block text-[10px] font-medium uppercase text-gray-400 dark:text-gray-500 mb-1">Período</label>
+        <select name="periodo" defaultValue={filtros.periodo ?? 'mes'} className="rounded-md border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-sm">
           <option value="mes">Mês atual</option>
           <option value="semana">Esta semana</option>
           <option value="ano">Este ano</option>
         </select>
       </div>
       <div>
-        <label className="block text-[10px] font-medium uppercase text-gray-400 mb-1">Corretor</label>
-        <select name="corretor" defaultValue={filtros.corretorId ?? ''} className="rounded-md border border-gray-300 px-3 py-1.5 text-sm">
+        <label className="block text-[10px] font-medium uppercase text-gray-400 dark:text-gray-500 mb-1">Corretor</label>
+        <select name="corretor" defaultValue={filtros.corretorId ?? ''} className="rounded-md border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-sm">
           <option value="">Todos</option>
           {corretores.map((c) => (
             <option key={c.id} value={c.id}>{c.nome}</option>
@@ -343,8 +343,8 @@ function FiltrosBarra({
         </select>
       </div>
       <div>
-        <label className="block text-[10px] font-medium uppercase text-gray-400 mb-1">Empreendimento</label>
-        <select name="empreendimento" defaultValue={filtros.empreendimentoId ?? ''} className="rounded-md border border-gray-300 px-3 py-1.5 text-sm">
+        <label className="block text-[10px] font-medium uppercase text-gray-400 dark:text-gray-500 mb-1">Empreendimento</label>
+        <select name="empreendimento" defaultValue={filtros.empreendimentoId ?? ''} className="rounded-md border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-sm">
           <option value="">Todos</option>
           {empreendimentos.map((e) => (
             <option key={e.id} value={e.id}>{e.nome}</option>
@@ -352,8 +352,8 @@ function FiltrosBarra({
         </select>
       </div>
       <div>
-        <label className="block text-[10px] font-medium uppercase text-gray-400 mb-1">Status</label>
-        <select name="status" defaultValue={filtros.status ?? 'TODOS'} className="rounded-md border border-gray-300 px-3 py-1.5 text-sm">
+        <label className="block text-[10px] font-medium uppercase text-gray-400 dark:text-gray-500 mb-1">Status</label>
+        <select name="status" defaultValue={filtros.status ?? 'TODOS'} className="rounded-md border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-sm">
           <option value="TODOS">Todos</option>
           <option value="PREVISTA">Prevista</option>
           <option value="RECEBIDA">Recebida</option>

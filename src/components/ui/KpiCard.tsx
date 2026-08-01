@@ -32,7 +32,7 @@ export default function KpiCard({
 }: KpiCardProps) {
   const isSimplePalette = ['blue', 'green', 'purple', 'orange'].includes(color)
   const palette = isSimplePalette ? PALETA_METRICA_SIMPLES : PALETA_KPI_CARD
-  const bgClass = palette[color] ?? 'bg-gray-50 text-gray-700 border-gray-200'
+  const bgClass = palette[color] ?? 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600'
 
   const sizeClass = {
     sm: 'text-lg',

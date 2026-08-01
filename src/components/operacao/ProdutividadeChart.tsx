@@ -33,7 +33,7 @@ function formatarDia(dia: string): string {
 export default function ProdutividadeChart({ series }: ProdutividadeChartProps) {
   if (!series.length) {
     return (
-      <div className="rounded-lg border border-gray-200 bg-white p-6 text-center text-sm text-gray-400">
+      <div className="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 p-6 text-center text-sm text-gray-400 dark:text-gray-500">
         Nenhum dado de produtividade disponível.
       </div>
     )
@@ -53,8 +53,8 @@ export default function ProdutividadeChart({ series }: ProdutividadeChartProps) 
   })
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4">
-      <h3 className="text-sm font-semibold text-gray-900 mb-3">Produtividade por Equipe</h3>
+    <div className="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 p-4">
+      <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Produtividade por Equipe</h3>
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={dadosUnificados}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />

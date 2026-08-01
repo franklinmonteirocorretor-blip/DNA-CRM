@@ -97,8 +97,8 @@ export default async function ClientesPage({ searchParams }: Props) {
       {/* Cabeçalho com título e botão */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Clientes</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Clientes</h1>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             {temFiltro
               ? `${totalClientes} cliente${totalClientes !== 1 ? 's' : ''} encontrado${totalClientes !== 1 ? 's' : ''}`
               : `${totalClientes} cliente${totalClientes !== 1 ? 's' : ''} no seu funil`
@@ -118,11 +118,11 @@ export default async function ClientesPage({ searchParams }: Props) {
 
       {/* Se não tem nenhum cliente cadastrado (sem filtro) */}
       {!temFiltro && totalClientes === 0 && (
-        <div className="rounded-lg border-2 border-dashed border-gray-300 bg-white p-12 text-center">
-          <p className="text-lg font-medium text-gray-500">
+        <div className="rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-12 text-center">
+          <p className="text-lg font-medium text-gray-500 dark:text-gray-400">
             Você ainda não tem clientes cadastrados.
           </p>
-          <p className="mt-1 text-sm text-gray-400">
+          <p className="mt-1 text-sm text-gray-400 dark:text-gray-500">
             Clique em &quot;+ Novo Cliente&quot; para adicionar seu primeiro lead.
           </p>
         </div>
@@ -130,11 +130,11 @@ export default async function ClientesPage({ searchParams }: Props) {
 
       {/* Se tem filtro mas nenhum resultado */}
       {temFiltro && totalClientes === 0 && (
-        <div className="rounded-lg border-2 border-dashed border-gray-300 bg-white p-12 text-center">
-          <p className="text-lg font-medium text-gray-500">
+        <div className="rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-12 text-center">
+          <p className="text-lg font-medium text-gray-500 dark:text-gray-400">
             Nenhum cliente encontrado.
           </p>
-          <p className="mt-1 text-sm text-gray-400">
+          <p className="mt-1 text-sm text-gray-400 dark:text-gray-500">
             Tente ajustar os filtros ou limpar a busca.
           </p>
         </div>
@@ -142,7 +142,7 @@ export default async function ClientesPage({ searchParams }: Props) {
 
       {/* Visualização com filtro ativo: lista plana */}
       {temFiltro && totalClientes > 0 && (
-        <div className="rounded-lg bg-white shadow-sm">
+        <div className="rounded-lg bg-white dark:bg-gray-800 shadow-sm">
           {clientesFiltrados.map((cliente) => (
             <ClienteCardLinha key={cliente.id} cliente={cliente} />
           ))}
@@ -159,13 +159,13 @@ export default async function ClientesPage({ searchParams }: Props) {
             if (clientesNaEtapa.length === 0) return null
 
             return (
-              <div key={etapa} className="min-w-0 rounded-lg bg-white p-4 shadow-sm">
+              <div key={etapa} className="min-w-0 rounded-lg bg-white dark:bg-gray-800 p-4 shadow-sm">
                 {/* Cabeçalho da coluna: badge da etapa + contagem */}
                 <div className="mb-3 flex items-center justify-between">
                   <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${ETAPA_BADGE_COLORS[etapa]}`}>
                     {ETAPA_LABEL_PLURAL[etapa]}
                   </span>
-                  <span className="text-xs font-semibold text-gray-400">
+                  <span className="text-xs font-semibold text-gray-400 dark:text-gray-500">
                     {clientesNaEtapa.length}
                   </span>
                 </div>
@@ -206,21 +206,19 @@ function ClienteCard({ cliente }: { cliente: Cliente }) {
   return (
     <Link
       href={`/dashboard/clientes/${cliente.id}`}
-      className={`block rounded-lg border p-3 transition hover:shadow-md ${
-        precisaAcao ? 'border-orange-300 bg-orange-50 hover:border-orange-400' : 'border-gray-100 bg-gray-50 hover:border-gray-300'
-      }`}
+      className={`block rounded-lg border p-3 transition hover:shadow-md ${ precisaAcao ? 'border-orange-300 bg-orange-50 hover:border-orange-400' : 'border-gray-100 bg-gray-50 dark:bg-gray-700 hover:border-gray-300' }`}
     >
       {/* Nome */}
-      <p className="text-sm font-semibold text-gray-900 truncate">{cliente.nome}</p>
+      <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{cliente.nome}</p>
 
       {/* Telefone */}
-      <p className="mt-0.5 text-xs text-gray-500">{telefoneFormatado}</p>
+      <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{telefoneFormatado}</p>
 
       {/* Indicadores extras */}
       <div className="mt-2 flex flex-wrap gap-1">
         {/* Empreendimento de interesse */}
         {cliente.empreendimento_interesse && (
-          <span className="rounded bg-white px-1.5 py-0.5 text-[11px] font-medium text-gray-600 shadow-sm">
+          <span className="rounded bg-white dark:bg-gray-800 px-1.5 py-0.5 text-[11px] font-medium text-gray-600 dark:text-gray-400 shadow-sm">
             {cliente.empreendimento_interesse.slice(0, 20)}
             {cliente.empreendimento_interesse.length > 20 ? '…' : ''}
           </span>
@@ -262,15 +260,15 @@ function ClienteCardLinha({ cliente }: { cliente: Cliente }) {
 return (
     <Link
       href={`/dashboard/clientes/${cliente.id}`}
-      className="flex items-center justify-between border-b border-gray-100 px-5 py-3.5 transition hover:bg-gray-50 last:border-b-0"
+      className="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 px-5 py-3.5 transition hover:bg-gray-50 dark:hover:bg-gray-700 last:border-b-0"
     >
       <div className="flex items-center gap-3 min-w-0">
-        <span className="text-sm font-semibold text-gray-900 truncate">
+        <span className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
           {cliente.nome}
         </span>
-        <span className="text-xs text-gray-400">{telefoneFormatado}</span>
+        <span className="text-xs text-gray-400 dark:text-gray-500">{telefoneFormatado}</span>
         {cliente.empreendimento_interesse && (
-          <span className="hidden sm:inline text-xs text-gray-500">
+          <span className="hidden sm:inline text-xs text-gray-500 dark:text-gray-400">
             &middot; {cliente.empreendimento_interesse.slice(0, 25)}
             {cliente.empreendimento_interesse.length > 25 ? '…' : ''}
           </span>

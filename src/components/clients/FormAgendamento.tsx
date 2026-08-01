@@ -50,7 +50,7 @@ export default function FormAgendamento({ clienteId }: { clienteId: string }) {
   return (
     <div className="rounded-lg border border-purple-100 bg-purple-50/50 p-5 shadow-sm">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-600">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-400">
           Agendar visita
         </h2>
         <button
@@ -67,11 +67,7 @@ export default function FormAgendamento({ clienteId }: { clienteId: string }) {
 
       {feedback && (
         <div
-          className={`mt-3 rounded-md px-3 py-2 text-xs font-medium ${
-            feedback.tipo === 'sucesso'
-              ? 'bg-green-100 text-green-700'
-              : 'bg-red-100 text-red-700'
-          }`}
+          className={`mt-3 rounded-md px-3 py-2 text-xs font-medium ${ feedback.tipo === 'sucesso' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }`}
         >
           {feedback.msg}
         </div>
@@ -81,7 +77,7 @@ export default function FormAgendamento({ clienteId }: { clienteId: string }) {
         <form ref={formRef} onSubmit={handleSubmit} className="mt-4 space-y-4">
           {/* Data e hora */}
           <div>
-            <label htmlFor="data_hora" className="block text-xs font-medium text-gray-500 mb-1">
+            <label htmlFor="data_hora" className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
               Data e hora da visita
             </label>
             <input
@@ -91,28 +87,28 @@ export default function FormAgendamento({ clienteId }: { clienteId: string }) {
               value={dataHora}
               onChange={(e) => setDataHora(e.target.value)}
               min={new Date().toISOString().slice(0, 16)}
-              className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+              className="block w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm shadow-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
             />
-            <p className="mt-1 text-[11px] text-gray-400">
+            <p className="mt-1 text-[11px] text-gray-400 dark:text-gray-500">
               Escolha uma data e hora no futuro
             </p>
           </div>
 
           {/* Empreendimento */}
           <div>
-            <label htmlFor="empreendimento_id" className="block text-xs font-medium text-gray-500 mb-1">
+            <label htmlFor="empreendimento_id" className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
               Empreendimento
             </label>
             <SelectEmpreendimento
               name="empreendimento_id"
               id="empreendimento_id"
-              className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+              className="block w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm shadow-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
             />
           </div>
 
           {/* Observação */}
           <div>
-            <label htmlFor="obs_agendamento" className="block text-xs font-medium text-gray-500 mb-1">
+            <label htmlFor="obs_agendamento" className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
               Observação
             </label>
             <textarea
@@ -122,7 +118,7 @@ export default function FormAgendamento({ clienteId }: { clienteId: string }) {
               rows={2}
               maxLength={300}
               placeholder="Ex: Levar book do empreendimento..."
-              className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+              className="block w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
             />
           </div>
 

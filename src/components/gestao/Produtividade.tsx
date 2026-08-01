@@ -14,7 +14,7 @@ function BarraHorizontal({
 }) {
   const pct = maxValor > 0 ? Math.min(100, (valor / maxValor) * 100) : 0
   return (
-    <div className={`${altura} bg-gray-100 rounded overflow-hidden`}>
+    <div className={`${altura} bg-gray-100 dark:bg-gray-800 rounded overflow-hidden`}>
       <div className={`h-full rounded transition-all ${cor}`} style={{ width: `${Math.max(0.5, pct)}%` }} />
     </div>
   )
@@ -30,8 +30,8 @@ export default function Produtividade({
   if (series.length === 0) {
     return (
       <section>
-        <h2 className="text-lg font-semibold text-gray-900">Produtividade</h2>
-        <p className="mt-3 text-sm text-gray-400">Nenhum dado no período.</p>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Produtividade</h2>
+        <p className="mt-3 text-sm text-gray-400 dark:text-gray-500">Nenhum dado no período.</p>
       </section>
     )
   }
@@ -42,12 +42,12 @@ export default function Produtividade({
 
   return (
     <section>
-      <h2 className="text-lg font-semibold text-gray-900">Produtividade</h2>
+      <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Produtividade</h2>
 
       <div className="mt-3 overflow-x-auto">
         <table className="w-full text-xs">
           <thead>
-            <tr className="border-b border-gray-200 text-left text-[10px] font-medium uppercase tracking-wide text-gray-400">
+            <tr className="border-b border-gray-200 dark:border-gray-600 text-left text-[10px] font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">
               <th className="pb-2 w-20">Período</th>
               <th className="pb-2">Vendas</th>
               <th className="pb-2">Comparec.</th>
@@ -60,8 +60,8 @@ export default function Produtividade({
           </thead>
           <tbody>
             {series.map((s) => (
-              <tr key={s.data} className="border-b border-gray-100">
-                <td className="py-2 text-gray-700 font-medium">
+              <tr key={s.data} className="border-b border-gray-100 dark:border-gray-700">
+                <td className="py-2 text-gray-700 dark:text-gray-300 font-medium">
                   {formatarData(s.data, agrupamento)}
                 </td>
                 <td className="py-2 pr-2">
@@ -82,9 +82,9 @@ export default function Produtividade({
                     <span className="w-6 text-right tabular-nums">{s.aprovacoes}</span>
                   </div>
                 </td>
-                <td className="py-2 text-right tabular-nums text-gray-500">{s.ligacoes}</td>
-                <td className="py-2 text-right tabular-nums text-gray-500">{s.whatsapps}</td>
-                <td className="py-2 text-right tabular-nums text-gray-500">{s.agendamentos}</td>
+                <td className="py-2 text-right tabular-nums text-gray-500 dark:text-gray-400">{s.ligacoes}</td>
+                <td className="py-2 text-right tabular-nums text-gray-500 dark:text-gray-400">{s.whatsapps}</td>
+                <td className="py-2 text-right tabular-nums text-gray-500 dark:text-gray-400">{s.agendamentos}</td>
                 <td className="py-2 text-right tabular-nums font-bold text-blue-600">
                   {s.pontuacao.toLocaleString('pt-BR')}
                 </td>

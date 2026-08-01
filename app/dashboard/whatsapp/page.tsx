@@ -39,7 +39,6 @@ export default async function WhatsAppPage() {
     <WhatsAppClientPage
       usuarioId={usuario.id}
       usuarioNome={usuario.nome ?? user.email ?? 'Usuário'}
-      usuarioPerfil={usuario.perfil ?? 'CORRETOR'}
       conversasIniciais={conversas}
       metricasIniciais={metricas}
     />

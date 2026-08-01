@@ -79,16 +79,16 @@ export default async function RankingsPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Rankings</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Rankings</h1>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Métricas de produtividade, VGV e comissões.
           </p>
         </div>
-        <div className="rounded-lg border-2 border-dashed border-gray-300 bg-white p-12 text-center">
-          <p className="text-lg font-medium text-gray-500">
+        <div className="rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-12 text-center">
+          <p className="text-lg font-medium text-gray-500 dark:text-gray-400">
             Nenhum corretor encontrado.
           </p>
-          <p className="mt-1 text-sm text-gray-400">
+          <p className="mt-1 text-sm text-gray-400 dark:text-gray-500">
             {ehGerente
               ? 'Sua equipe ainda não tem corretores cadastrados.'
               : 'Seus dados de produtividade aparecerão aqui.'}
@@ -224,8 +224,8 @@ export default async function RankingsPage() {
       {/* Cabeçalho */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Rankings</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Rankings</h1>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             {ehGerente ? 'Produtividade da equipe' : 'Seus resultados'} · {mesLabel}
           </p>
         </div>
@@ -233,8 +233,8 @@ export default async function RankingsPage() {
 
       {/* ── TOP 3 DESTAQUE ───────────────────────────────────────────────── */}
       <div>
-        <h2 className="text-lg font-semibold text-gray-900">🏆 Top 3 — VGV e Comissões</h2>
-        <p className="mt-1 text-xs text-gray-500">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">🏆 Top 3 — VGV e Comissões</h2>
+        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
           Os três maiores vendedores do mês em valor de vendas.
         </p>
 
@@ -273,8 +273,8 @@ export default async function RankingsPage() {
 
       {/* ── RANKINGS DE PRODUTIVIDADE ─────────────────────────────────────── */}
       <div>
-        <h2 className="text-lg font-semibold text-gray-900">📊 Produtividade</h2>
-        <p className="mt-1 text-xs text-gray-500">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">📊 Produtividade</h2>
+        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
           Comparativo de desempenho entre corretores no mês de {mesLabel}.
         </p>
 
@@ -326,18 +326,18 @@ export default async function RankingsPage() {
 
       {/* ── RANKING DE VGV ────────────────────────────────────────────────── */}
       <div>
-        <h2 className="text-lg font-semibold text-gray-900">💰 VGV (Valor Geral de Vendas)</h2>
-        <p className="mt-1 text-xs text-gray-500">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">💰 VGV (Valor Geral de Vendas)</h2>
+        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
           Soma do valor de vendas dos fechamentos no mês de {mesLabel}.
         </p>
 
-        <div className="mt-3 rounded-lg bg-white shadow-sm">
+        <div className="mt-3 rounded-lg bg-white dark:bg-gray-800 shadow-sm">
           {rankingVgv.length > 0 ? (
             rankingVgv.map((item) => (
               <LinhaRanking key={item.posicao} item={item} cor="#f59e0b" />
             ))
           ) : (
-            <p className="px-5 py-6 text-sm text-gray-400 text-center">
+            <p className="px-5 py-6 text-sm text-gray-400 dark:text-gray-500 text-center">
               Nenhum VGV registrado no mês.
             </p>
           )}
@@ -346,18 +346,18 @@ export default async function RankingsPage() {
 
       {/* ── RANKING DE COMISSÕES ──────────────────────────────────────────── */}
       <div>
-        <h2 className="text-lg font-semibold text-gray-900">💵 Comissões</h2>
-        <p className="mt-1 text-xs text-gray-500">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">💵 Comissões</h2>
+        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
           Total de comissões calculadas sobre os fechamentos do mês de {mesLabel}.
         </p>
 
-        <div className="mt-3 rounded-lg bg-white shadow-sm">
+        <div className="mt-3 rounded-lg bg-white dark:bg-gray-800 shadow-sm">
           {rankingComissao.length > 0 ? (
             rankingComissao.map((item) => (
               <LinhaRanking key={item.posicao} item={item} cor="#22c55e" />
             ))
           ) : (
-            <p className="px-5 py-6 text-sm text-gray-400 text-center">
+            <p className="px-5 py-6 text-sm text-gray-400 dark:text-gray-500 text-center">
               Nenhuma comissão calculada no mês.
             </p>
           )}
@@ -365,9 +365,9 @@ export default async function RankingsPage() {
       </div>
 
       {/* ── TABELA COMPLETA ───────────────────────────────────────────────── */}
-      <div className="rounded-lg bg-white shadow-sm overflow-hidden">
+      <div className="rounded-lg bg-white dark:bg-gray-800 shadow-sm overflow-hidden">
         <div className="border-b px-5 py-3">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
             Visão completa · {mesLabel}
           </h2>
         </div>
@@ -375,7 +375,7 @@ export default async function RankingsPage() {
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">
             <thead>
-              <tr className="border-b bg-gray-50 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+              <tr className="border-b bg-gray-50 dark:bg-gray-700 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                 <th className="px-4 py-2.5">Corretor</th>
                 <th className="px-4 py-2.5 text-center">📞</th>
                 <th className="px-4 py-2.5 text-center">📁</th>
@@ -387,17 +387,17 @@ export default async function RankingsPage() {
                 <th className="px-4 py-2.5 text-right">Comissão</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
               {stats.map((s) => (
-                <tr key={s.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-2.5 font-medium text-gray-900">{s.nome}</td>
-                  <td className="px-4 py-2.5 text-center text-gray-600">{s.ligacoes}</td>
-                  <td className="px-4 py-2.5 text-center text-gray-600">{s.documentos}</td>
-                  <td className="px-4 py-2.5 text-center text-gray-600">{s.analises}</td>
-                  <td className="px-4 py-2.5 text-center text-gray-600">{s.aprovacoes}</td>
+                <tr key={s.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                  <td className="px-4 py-2.5 font-medium text-gray-900 dark:text-gray-100">{s.nome}</td>
+                  <td className="px-4 py-2.5 text-center text-gray-600 dark:text-gray-400">{s.ligacoes}</td>
+                  <td className="px-4 py-2.5 text-center text-gray-600 dark:text-gray-400">{s.documentos}</td>
+                  <td className="px-4 py-2.5 text-center text-gray-600 dark:text-gray-400">{s.analises}</td>
+                  <td className="px-4 py-2.5 text-center text-gray-600 dark:text-gray-400">{s.aprovacoes}</td>
                   <td className="px-4 py-2.5 text-center font-semibold text-green-600">{s.fechamentos}</td>
-                  <td className="px-4 py-2.5 text-center text-gray-600">{s.taxaConversao.toFixed(1)}%</td>
-                  <td className="px-4 py-2.5 text-right text-gray-700">
+                  <td className="px-4 py-2.5 text-center text-gray-600 dark:text-gray-400">{s.taxaConversao.toFixed(1)}%</td>
+                  <td className="px-4 py-2.5 text-right text-gray-700 dark:text-gray-300">
                     {s.vgv > 0 ? s.vgv.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '—'}
                   </td>
                   <td className="px-4 py-2.5 text-right font-medium text-green-700">
@@ -432,23 +432,23 @@ function CardDestaque({
 }) {
   return (
     <div
-      className="rounded-xl bg-white p-5 shadow-sm border-2"
+      className="rounded-xl bg-white dark:bg-gray-800 p-5 shadow-sm border-2"
       style={{ borderColor: cor }}
     >
       <div className="flex items-center gap-2">
         <span className="text-2xl">{emoji}</span>
-        <span className="text-xs font-bold uppercase tracking-wide text-gray-400">
+        <span className="text-xs font-bold uppercase tracking-wide text-gray-400 dark:text-gray-500">
           {posicao}º lugar
         </span>
       </div>
-      <p className="mt-2 text-lg font-bold text-gray-900">{nome}</p>
+      <p className="mt-2 text-lg font-bold text-gray-900 dark:text-gray-100">{nome}</p>
       <div className="mt-3 space-y-1">
         <div className="flex items-center justify-between text-sm">
-          <span className="text-gray-500">VGV</span>
-          <span className="font-semibold text-gray-900">{vgv}</span>
+          <span className="text-gray-500 dark:text-gray-400">VGV</span>
+          <span className="font-semibold text-gray-900 dark:text-gray-100">{vgv}</span>
         </div>
         <div className="flex items-center justify-between text-sm">
-          <span className="text-gray-500">Comissão</span>
+          <span className="text-gray-500 dark:text-gray-400">Comissão</span>
           <span className="font-semibold text-green-700">{comissao}</span>
         </div>
       </div>
@@ -470,8 +470,8 @@ function SecaoRanking({
   vazio: string
 }) {
   return (
-    <div className="rounded-lg bg-white p-4 shadow-sm">
-      <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+    <div className="rounded-lg bg-white dark:bg-gray-800 p-4 shadow-sm">
+      <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
         <span>{icone}</span>
         {titulo}
       </h3>
@@ -482,7 +482,7 @@ function SecaoRanking({
           ))}
         </ul>
       ) : (
-        <p className="mt-3 text-xs text-gray-400">{vazio}</p>
+        <p className="mt-3 text-xs text-gray-400 dark:text-gray-500">{vazio}</p>
       )}
     </div>
   )
@@ -491,10 +491,10 @@ function SecaoRanking({
 function LinhaRanking({ item, cor }: { item: RankingItem; cor: string }) {
   const medalhas = ['🥇', '🥈', '🥉']
   return (
-    <li className="flex items-center justify-between rounded-md bg-gray-50 px-3 py-2">
+    <li className="flex items-center justify-between rounded-md bg-gray-50 dark:bg-gray-700 px-3 py-2">
       <div className="flex items-center gap-2">
         <span className="text-sm">{medalhas[item.posicao - 1]}</span>
-        <span className="text-sm font-medium text-gray-900">{item.nome}</span>
+        <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{item.nome}</span>
       </div>
       <span className="text-sm font-bold" style={{ color: cor }}>
         {item.valor}

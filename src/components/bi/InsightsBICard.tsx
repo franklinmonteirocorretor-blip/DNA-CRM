@@ -23,20 +23,20 @@ function InsightCard({ insight }: { insight: BIInsight }) {
 
   return (
     <div
-      className={`rounded-r-lg border-l-4 ${corBorda} bg-white shadow-sm border border-gray-100 p-4`}
+      className={`rounded-r-lg border-l-4 ${corBorda} bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 p-4`}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-gray-700 uppercase">
+          <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase">
             {LABELS_CATEGORIA[insight.categoria] ?? insight.categoria}
           </span>
-          <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-600">
+          <span className="inline-flex items-center rounded-full bg-gray-100 dark:bg-gray-800 px-2 py-0.5 text-[11px] font-medium text-gray-600 dark:text-gray-400">
             {Math.round(insight.confianza)}% confiança
           </span>
         </div>
       </div>
-      <p className="mt-1 text-sm font-semibold text-gray-900">{insight.titulo}</p>
-      <p className="mt-1 text-xs text-gray-600">{insight.descricao}</p>
+      <p className="mt-1 text-sm font-semibold text-gray-900 dark:text-gray-100">{insight.titulo}</p>
+      <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">{insight.descricao}</p>
       {insight.acaoSugerida && (
         <div className="mt-2 rounded-md bg-blue-50 px-3 py-2 text-xs text-blue-700">
           <span className="font-medium">Sugestão:</span> {insight.acaoSugerida}
@@ -49,8 +49,8 @@ function InsightCard({ insight }: { insight: BIInsight }) {
 export default function InsightsBICard({ insights }: { insights: BIInsight[] }) {
   if (insights.length === 0) {
     return (
-      <div className="rounded-xl border border-gray-200 bg-gray-50 p-8 text-center shadow-sm">
-        <p className="text-sm font-medium text-gray-600">Nenhum insight disponível.</p>
+      <div className="rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-8 text-center shadow-sm">
+        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Nenhum insight disponível.</p>
       </div>
     )
   }

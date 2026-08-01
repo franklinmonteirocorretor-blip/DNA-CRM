@@ -23,7 +23,6 @@ import {
 interface WhatsAppClientPageProps {
   usuarioId: string
   usuarioNome: string
-  usuarioPerfil: string
   conversasIniciais: WhatsAppConversaEnriquecida[]
   metricasIniciais: WhatsAppMetricas
 }
@@ -51,7 +50,6 @@ export default function WhatsAppClientPage({
 
   const handleSelecionarConversa = useCallback(async (id: string) => {
     setConversaAtivaId(id)
-    // Aqui podemos carregar mensagens; por enquanto carrega local mock
     setMensagens([])
   }, [])
 
@@ -111,62 +109,58 @@ export default function WhatsAppClientPage({
     // TODO: criar conversa e selecionar
   }, [])
 
-  // ── Tabs da Sidebar ──────────────────────────────────────────────────────────
+  // ── Tabs ──────────────────────────────────────────────────────────────────────
 
   const tabs: { id: Aba; label: string; icon: string }[] = [
-    { id: 'CLIENTE', label: 'Cliente', icon: '👤' },
-    { id: 'TEMPLATES', label: 'Templates', icon: '📋' },
-    { id: 'METRICAS', label: 'Métricas', icon: '📊' },
-    { id: 'CENTRO_COMANDO', label: 'Comando', icon: '⚡' },
+    { id: 'CLIENTE', label: 'Cliente', icon: '\u{1F464}' },
+    { id: 'TEMPLATES', label: 'Templates', icon: '\u{1F4CB}' },
+    { id: 'METRICAS', label: 'Métricas', icon: '\u{1F4CA}' },
+    { id: 'CENTRO_COMANDO', label: 'Comando', icon: '\u{26A1}' },
   ]
 
   // ── Render ────────────────────────────────────────────────────────────────────
 
   return (
-    <div className="grid grid-cols-12 h-full">
+    <div className="flex flex-col lg:grid lg:grid-cols-12 h-full">
       {/* Caixa de Entrada */}
-      <CaixaEntrada
-        conversas={conversas}
-        conversaAtivaId={conversaAtivaId}
-        onSelecionar={handleSelecionarConversa}
-        onFiltrar={handleFiltrar}
-        filtroAtual={filtroStatus}
-      />
+      <div className="lg:col-span-3 lg:border-r">
+        <CaixaEntrada
+          conversas={conversas}
+          conversaAtivaId={conversaAtivaId}
+          onSelecionar={handleSelecionarConversa}
+          onFiltrar={handleFiltrar}
+          filtroAtual={filtroStatus}
+        />
+      </div>
 
       {/* Chat Principal */}
-      <ChatPanel
-        conversa={conversaAtiva}
-        mensagens={mensagens}
-        usuarioName={usuarioNome}
-        onEnviar={handleEnviarMensagem}
-        onMarcaLidas={handleMarcarLidas}
-      />
+      <div className="lg:col-span-6 flex flex-col">
+        <ChatPanel
+          conversa={conversaAtiva}
+          mensagens={mensagens}
+          usuarioName={usuarioNome}
+          onEnviar={handleEnviarMensagem}
+          onMarcaLidas={handleMarcarLidas}
+        />
+      </div>
 
-      {/* Sidebar Direita — Abas */}
-      <div className="col-span-3 flex flex-col border-l">
-        {/* Mini-navegação de abas */}
+      {/* Sidebar Direita */}
+      <div className="lg:col-span-3 flex flex-col border-t lg:border-t-0 lg:border-l">
+        {/* Mini-navegação */}
         <div className="flex border-b">
           {tabs.map(t => (
             <button
               key={t.id}
               onClick={() => setAbaAtiva(t.id)}
-              className={`flex-1 px-2 py-2 text-xs font-medium transition ${
-                abaAtiva === t.id
-                  ? 'border-b-2 border-blue-600 text-blue-600'
-                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
-              }`}
+              className={`flex-1 px-2 py-2 text-xs font-medium transition ${ abaAtiva === t.id ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100' }`}
             >
               <span className="block text-center">{t.icon}</span>
               <span className="block text-center text-[10px] mt-0.5">{t.label}</span>
             </button>
           ))}
         </div>
-
-        {/* Conteúdo da aba ativa */}
         <div className="flex-1 overflow-y-auto">
-          {abaAtiva === 'CLIENTE' && (
-            <PainelCliente conversa={conversaAtiva} />
-          )}
+          {abaAtiva === 'CLIENTE' && <PainelCliente conversa={conversaAtiva} />}
           {abaAtiva === 'TEMPLATES' && (
             <GerenciadorTemplates
               templates={templates}
@@ -176,9 +170,7 @@ export default function WhatsAppClientPage({
               selecionadoId={selectedTemplateId}
             />
           )}
-          {abaAtiva === 'METRICAS' && (
-            <WidgetMetricas metricas={metricasIniciais} />
-          )}
+          {abaAtiva === 'METRICAS' && <WidgetMetricas metricas={metricasIniciais} />}
           {abaAtiva === 'CENTRO_COMANDO' && (
             <CentroComandoWhatsApp
               metricas={metricasIniciais}

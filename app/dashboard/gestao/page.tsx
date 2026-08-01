@@ -24,7 +24,7 @@ export default async function GestaoPage() {
   if (!user) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-gray-400">Você precisa estar autenticado.</p>
+        <p className="text-gray-400 dark:text-gray-500">Você precisa estar autenticado.</p>
       </div>
     )
   }
@@ -51,8 +51,8 @@ export default async function GestaoPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Gestão Comercial</h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Gestão Comercial</h1>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Centro de comando da DNA Imóveis. Dados em tempo real.
         </p>
       </div>

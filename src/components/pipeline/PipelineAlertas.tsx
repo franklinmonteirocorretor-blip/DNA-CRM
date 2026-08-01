@@ -45,15 +45,15 @@ function AlertaBloco({
         )}
       </div>
       {itens.length === 0 ? (
-        <p className="text-xs text-gray-400">{vazio}</p>
+        <p className="text-xs text-gray-400 dark:text-gray-500">{vazio}</p>
       ) : (
         <ul className="space-y-1.5">
           {itens.slice(0, 10).map((item) => (
             <li key={item.id} className="text-xs">
-              <Link href={`/dashboard/clientes/${item.id}`} className="text-gray-700 hover:text-blue-600 transition">
+              <Link href={`/dashboard/clientes/${item.id}`} className="text-gray-700 dark:text-gray-300 hover:text-blue-600 transition">
                 {item.nome}
               </Link>
-              <span className="ml-2 text-gray-400">
+              <span className="ml-2 text-gray-400 dark:text-gray-500">
                 {item.corretorNome} · {item.diasNaEtapa}d na etapa
               </span>
             </li>
@@ -67,7 +67,7 @@ function AlertaBloco({
 export default function PipelineAlertas({ alertas }: { alertas: PipelineAlertasType }) {
   return (
     <section>
-      <h2 className="text-lg font-semibold text-gray-900">Alertas</h2>
+      <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Alertas</h2>
       <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
         <AlertaBloco titulo="Sem contato +3 dias" icone="📞" cor="red" itens={alertas.semContato} vazio="Todos foram contatados recentemente." />
         <AlertaBloco titulo="Parados na etapa +7d" icone="⏸️" cor="amber" itens={alertas.paradosNaEtapa} vazio="Nenhum cliente parado." />

@@ -33,11 +33,11 @@ export function CaixaEntrada({ conversas, conversaAtivaId, onSelecionar, onFiltr
   ]
 
   return (
-    <section className="col-span-3 flex flex-col border-r bg-gray-50">
+    <section className="flex flex-col h-full bg-gray-50 dark:bg-gray-700">
       {/* Header */}
-      <div className="border-b bg-white p-4">
-        <h2 className="text-sm font-semibold text-gray-900">Caixa de Entrada</h2>
-        <p className="mt-0.5 text-xs text-gray-500">{conversas.length} conversas</p>
+      <div className="border-b bg-white dark:bg-gray-800 p-4">
+        <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Caixa de Entrada</h2>
+        <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{conversas.length} conversas</p>
       </div>
 
       {/* Busca */}
@@ -47,7 +47,7 @@ export function CaixaEntrada({ conversas, conversaAtivaId, onSelecionar, onFiltr
           value={busca}
           onChange={e => setBusca(e.target.value)}
           placeholder="Buscar cliente..."
-          className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm placeholder-gray-400 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400"
+          className="w-full rounded-md border border-gray-200 dark:border-gray-600 px-3 py-2 text-sm placeholder-gray-400 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400"
         />
       </div>
 
@@ -57,11 +57,7 @@ export function CaixaEntrada({ conversas, conversaAtivaId, onSelecionar, onFiltr
           <button
             key={b.value}
             onClick={() => onFiltrar(b.value)}
-            className={`rounded-full px-3 py-1 text-xs font-medium transition ${
-              filtroAtual === b.value
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
+            className={`rounded-full px-3 py-1 text-xs font-medium transition ${ filtroAtual === b.value ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 dark:text-gray-400 hover:bg-gray-200' }`}
           >
             {b.label}
           </button>
@@ -71,7 +67,7 @@ export function CaixaEntrada({ conversas, conversaAtivaId, onSelecionar, onFiltr
       {/* Lista */}
       <div className="mt-3 flex-1 overflow-y-auto">
         {filtradas.length === 0 ? (
-          <p className="px-4 py-8 text-center text-sm text-gray-400">
+          <p className="px-4 py-8 text-center text-sm text-gray-400 dark:text-gray-500">
             {busca ? 'Nenhuma conversa encontrada.' : 'Nenhuma conversa.'}
           </p>
         ) : (
@@ -79,22 +75,20 @@ export function CaixaEntrada({ conversas, conversaAtivaId, onSelecionar, onFiltr
             <button
               key={c.conversa.id}
               onClick={() => onSelecionar(c.conversa.id)}
-              className={`w-full border-b px-4 py-3 text-left transition hover:bg-blue-50 ${
-                conversaAtivaId === c.conversa.id ? 'bg-blue-50 border-l-2 border-l-blue-600' : ''
-              }`}
+              className={`w-full border-b px-4 py-3 text-left transition hover:bg-blue-50 ${ conversaAtivaId === c.conversa.id ? 'bg-blue-50 border-l-2 border-l-blue-600' : '' }`}
             >
               <div className="flex items-start justify-between">
-                <span className="text-sm font-medium text-gray-900 truncate">{c.cliente.nome}</span>
+                <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{c.cliente.nome}</span>
                 {c.naoLidas > 0 && (
                   <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-blue-600 px-1.5 text-[10px] font-bold text-white">
                     {c.naoLidas}
                   </span>
                 )}
               </div>
-              <div className="mt-1 text-xs text-gray-500 truncate">
+              <div className="mt-1 text-xs text-gray-500 dark:text-gray-400 truncate">
                 {c.ultimaMensagem?.texto ?? 'Nova conversa'}
               </div>
-              <div className="mt-1 flex items-center gap-2 text-[10px] text-gray-400">
+              <div className="mt-1 flex items-center gap-2 text-[10px] text-gray-400 dark:text-gray-500">
                 <span>{c.cliente.etapa_atual}</span>
                 <span>·</span>
                 <span>{c.cliente.corretor_nome}</span>

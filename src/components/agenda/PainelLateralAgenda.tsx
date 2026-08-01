@@ -157,11 +157,11 @@ export default function PainelLateralAgenda({ evento, onFechar, onAtualizado }: 
       <div className="fixed inset-0 z-40 bg-black/30" onClick={onFechar} />
 
       {/* Painel */}
-      <div className="fixed right-0 top-0 z-50 h-full w-full max-w-md bg-white shadow-2xl overflow-y-auto">
+      <div className="fixed right-0 top-0 z-50 h-full w-full max-w-md bg-white dark:bg-gray-800 shadow-2xl overflow-y-auto">
         {/* Cabeçalho */}
-        <div className="sticky top-0 z-10 bg-white border-b px-4 py-3 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-gray-900 truncate">{evento.cliente.nome}</h2>
-          <button onClick={onFechar} className="rounded-full p-1 hover:bg-gray-100 text-gray-500">
+        <div className="sticky top-0 z-10 bg-white dark:bg-gray-800 border-b px-4 py-3 flex items-center justify-between">
+          <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 truncate">{evento.cliente.nome}</h2>
+          <button onClick={onFechar} className="rounded-full p-1 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400">
             ✕
           </button>
         </div>
@@ -174,22 +174,22 @@ export default function PainelLateralAgenda({ evento, onFechar, onAtualizado }: 
         )}
 
         {carregando ? (
-          <div className="p-8 text-center text-sm text-gray-400 animate-pulse">Carregando dados...</div>
+          <div className="p-8 text-center text-sm text-gray-400 dark:text-gray-500 animate-pulse">Carregando dados...</div>
         ) : (
           <div className="p-4 space-y-4">
             {/* Dados do cliente */}
-            <div className="rounded-lg bg-gray-50 p-3 space-y-2 text-sm">
+            <div className="rounded-lg bg-gray-50 dark:bg-gray-700 p-3 space-y-2 text-sm">
               <p className="font-semibold text-gray-800">
                 {STATUS_LABEL[evento.agendamento.status]} — {new Date(evento.agendamento.data_hora).toLocaleDateString('pt-BR')}
                 {' às '}{new Date(evento.agendamento.data_hora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
               </p>
-              <p className="text-gray-600">📞 {telFormatado}</p>
-              {evento.cliente.email && <p className="text-gray-600">✉️ {evento.cliente.email}</p>}
-              {evento.empreendimento && <p className="text-gray-600">🏢 {evento.empreendimento.nome}</p>}
-              {evento.agendamento.local && <p className="text-gray-600">📍 {evento.agendamento.local}</p>}
-              <p className="text-gray-600">👤 Corretor: {evento.corretor.nome}</p>
+              <p className="text-gray-600 dark:text-gray-400">📞 {telFormatado}</p>
+              {evento.cliente.email && <p className="text-gray-600 dark:text-gray-400">✉️ {evento.cliente.email}</p>}
+              {evento.empreendimento && <p className="text-gray-600 dark:text-gray-400">🏢 {evento.empreendimento.nome}</p>}
+              {evento.agendamento.local && <p className="text-gray-600 dark:text-gray-400">📍 {evento.agendamento.local}</p>}
+              <p className="text-gray-600 dark:text-gray-400">👤 Corretor: {evento.corretor.nome}</p>
               {evento.agendamento.observacao && (
-                <p className="text-gray-500 text-xs border-t pt-2 mt-2">📝 {evento.agendamento.observacao}</p>
+                <p className="text-gray-500 dark:text-gray-400 text-xs border-t pt-2 mt-2">📝 {evento.agendamento.observacao}</p>
               )}
             </div>
 
@@ -270,12 +270,12 @@ export default function PainelLateralAgenda({ evento, onFechar, onAtualizado }: 
                   onChange={(e) => setObsReagendar(e.target.value)}
                   maxLength={300}
                   placeholder="Motivo do reagendamento (opcional)..."
-                  className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                  className="block w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm"
                   rows={2}
                 />
                 <div className="flex justify-end gap-2">
                   <button type="button" onClick={() => setMostrarReagendar(false)}
-                    className="rounded-lg border px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-100">Cancelar</button>
+                    className="rounded-lg border px-3 py-1.5 text-xs text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800">Cancelar</button>
                   <button type="submit" disabled={executandoAcao !== ''}
                     className="rounded-lg bg-yellow-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-yellow-500 disabled:opacity-50">
                     {executandoAcao === 'reagendar' ? 'Salvando...' : 'Confirmar Reagendamento'}
@@ -290,11 +290,11 @@ export default function PainelLateralAgenda({ evento, onFechar, onAtualizado }: 
                 <h4 className="text-sm font-semibold text-purple-800">Registrar comparecimento</h4>
                 <div className="flex gap-2">
                   <button type="button" onClick={() => setResultadoComp('COMPARECEU')}
-                    className={`flex-1 rounded-lg border px-3 py-2 text-xs font-medium ${resultadoComp === 'COMPARECEU' ? 'border-green-300 bg-green-100 text-green-700' : 'border-gray-200 bg-white text-gray-600'}`}>
+                    className={`flex-1 rounded-lg border px-3 py-2 text-xs font-medium ${resultadoComp === 'COMPARECEU' ? 'border-green-300 bg-green-100 text-green-700' : 'border-gray-200 bg-white dark:bg-gray-800 text-gray-600'}`}>
                     ✅ Compareceu
                   </button>
                   <button type="button" onClick={() => setResultadoComp('NAO_COMPARECEU')}
-                    className={`flex-1 rounded-lg border px-3 py-2 text-xs font-medium ${resultadoComp === 'NAO_COMPARECEU' ? 'border-red-300 bg-red-100 text-red-700' : 'border-gray-200 bg-white text-gray-600'}`}>
+                    className={`flex-1 rounded-lg border px-3 py-2 text-xs font-medium ${resultadoComp === 'NAO_COMPARECEU' ? 'border-red-300 bg-red-100 text-red-700' : 'border-gray-200 bg-white dark:bg-gray-800 text-gray-600'}`}>
                     ❌ Não compareceu
                   </button>
                 </div>
@@ -313,12 +313,12 @@ export default function PainelLateralAgenda({ evento, onFechar, onAtualizado }: 
                   onChange={(e) => setObsComparecimento(e.target.value)}
                   maxLength={300}
                   placeholder="Observações (opcional)..."
-                  className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                  className="block w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm"
                   rows={2}
                 />
                 <div className="flex justify-end gap-2">
                   <button type="button" onClick={() => setMostrarComparecimento(false)}
-                    className="rounded-lg border px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-100">Cancelar</button>
+                    className="rounded-lg border px-3 py-1.5 text-xs text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800">Cancelar</button>
                   <button type="submit" disabled={executandoAcao !== '' || !resultadoComp}
                     className="rounded-lg bg-purple-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-purple-500 disabled:opacity-50">
                     {executandoAcao === 'comparecimento' ? 'Salvando...' : 'Confirmar'}
@@ -345,7 +345,7 @@ export default function PainelLateralAgenda({ evento, onFechar, onAtualizado }: 
                   <p><strong>Renda:</strong> {dados.cliente.renda != null ? `R$ ${dados.cliente.renda.toLocaleString('pt-BR')}` : '—'}</p>
                   <p><strong>FGTS:</strong> R$ {dados.cliente.saldo_fgts.toLocaleString('pt-BR')}</p>
                   {dados.cliente.observacoes && (
-                    <p className="whitespace-pre-wrap text-gray-500 mt-2 pt-2 border-t">{dados.cliente.observacoes}</p>
+                    <p className="whitespace-pre-wrap text-gray-500 dark:text-gray-400 mt-2 pt-2 border-t">{dados.cliente.observacoes}</p>
                   )}
                 </div>
               )}
@@ -353,18 +353,18 @@ export default function PainelLateralAgenda({ evento, onFechar, onAtualizado }: 
               {aba === 'historico' && dados && (
                 <div className="py-3 space-y-3">
                   {dados.agendamentos.length === 0 ? (
-                    <p className="text-xs text-gray-400">Nenhum agendamento anterior.</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500">Nenhum agendamento anterior.</p>
                   ) : (
                     dados.agendamentos.map((ag) => (
-                      <div key={ag.id} className="rounded bg-gray-50 p-3 text-xs">
+                      <div key={ag.id} className="rounded bg-gray-50 dark:bg-gray-700 p-3 text-xs">
                         <p className="font-medium">{new Date(ag.data_hora).toLocaleDateString('pt-BR')} às {new Date(ag.data_hora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</p>
-                        <p className="text-gray-500">{STATUS_LABEL[ag.status]}</p>
+                        <p className="text-gray-500 dark:text-gray-400">{STATUS_LABEL[ag.status]}</p>
                         {ag.comparecimentos?.[0] && (
                           <p className={ag.comparecimentos[0].resultado === 'COMPARECEU' ? 'text-green-600' : 'text-red-600'}>
                             {ag.comparecimentos[0].resultado === 'COMPARECEU' ? '✓ Compareceu' : '✗ Não compareceu'}
                           </p>
                         )}
-                        {ag.observacao && <p className="text-gray-400 mt-1 italic">{ag.observacao}</p>}
+                        {ag.observacao && <p className="text-gray-400 dark:text-gray-500 mt-1 italic">{ag.observacao}</p>}
                       </div>
                     ))
                   )}
@@ -374,13 +374,13 @@ export default function PainelLateralAgenda({ evento, onFechar, onAtualizado }: 
               {aba === 'atividades' && dados && (
                 <div className="py-3 space-y-2">
                   {dados.atividades.length === 0 ? (
-                    <p className="text-xs text-gray-400">Nenhuma atividade registrada.</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500">Nenhuma atividade registrada.</p>
                   ) : (
                     dados.atividades.map((ativ) => (
                       <div key={ativ.id} className="border-l-2 border-blue-200 pl-3 py-1 text-xs">
                         <p className="font-medium">{ativ.tipo} — {ativ.resultado ?? 'Sem resultado'}</p>
-                        {ativ.observacao && <p className="text-gray-400 mt-0.5">{ativ.observacao}</p>}
-                        <p className="text-gray-300 text-[10px] mt-0.5">
+                        {ativ.observacao && <p className="text-gray-400 dark:text-gray-500 mt-0.5">{ativ.observacao}</p>}
+                        <p className="text-gray-300 dark:text-gray-600 text-[10px] mt-0.5">
                           {new Date(ativ.created_at).toLocaleString('pt-BR')}
                         </p>
                       </div>

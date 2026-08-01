@@ -58,22 +58,22 @@ export default function ChecklistDocumentos({ clienteId }: { clienteId: string }
 
   if (carregando) {
     return (
-      <div className="rounded-lg border border-gray-200 p-4">
-        <p className="text-xs text-gray-400 animate-pulse">Carregando checklist...</p>
+      <div className="rounded-lg border border-gray-200 dark:border-gray-600 p-4">
+        <p className="text-xs text-gray-400 dark:text-gray-500 animate-pulse">Carregando checklist...</p>
       </div>
     )
   }
 
   if (!dados) {
     return (
-      <div className="rounded-lg border border-gray-200 p-4">
+      <div className="rounded-lg border border-gray-200 dark:border-gray-600 p-4">
         <p className="text-xs text-red-500">Cliente não encontrado.</p>
       </div>
     )
   }
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4">
+    <div className="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 p-4">
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-semibold text-gray-800">Checklist Documental</h3>
         {dados.checklistCompleto ? (
@@ -103,11 +103,11 @@ export default function ChecklistDocumentos({ clienteId }: { clienteId: string }
 
       {/* Lista de documentos */}
       {dados.documentos.length === 0 ? (
-        <p className="text-xs text-gray-400">Nenhum documento enviado.</p>
+        <p className="text-xs text-gray-400 dark:text-gray-500">Nenhum documento enviado.</p>
       ) : (
         <div className="space-y-1.5">
           {dados.documentos.map((doc: Documento) => (
-            <div key={doc.id} className="flex items-center justify-between rounded-md border border-gray-200 p-2.5 text-xs">
+            <div key={doc.id} className="flex items-center justify-between rounded-md border border-gray-200 dark:border-gray-600 p-2.5 text-xs">
               <div className="flex items-center gap-2 flex-1">
                 <span className={`font-medium ${dados.checklistObrigatorio.includes(doc.tipo) ? 'text-gray-800' : 'text-gray-400'}`}>
                   {TIPO_DOCUMENTO_LABEL[doc.tipo]}
@@ -115,13 +115,13 @@ export default function ChecklistDocumentos({ clienteId }: { clienteId: string }
                 <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-semibold ${STATUS_COR[doc.status_validacao] ?? 'bg-gray-100 text-gray-500'}`}>
                   {STATUS_LABEL[doc.status_validacao] ?? doc.status_validacao}
                 </span>
-                {doc.versao > 1 && <span className="text-[9px] text-gray-400">v{doc.versao}</span>}
-                {doc.vencimento && <span className="text-[9px] text-gray-400">Venc: {new Date(doc.vencimento + 'T00:00:00').toLocaleDateString('pt-BR')}</span>}
+                {doc.versao > 1 && <span className="text-[9px] text-gray-400 dark:text-gray-500">v{doc.versao}</span>}
+                {doc.vencimento && <span className="text-[9px] text-gray-400 dark:text-gray-500">Venc: {new Date(doc.vencimento + 'T00:00:00').toLocaleDateString('pt-BR')}</span>}
               </div>
               <div className="flex items-center gap-1 shrink-0">
                 {doc.arquivo_url && (
                   <a href={doc.arquivo_url} target="_blank" rel="noopener noreferrer"
-                    className="rounded px-2 py-0.5 text-[9px] font-medium bg-gray-100 text-gray-600 hover:bg-gray-200">
+                    className="rounded px-2 py-0.5 text-[9px] font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600">
                     Ver
                   </a>
                 )}
@@ -146,18 +146,18 @@ export default function ChecklistDocumentos({ clienteId }: { clienteId: string }
       {/* Modal de rejeição */}
       {docRejeitando && (
         <div className="fixed inset-0 bg-black/30 z-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg p-6 shadow-xl max-w-sm w-full mx-4">
-            <p className="text-sm font-semibold text-gray-900">Rejeitar documento</p>
-            <p className="text-xs text-gray-500 mt-1">Informe o motivo da rejeição:</p>
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-xl max-w-sm w-full mx-4">
+            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Rejeitar documento</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Informe o motivo da rejeição:</p>
             <textarea
               value={motivoRejeicao}
               onChange={(e) => setMotivoRejeicao(e.target.value)}
-              className="mt-3 w-full rounded-md border border-gray-300 px-3 py-2 text-xs text-gray-700 resize-none h-20"
+              className="mt-3 w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-xs text-gray-700 dark:text-gray-300 resize-none h-20"
               placeholder="Documento ilegível, vencido, incorreto..."
             />
             <div className="mt-3 flex gap-2 justify-end">
               <button onClick={() => { setDocRejeitando(null); setMotivoRejeicao('') }}
-                className="rounded-md border border-gray-300 px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50">
+                className="rounded-md border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-xs text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700">
                 Cancelar
               </button>
               <button onClick={() => onRejeitar(docRejeitando)}

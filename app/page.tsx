@@ -2,12 +2,12 @@
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4 text-center">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 dark:bg-gray-950 px-4 text-center">
       <div className="max-w-lg">
-        <h1 className="text-4xl font-bold tracking-tight text-gray-900">
+        <h1 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
           DNA CRM
         </h1>
-        <p className="mt-3 text-lg text-gray-500">
+        <p className="mt-3 text-lg text-gray-500 dark:text-gray-400">
           Sistema de gestão imobiliária — controle seu funil de vendas,
           acompanhe leads e aumente suas conversões.
         </p>
@@ -20,7 +20,7 @@ export default function Home() {
           </Link>
           <Link
             href="/test-supabase"
-            className="rounded-lg bg-gray-100 px-6 py-3 text-sm font-medium text-gray-600 hover:bg-gray-200"
+            className="rounded-lg bg-gray-100 dark:bg-gray-800 px-6 py-3 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600"
           >
             Testar conexão
           </Link>

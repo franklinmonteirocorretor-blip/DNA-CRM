@@ -30,9 +30,9 @@ export function EmptyState({
     <div className="flex flex-col items-center justify-center min-h-[40vh] px-4 py-12">
       <div className="text-center space-y-4 max-w-md">
         <div className="text-5xl">{icon}</div>
-        <h3 className="text-lg font-semibold text-gray-700">{title}</h3>
+        <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">{title}</h3>
         {description && (
-          <p className="text-sm text-gray-500 leading-relaxed">{description}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{description}</p>
         )}
         <div className="flex gap-3 justify-center pt-2">
           {action && (
@@ -46,7 +46,7 @@ export function EmptyState({
           {secondaryAction && (
             <a
               href={secondaryAction.href}
-              className="px-4 py-2 text-sm font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
+              className="px-4 py-2 text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition"
             >
               {secondaryAction.label}
             </a>

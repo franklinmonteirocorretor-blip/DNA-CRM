@@ -123,15 +123,15 @@ export default function SecaoDocumentos({
   const pastaOk = pastaCompleta
 
   return (
-    <div className="rounded-lg bg-white p-5 shadow-sm space-y-5">
+    <div className="rounded-lg bg-white dark:bg-gray-800 p-5 shadow-sm space-y-5">
       {/* Cabeçalho */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
             Documentos
           </h2>
           {totalDocs > 0 && (
-            <span className="text-xs font-medium text-gray-500">
+            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
               {totalDocs} arquivo{totalDocs !== 1 ? 's' : ''}
             </span>
           )}
@@ -146,11 +146,7 @@ export default function SecaoDocumentos({
       {/* Feedback */}
       {feedback && (
         <div
-          className={`rounded-md px-3 py-2 text-xs font-medium ${
-            feedback.tipo === 'sucesso'
-              ? 'bg-green-100 text-green-700'
-              : 'bg-red-100 text-red-700'
-          }`}
+          className={`rounded-md px-3 py-2 text-xs font-medium ${ feedback.tipo === 'sucesso' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }`}
         >
           {feedback.msg}
         </div>
@@ -160,13 +156,13 @@ export default function SecaoDocumentos({
       <form onSubmit={handleUpload} className="flex flex-wrap items-end gap-3">
         {/* Tipo de documento */}
         <div className="min-w-[160px]">
-          <label className="block text-[11px] font-medium text-gray-500 mb-1">
+          <label className="block text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-1">
             Tipo
           </label>
           <select
             value={tipo}
             onChange={(e) => setTipo(e.target.value as TipoDocumento | '')}
-            className="block w-full rounded-md border border-gray-300 py-2 pl-3 pr-8 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="block w-full rounded-md border border-gray-300 dark:border-gray-600 py-2 pl-3 pr-8 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           >
             <option value="">Selecionar tipo...</option>
             {TIPOS_DOC.map((t) => (
@@ -179,7 +175,7 @@ export default function SecaoDocumentos({
 
         {/* Arquivo */}
         <div className="flex-1 min-w-[200px]">
-          <label className="block text-[11px] font-medium text-gray-500 mb-1">
+          <label className="block text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-1">
             Arquivo (JPG, PNG, WebP, PDF — máx. 10 MB)
           </label>
           <input
@@ -187,7 +183,7 @@ export default function SecaoDocumentos({
             type="file"
             accept=".jpg,.jpeg,.png,.webp,.pdf"
             onChange={(e) => setArquivoSelecionado(e.target.files?.[0] ?? null)}
-            className="block w-full rounded-md border border-gray-300 py-2 pl-3 text-sm shadow-sm file:mr-3 file:rounded file:border-0 file:bg-blue-50 file:px-3 file:py-1 file:text-xs file:font-medium file:text-blue-700 hover:file:bg-blue-100"
+            className="block w-full rounded-md border border-gray-300 dark:border-gray-600 py-2 pl-3 text-sm shadow-sm file:mr-3 file:rounded file:border-0 file:bg-blue-50 file:px-3 file:py-1 file:text-xs file:font-medium file:text-blue-700 hover:file:bg-blue-100"
           />
         </div>
 
@@ -210,27 +206,27 @@ export default function SecaoDocumentos({
 
             return (
               <div key={t.valor}>
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400 mb-1.5">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 mb-1.5">
                   {t.label} {t.obrigatorio ? '(obrigatório)' : ''}
                 </p>
                 <div className="space-y-1">
                   {docs.map((doc) => (
                     <div
                       key={doc.id}
-                      className="flex items-center justify-between rounded-md bg-gray-50 px-3 py-2 text-xs"
+                      className="flex items-center justify-between rounded-md bg-gray-50 dark:bg-gray-700 px-3 py-2 text-xs"
                     >
                       <div className="flex items-center gap-2 min-w-0">
                         {/* Ícone indicando tipo de arquivo */}
-                        <span className="shrink-0 text-gray-400">
+                        <span className="shrink-0 text-gray-400 dark:text-gray-500">
                           {doc.arquivo_url.endsWith('.pdf') || doc.arquivo_url.includes('.pdf') ? '📄' : '🖼️'}
                         </span>
 
                         {/* Info */}
                         <div className="min-w-0">
-                          <p className="text-gray-700 font-medium truncate">
+                          <p className="text-gray-700 dark:text-gray-300 font-medium truncate">
                             {doc.tipo === 'COMPROVANTE_RENDA' ? 'Comprovante' : doc.tipo}
                           </p>
-                          <p className="text-[11px] text-gray-400">
+                          <p className="text-[11px] text-gray-400 dark:text-gray-500">
                             {new Date(doc.created_at).toLocaleDateString('pt-BR')}
                           </p>
                         </div>
@@ -240,13 +236,7 @@ export default function SecaoDocumentos({
                       <div className="flex items-center gap-2 shrink-0">
                         {/* Status de validação */}
                         <span
-                          className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${
-                            doc.status_validacao === 'VALIDADO'
-                              ? 'bg-green-100 text-green-600'
-                              : doc.status_validacao === 'REJEITADO'
-                                ? 'bg-red-100 text-red-600'
-                                : 'bg-yellow-100 text-yellow-600'
-                          }`}
+                          className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${ doc.status_validacao === 'VALIDADO' ? 'bg-green-100 text-green-600' : doc.status_validacao === 'REJEITADO' ? 'bg-red-100 text-red-600' : 'bg-yellow-100 text-yellow-600' }`}
                         >
                           {doc.status_validacao === 'VALIDADO'
                             ? '✓ OK'
@@ -259,7 +249,7 @@ export default function SecaoDocumentos({
                         <button
                           type="button"
                           onClick={() => abrirDocumento(doc.arquivo_url)}
-                          className="rounded border border-gray-200 bg-white px-2 py-1 text-[10px] font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                          className="rounded border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-2 py-1 text-[10px] font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700"
                         >
                           Abrir
                         </button>
@@ -275,9 +265,9 @@ export default function SecaoDocumentos({
 
       {/* Estado vazio */}
       {totalDocs === 0 && (
-        <div className="rounded-lg border-2 border-dashed border-gray-200 bg-gray-50/50 p-6 text-center">
-          <p className="text-sm font-medium text-gray-400">Nenhum documento enviado</p>
-          <p className="mt-1 text-xs text-gray-400">
+        <div className="rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-600 bg-gray-50/50 p-6 text-center">
+          <p className="text-sm font-medium text-gray-400 dark:text-gray-500">Nenhum documento enviado</p>
+          <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
             Envie RG, CPF e Comprovante de Renda para completar a pasta
           </p>
         </div>

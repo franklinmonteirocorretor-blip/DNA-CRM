@@ -28,12 +28,12 @@ function formatarTempo(minutos: number): string {
 /** Seção 2 — Próximas ações agendadas */
 export default function FollowUpProximasAcoes({ acoes }: Props) {
   return (
-    <div className="rounded-lg bg-white p-5 shadow-sm">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400">
+    <div className="rounded-lg bg-white dark:bg-gray-800 p-5 shadow-sm">
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
         Próximas Ações ({acoes.length})
       </h2>
       {acoes.length === 0 ? (
-        <p className="mt-2 text-sm text-gray-400">Nenhuma ação agendada.</p>
+        <p className="mt-2 text-sm text-gray-400 dark:text-gray-500">Nenhuma ação agendada.</p>
       ) : (
         <div className="mt-3 max-h-96 overflow-y-auto space-y-2">
           {acoes.map((acao) => (
@@ -43,9 +43,9 @@ export default function FollowUpProximasAcoes({ acoes }: Props) {
               className={`flex items-start gap-3 rounded-lg border-l-4 p-3 hover:shadow-sm transition-shadow ${PRIORIDADE_COR[acao.prioridade]}`}
             >
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-gray-900 truncate">{acao.nome}</p>
-                <p className="text-xs text-gray-600">{acao.acao}</p>
-                <div className="mt-1 flex flex-wrap gap-x-2 gap-y-0.5 text-[11px] text-gray-400">
+                <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{acao.nome}</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">{acao.acao}</p>
+                <div className="mt-1 flex flex-wrap gap-x-2 gap-y-0.5 text-[11px] text-gray-400 dark:text-gray-500">
                   <span>{new Date(acao.dataHora).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
                   <span>· {acao.responsavel}</span>
                   <span>· {acao.etapa}</span>

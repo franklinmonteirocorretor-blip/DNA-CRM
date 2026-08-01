@@ -31,11 +31,7 @@ export default function FormAlternarAtivo({
     <button
       onClick={handleToggle}
       disabled={carregando}
-      className={`rounded-md px-3 py-1.5 text-xs font-medium transition ${
-        otimista
-          ? 'border border-green-200 bg-green-50 text-green-700 hover:bg-green-100'
-          : 'border border-gray-200 bg-gray-50 text-gray-500 hover:bg-gray-100'
-      }`}
+      className={`rounded-md px-3 py-1.5 text-xs font-medium transition ${ otimista ? 'border border-green-200 bg-green-50 text-green-700 hover:bg-green-100' : 'border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-100' }`}
     >
       {otimista ? 'Ativo' : 'Inativo'}
     </button>

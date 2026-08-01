@@ -19,26 +19,26 @@ const tendenciaMap: Record<string, string> = {
 export function CopilotoInsights({ insights }: InsightsProps) {
   if (insights.length === 0) {
     return (
-      <section className="rounded-lg border bg-white p-5 shadow-sm">
-        <h3 className="text-sm font-semibold text-gray-900">📊 Insights</h3>
-        <p className="mt-2 text-xs text-gray-500">Carregando insights...</p>
+      <section className="rounded-lg border bg-white dark:bg-gray-800 p-5 shadow-sm">
+        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">📊 Insights</h3>
+        <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">Carregando insights...</p>
       </section>
     )
   }
 
   return (
-    <section className="rounded-lg border bg-white p-5 shadow-sm">
-      <h3 className="text-sm font-semibold text-gray-900">📊 Insights</h3>
+    <section className="rounded-lg border bg-white dark:bg-gray-800 p-5 shadow-sm">
+      <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">📊 Insights</h3>
 
       <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
         {insights.map((insight, i) => (
-          <div key={i} className="rounded-lg border border-gray-100 bg-gray-50 p-4">
+          <div key={i} className="rounded-lg border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 p-4">
             <div className="flex items-start gap-2">
               <span className="text-2xl">{insight.icone}</span>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-gray-900">{insight.titulo}</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{insight.titulo}</p>
                 <p className="mt-1 text-xl font-bold text-gray-800">{insight.valor}</p>
-                <p className="mt-0.5 text-xs text-gray-500">{insight.descricao}</p>
+                <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{insight.descricao}</p>
                 {insight.detalhes && (
                   <p className={`mt-1 text-[10px] font-medium ${tendenciaMap[insight.tendencia]}`}>
                     {insight.tendencia === 'subindo' ? '↑ ' : insight.tendencia === 'caindo' ? '↓ ' : '→ '}

@@ -193,13 +193,13 @@ export default function CalendarioAgenda() {
       {/* Cabeçalho com navegação e views */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
-          <button onClick={() => navegar(-1)} className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-100">
+          <button onClick={() => navegar(-1)} className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-800">
             ◀
           </button>
-          <h2 className="text-lg font-bold text-gray-900 min-w-[180px] text-center">
+          <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 min-w-[180px] text-center">
             {tituloView()}
           </h2>
-          <button onClick={() => navegar(1)} className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-100">
+          <button onClick={() => navegar(1)} className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-800">
             ▶
           </button>
           <button onClick={irParaHoje} className="ml-2 rounded-lg border border-blue-300 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100">
@@ -208,16 +208,12 @@ export default function CalendarioAgenda() {
         </div>
 
         {/* Toggle de views */}
-        <div className="flex rounded-lg border bg-white overflow-hidden">
+        <div className="flex rounded-lg border bg-white dark:bg-gray-800 overflow-hidden">
           {(['monthly', 'weekly', 'daily', 'list'] as AgendaView[]).map((v) => (
             <button
               key={v}
               onClick={() => setView(v)}
-              className={`px-4 py-1.5 text-xs font-medium transition ${
-                view === v
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-600 hover:bg-gray-100'
-              }`}
+              className={`px-4 py-1.5 text-xs font-medium transition ${ view === v ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100' }`}
             >
               {{ monthly: 'Mês', weekly: 'Semana', daily: 'Dia', list: 'Lista' }[v]}
             </button>
@@ -226,12 +222,12 @@ export default function CalendarioAgenda() {
       </div>
 
       {/* Filtros */}
-      <div className="flex flex-wrap gap-2 rounded-lg bg-white p-3 shadow-sm">
+      <div className="flex flex-wrap gap-2 rounded-lg bg-white dark:bg-gray-800 p-3 shadow-sm">
         {/* Status */}
         <select
           value={filtros.status ?? ''}
           onChange={(e) => setFiltros({ ...filtros, status: (e.target.value as AgendaFiltros['status']) || null })}
-          className="rounded-md border border-gray-300 px-2 py-1.5 text-xs"
+          className="rounded-md border border-gray-300 dark:border-gray-600 px-2 py-1.5 text-xs"
         >
           <option value="">Todos os status</option>
           <option value="AGENDADO">Agendado</option>
@@ -246,7 +242,7 @@ export default function CalendarioAgenda() {
         <select
           value={filtros.empreendimentoId ?? ''}
           onChange={(e) => setFiltros({ ...filtros, empreendimentoId: e.target.value || null })}
-          className="rounded-md border border-gray-300 px-2 py-1.5 text-xs"
+          className="rounded-md border border-gray-300 dark:border-gray-600 px-2 py-1.5 text-xs"
         >
           <option value="">Todos os empreendimentos</option>
           {opcoes.empreendimentos.map((emp) => (
@@ -258,7 +254,7 @@ export default function CalendarioAgenda() {
         <select
           value={filtros.corretorId ?? ''}
           onChange={(e) => setFiltros({ ...filtros, corretorId: e.target.value || null })}
-          className="rounded-md border border-gray-300 px-2 py-1.5 text-xs"
+          className="rounded-md border border-gray-300 dark:border-gray-600 px-2 py-1.5 text-xs"
         >
           <option value="">Todos os corretores</option>
           {opcoes.corretores.map((c) => (
@@ -272,14 +268,14 @@ export default function CalendarioAgenda() {
           value={filtros.clienteBusca ?? ''}
           onChange={(e) => setFiltros({ ...filtros, clienteBusca: e.target.value || null })}
           placeholder="Buscar cliente..."
-          className="rounded-md border border-gray-300 px-2 py-1.5 text-xs w-32"
+          className="rounded-md border border-gray-300 dark:border-gray-600 px-2 py-1.5 text-xs w-32"
         />
 
         {/* Limpar filtros */}
         {(filtros.status || filtros.empreendimentoId || filtros.corretorId || filtros.clienteBusca) && (
           <button
             onClick={() => setFiltros({ corretorId: null, empreendimentoId: null, status: null, dataInicio: null, dataFim: null, clienteBusca: null })}
-            className="rounded-md border border-gray-300 px-3 py-1.5 text-xs text-gray-500 hover:bg-gray-100"
+            className="rounded-md border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-xs text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
           >
             Limpar filtros
           </button>
@@ -291,8 +287,8 @@ export default function CalendarioAgenda() {
 
       {/* Loading */}
       {carregando && (
-        <div className="rounded-lg bg-white p-12 text-center shadow-sm">
-          <p className="text-sm text-gray-400 animate-pulse">Carregando agenda...</p>
+        <div className="rounded-lg bg-white dark:bg-gray-800 p-12 text-center shadow-sm">
+          <p className="text-sm text-gray-400 dark:text-gray-500 animate-pulse">Carregando agenda...</p>
         </div>
       )}
 
@@ -308,8 +304,8 @@ export default function CalendarioAgenda() {
 
       {/* Estado vazio */}
       {!carregando && eventos.length === 0 && (
-        <div className="rounded-lg bg-white p-12 text-center shadow-sm">
-          <p className="text-gray-400">Nenhum compromisso encontrado neste período.</p>
+        <div className="rounded-lg bg-white dark:bg-gray-800 p-12 text-center shadow-sm">
+          <p className="text-gray-400 dark:text-gray-500">Nenhum compromisso encontrado neste período.</p>
         </div>
       )}
 
@@ -372,11 +368,11 @@ function CalendarioMensal({
   }
 
   return (
-    <div className="rounded-lg bg-white shadow-sm overflow-hidden">
+    <div className="rounded-lg bg-white dark:bg-gray-800 shadow-sm overflow-hidden">
       {/* Cabeçalho dos dias da semana */}
-      <div className="grid grid-cols-7 bg-gray-50">
+      <div className="grid grid-cols-7 bg-gray-50 dark:bg-gray-700">
         {DIAS_SEMANA.map((dia) => (
-          <div key={dia} className="py-2 text-center text-xs font-semibold text-gray-500 uppercase">
+          <div key={dia} className="py-2 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
             {dia}
           </div>
         ))}
@@ -412,7 +408,7 @@ function CalendarioMensal({
                       </button>
                     ))}
                     {eventosDia.length > 3 && (
-                      <p className="text-[9px] text-gray-400 px-1">+{eventosDia.length - 3} mais</p>
+                      <p className="text-[9px] text-gray-400 dark:text-gray-500 px-1">+{eventosDia.length - 3} mais</p>
                     )}
                   </div>
                 </div>
@@ -453,7 +449,7 @@ function CalendarioSemanal({
   })
 
   return (
-    <div className="rounded-lg bg-white shadow-sm overflow-hidden">
+    <div className="rounded-lg bg-white dark:bg-gray-800 shadow-sm overflow-hidden">
       <div className="grid grid-cols-7 divide-x">
         {dias.map((dia) => {
           const dataStr = dia.toISOString().slice(0, 10)
@@ -463,7 +459,7 @@ function CalendarioSemanal({
           return (
             <div key={dataStr} className={`min-h-[300px] p-2 ${ehHoje ? 'bg-blue-50/30' : ''}`}>
               <div className={`text-center mb-2 ${ehHoje ? 'font-bold' : ''}`}>
-                <p className="text-xs text-gray-500">{DIAS_SEMANA[dia.getDay()]}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{DIAS_SEMANA[dia.getDay()]}</p>
                 <p className={`text-sm font-semibold ${ehHoje ? 'text-blue-700 bg-blue-100 rounded-full w-7 h-7 flex items-center justify-center mx-auto mt-0.5' : 'text-gray-800'}`}>
                   {dia.getDate()}
                 </p>
@@ -473,13 +469,13 @@ function CalendarioSemanal({
                   <button
                     key={ev.agendamento.id}
                     onClick={() => onEventoClick(ev)}
-                    className={`block w-full rounded px-2 py-1.5 text-left text-xs border ${STATUS_COR[ev.agendamento.status]?.replace('bg-', 'border-').replace(' text-', ' ').replace('-100', '-200') ?? 'border-gray-200'} bg-white hover:shadow`}
+                    className={`block w-full rounded px-2 py-1.5 text-left text-xs border ${STATUS_COR[ev.agendamento.status]?.replace('bg-', 'border-').replace(' text-', ' ').replace('-100', '-200') ?? 'border-gray-200'} bg-white dark:bg-gray-800 hover:shadow`}
                   >
                     <p className="font-medium text-gray-800 text-[11px]">
                       {new Date(ev.agendamento.data_hora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                     </p>
-                    <p className="text-[11px] text-gray-600 truncate">{ev.cliente.nome}</p>
-                    {ev.agendamento.local && <p className="text-[9px] text-gray-400 truncate">📍 {ev.agendamento.local}</p>}
+                    <p className="text-[11px] text-gray-600 dark:text-gray-400 truncate">{ev.cliente.nome}</p>
+                    {ev.agendamento.local && <p className="text-[9px] text-gray-400 dark:text-gray-500 truncate">📍 {ev.agendamento.local}</p>}
                   </button>
                 ))}
               </div>
@@ -517,7 +513,7 @@ function CalendarioDiario({
   const horas = Array.from({ length: 24 }, (_, i) => i)
 
   return (
-    <div className="rounded-lg bg-white shadow-sm">
+    <div className="rounded-lg bg-white dark:bg-gray-800 shadow-sm">
       <div className="px-4 py-3 border-b">
         <h3 className="text-sm font-semibold text-gray-800">
           {dataReferencia.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })}
@@ -528,7 +524,7 @@ function CalendarioDiario({
           const eventosHora = porHora[h] ?? []
           return (
             <div key={h} className="flex min-h-[48px]">
-              <div className="w-16 shrink-0 py-2 text-center text-xs text-gray-400 border-r">
+              <div className="w-16 shrink-0 py-2 text-center text-xs text-gray-400 dark:text-gray-500 border-r">
                 {String(h).padStart(2, '0')}:00
               </div>
               <div className="flex-1 p-1">
@@ -551,7 +547,7 @@ function CalendarioDiario({
           )
         })}
         {eventosDia.length === 0 && (
-          <div className="p-8 text-center text-sm text-gray-400">Nenhum compromisso neste dia.</div>
+          <div className="p-8 text-center text-sm text-gray-400 dark:text-gray-500">Nenhum compromisso neste dia.</div>
         )}
       </div>
     </div>
@@ -569,9 +565,9 @@ function VisualizacaoLista({
   onEventoClick: (ev: AgendaEvent) => void
 }) {
   return (
-    <div className="rounded-lg bg-white shadow-sm overflow-hidden">
+    <div className="rounded-lg bg-white dark:bg-gray-800 shadow-sm overflow-hidden">
       {/* Cabeçalho da tabela */}
-      <div className="grid grid-cols-7 gap-2 bg-gray-50 px-4 py-2 text-xs font-semibold text-gray-500 uppercase">
+      <div className="grid grid-cols-7 gap-2 bg-gray-50 dark:bg-gray-700 px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
         <span>Data/Hora</span>
         <span>Cliente</span>
         <span className="col-span-2">Telefone / Empreend.</span>
@@ -584,21 +580,21 @@ function VisualizacaoLista({
         <button
           key={ev.agendamento.id}
           onClick={() => onEventoClick(ev)}
-          className="grid grid-cols-7 gap-2 px-4 py-3 border-t text-xs items-center hover:bg-gray-50 w-full text-left"
+          className="grid grid-cols-7 gap-2 px-4 py-3 border-t text-xs items-center hover:bg-gray-50 dark:hover:bg-gray-700 w-full text-left"
         >
           <span className="font-medium text-gray-800">
             {new Date(ev.agendamento.data_hora).toLocaleDateString('pt-BR')}
             <br />
-            <span className="text-[10px] text-gray-400">
+            <span className="text-[10px] text-gray-400 dark:text-gray-500">
               {new Date(ev.agendamento.data_hora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
             </span>
           </span>
           <span className="font-semibold text-gray-800 truncate">{ev.cliente.nome}</span>
-          <span className="col-span-2 text-gray-500 truncate">
+          <span className="col-span-2 text-gray-500 dark:text-gray-400 truncate">
             {ev.cliente.telefone}
             {ev.empreendimento && <><br /><span className="text-[10px]">{ev.empreendimento.nome}</span></>}
           </span>
-          <span className="text-gray-600 truncate">{ev.corretor.nome}</span>
+          <span className="text-gray-600 dark:text-gray-400 truncate">{ev.corretor.nome}</span>
           <span>
             <span className={`inline-block rounded px-2 py-0.5 text-[10px] font-medium ${STATUS_COR[ev.agendamento.status] ?? 'bg-gray-100 text-gray-500'}`}>
               {STATUS_LABEL[ev.agendamento.status] ?? ev.agendamento.status}
@@ -614,7 +610,7 @@ function VisualizacaoLista({
       ))}
 
       {eventos.length === 0 && (
-        <div className="p-8 text-center text-sm text-gray-400">Nenhum compromisso encontrado.</div>
+        <div className="p-8 text-center text-sm text-gray-400 dark:text-gray-500">Nenhum compromisso encontrado.</div>
       )}
     </div>
   )

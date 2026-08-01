@@ -5,6 +5,17 @@ import { createSupabaseServerClient } from '@/src/lib/server/supabase'
 import AutomacoesClient from '@/src/components/automacoes/AutomacoesClient'
 import type { AutomationRecord, AutomationLog, AutomationQueueItem } from '@/src/lib/automation/types'
 
+interface QueueItem {
+  id: string
+  evento: string
+  prioridade: number
+  tentativas: number
+  max_tentativas: number
+  status: string
+  criado_em: string
+  contexto: Record<string, unknown> | null
+}
+
 export const dynamic = 'force-dynamic'
 
 export default async function AutomacoesPage() {
@@ -14,7 +25,7 @@ export default async function AutomacoesPage() {
   if (!user) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-gray-400">Voce precisa estar autenticado.</p>
+        <p className="text-gray-400 dark:text-gray-500">Voce precisa estar autenticado.</p>
       </div>
     )
   }
@@ -30,7 +41,7 @@ export default async function AutomacoesPage() {
     <AutomacoesClient
       automacoes={automacoes}
       logsRecentes={logsRecentes}
-      fila={fila as any}
+      fila={fila as QueueItem[]}
       metricas={metricas}
     />
   )

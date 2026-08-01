@@ -12,8 +12,8 @@ interface PainelClienteProps {
 export function PainelCliente({ conversa }: PainelClienteProps) {
   if (!conversa) {
     return (
-      <div className="flex flex-col border-l bg-gray-50 p-6">
-        <p className="text-xs text-gray-400 text-center">Selecione uma conversa para ver os detalhes do cliente.</p>
+      <div className="flex flex-col border-l bg-gray-50 dark:bg-gray-700 p-6">
+        <p className="text-xs text-gray-400 dark:text-gray-500 text-center">Selecione uma conversa para ver os detalhes do cliente.</p>
       </div>
     )
   }
@@ -21,11 +21,11 @@ export function PainelCliente({ conversa }: PainelClienteProps) {
   const c = conversa.cliente
 
   return (
-    <div className="flex flex-col border-l bg-white">
+    <div className="flex flex-col border-l bg-white dark:bg-gray-800">
       {/* Header */}
       <div className="border-b px-4 py-3">
-        <h3 className="text-sm font-semibold text-gray-900">{c.nome}</h3>
-        <p className="text-xs text-gray-500">{c.telefone}</p>
+        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{c.nome}</h3>
+        <p className="text-xs text-gray-500 dark:text-gray-400">{c.telefone}</p>
       </div>
 
       {/* Dados CRM */}
@@ -35,13 +35,13 @@ export function PainelCliente({ conversa }: PainelClienteProps) {
         <InfoLinha label="Criada em" value={conversa.conversa.created_at ? new Date(conversa.conversa.created_at).toLocaleDateString('pt-BR') : '—'} />
         <InfoLinha label="Mensagens" value={String(conversa.conversa.total_mensagens)} />
         <div>
-          <span className="text-[10px] uppercase tracking-wide text-gray-400">Não lidas</span>
+          <span className="text-[10px] uppercase tracking-wide text-gray-400 dark:text-gray-500">Não lidas</span>
           {conversa.naoLidas > 0 ? (
             <p className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-medium text-red-700 inline-block mt-0.5">
               {conversa.naoLidas}
             </p>
           ) : (
-            <p className="text-xs text-gray-400 mt-0.5">0</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">0</p>
           )}
         </div>
       </div>
@@ -54,7 +54,7 @@ export function PainelCliente({ conversa }: PainelClienteProps) {
         >
           Ver Cliente 360°
         </Link>
-        <button className="w-full rounded-md text-xs font-medium text-gray-600 hover:text-gray-900 py-1">
+        <button className="w-full rounded-md text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 py-1">
           Finalizar Conversa
         </button>
       </div>
@@ -65,8 +65,8 @@ export function PainelCliente({ conversa }: PainelClienteProps) {
 function InfoLinha({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <span className="text-[10px] uppercase tracking-wide text-gray-400">{label}</span>
-      <p className="text-sm font-medium text-gray-900">{value}</p>
+      <span className="text-[10px] uppercase tracking-wide text-gray-400 dark:text-gray-500">{label}</span>
+      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{value}</p>
     </div>
   )
 }

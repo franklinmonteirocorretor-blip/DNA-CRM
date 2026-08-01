@@ -30,9 +30,9 @@ export default async function PerfilCorretorPage({
             {u.nome.charAt(0).toUpperCase()}
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{u.nome}</h1>
-            <p className="text-sm text-gray-500">{u.cargo ?? u.perfil}</p>
-            <div className="mt-1 flex items-center gap-2 text-xs text-gray-400">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{u.nome}</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{u.cargo ?? u.perfil}</p>
+            <div className="mt-1 flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
               {u.creci && <span>CRECI: {u.creci}</span>}
               {dados.equipeNome && <span>· {dados.equipeNome}</span>}
               {dados.supervisorNome && <span>· Supervisor: {dados.supervisorNome}</span>}
@@ -42,13 +42,13 @@ export default async function PerfilCorretorPage({
         <div className="flex gap-2">
           <Link
             href={`/dashboard/corretores/${id}/editar`}
-            className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+            className="rounded-md border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
           >
             Editar
           </Link>
           <Link
             href="/dashboard/corretores"
-            className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+            className="rounded-md border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
           >
             Voltar
           </Link>
@@ -67,7 +67,7 @@ export default async function PerfilCorretorPage({
 
       {/* Dados pessoais */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-900">Informações Pessoais</h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Informações Pessoais</h2>
         <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
           <InfoItem label="E-mail" value={u.email} />
           <InfoItem label="Telefone" value={u.telefone ?? '—'} />
@@ -82,19 +82,19 @@ export default async function PerfilCorretorPage({
 
       {/* Clientes */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-900">Clientes</h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Clientes</h2>
         {dados.clientes.length === 0 ? (
-          <p className="mt-3 text-sm text-gray-400">Nenhum cliente atribuído.</p>
+          <p className="mt-3 text-sm text-gray-400 dark:text-gray-500">Nenhum cliente atribuído.</p>
         ) : (
           <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
             {dados.clientes.map((c) => (
               <Link
                 key={c.id}
                 href={`/dashboard/clientes/${c.id}`}
-                className="rounded-lg border border-gray-200 p-3 hover:bg-gray-50 transition flex items-center justify-between"
+                className="rounded-lg border border-gray-200 dark:border-gray-600 p-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition flex items-center justify-between"
               >
-                <span className="text-sm font-medium text-gray-700">{c.nome}</span>
-                <span className="text-[10px] text-gray-400">{c.etapa}</span>
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{c.nome}</span>
+                <span className="text-[10px] text-gray-400 dark:text-gray-500">{c.etapa}</span>
               </Link>
             ))}
           </div>
@@ -103,22 +103,18 @@ export default async function PerfilCorretorPage({
 
       {/* Próximos agendamentos */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-900">Próximos Agendamentos</h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Próximos Agendamentos</h2>
         {dados.proximosAgendamentos.length === 0 ? (
-          <p className="mt-3 text-sm text-gray-400">Nenhum agendamento futuro.</p>
+          <p className="mt-3 text-sm text-gray-400 dark:text-gray-500">Nenhum agendamento futuro.</p>
         ) : (
           <div className="mt-3 space-y-2">
             {dados.proximosAgendamentos.map((a) => (
-              <div key={a.id} className="flex items-center justify-between rounded-lg border border-gray-200 p-3 text-sm">
+              <div key={a.id} className="flex items-center justify-between rounded-lg border border-gray-200 dark:border-gray-600 p-3 text-sm">
                 <div>
-                  <p className="font-medium text-gray-700">{a.clienteNome}</p>
-                  <p className="text-xs text-gray-400">{new Date(a.dataHora).toLocaleString('pt-BR')}</p>
+                  <p className="font-medium text-gray-700 dark:text-gray-300">{a.clienteNome}</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500">{new Date(a.dataHora).toLocaleString('pt-BR')}</p>
                 </div>
-                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                  a.status === 'CONFIRMADO' ? 'bg-emerald-100 text-emerald-700' :
-                  a.status === 'REMARCADO' ? 'bg-amber-100 text-amber-700' :
-                  'bg-blue-100 text-blue-700'
-                }`}>
+                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${ a.status === 'CONFIRMADO' ? 'bg-emerald-100 text-emerald-700' : a.status === 'REMARCADO' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700' }`}>
                   {a.status}
                 </span>
               </div>
@@ -129,14 +125,14 @@ export default async function PerfilCorretorPage({
 
       {/* Produção mensal (tabela simplificada) */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-900">Produção Mensal</h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Produção Mensal</h2>
         {dados.producaoMensal.length === 0 ? (
-          <p className="mt-3 text-sm text-gray-400">Nenhum dado de produção.</p>
+          <p className="mt-3 text-sm text-gray-400 dark:text-gray-500">Nenhum dado de produção.</p>
         ) : (
           <div className="mt-3 overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
-                <tr className="border-b border-gray-200 text-left text-[10px] font-medium uppercase tracking-wide text-gray-400">
+                <tr className="border-b border-gray-200 dark:border-gray-600 text-left text-[10px] font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">
                   <th className="pb-2">Mês</th>
                   <th className="pb-2 text-right">Vendas</th>
                   <th className="pb-2 text-right">VGV</th>
@@ -150,11 +146,11 @@ export default async function PerfilCorretorPage({
                   const [ano, mes] = m.mes.split('-')
                   const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
                   return (
-                    <tr key={m.mes} className="border-b border-gray-100">
-                      <td className="py-2 font-medium text-gray-700">{meses[Number(mes) - 1]} {ano}</td>
+                    <tr key={m.mes} className="border-b border-gray-100 dark:border-gray-700">
+                      <td className="py-2 font-medium text-gray-700 dark:text-gray-300">{meses[Number(mes) - 1]} {ano}</td>
                       <td className="py-2 text-right tabular-nums text-teal-600">{m.vendas}</td>
-                      <td className="py-2 text-right tabular-nums text-gray-600">{formatarMoeda(m.vgv)}</td>
-                      <td className="py-2 text-right tabular-nums text-gray-600">{formatarMoeda(m.comissao)}</td>
+                      <td className="py-2 text-right tabular-nums text-gray-600 dark:text-gray-400">{formatarMoeda(m.vgv)}</td>
+                      <td className="py-2 text-right tabular-nums text-gray-600 dark:text-gray-400">{formatarMoeda(m.comissao)}</td>
                       <td className="py-2 text-right tabular-nums text-indigo-600">{m.aprovacoes}</td>
                       <td className="py-2 text-right tabular-nums font-bold text-blue-600">{m.pontuacao.toLocaleString('pt-BR')}</td>
                     </tr>
@@ -171,9 +167,9 @@ export default async function PerfilCorretorPage({
 
 function InfoItem({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md bg-gray-50 p-3">
-      <p className="text-[10px] font-medium uppercase tracking-wide text-gray-400">{label}</p>
-      <p className="mt-0.5 text-sm text-gray-700">{value}</p>
+    <div className="rounded-md bg-gray-50 dark:bg-gray-700 p-3">
+      <p className="text-[10px] font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">{label}</p>
+      <p className="mt-0.5 text-sm text-gray-700 dark:text-gray-300">{value}</p>
     </div>
   )
 }

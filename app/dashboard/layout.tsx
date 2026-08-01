@@ -2,6 +2,7 @@ import { createSupabaseServerClient } from '@/src/lib/server/supabase'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import NotificacoesBell from '@/src/components/layout/NotificacoesBell'
+import ThemeToggle from '@/src/components/layout/ThemeToggle'
 
 // Layout do Dashboard — protege todas as páginas dentro de /dashboard/*
 // Se o usuário não estiver logado, redireciona para /login automaticamente.
@@ -33,11 +34,11 @@ export default async function DashboardLayout({
   const podeVerFinanceiro = ehGerente || usuario?.perfil === 'SUPERVISOR'
 
   return (
-    <div className="flex h-screen flex-col bg-gray-50">
+    <div className="flex h-screen flex-col bg-gray-50 dark:bg-gray-950">
       {/* Header simples */}
-      <header className="flex items-center justify-between border-b bg-white px-6 py-3 shadow-sm">
+      <header className="flex items-center justify-between border-b bg-white px-6 py-3 shadow-sm dark:bg-gray-900 dark:border-gray-800">
         <div className="flex items-center gap-3">
-          <Link href="/dashboard" className="text-lg font-bold text-gray-900 hover:text-blue-600">
+          <Link href="/dashboard" className="text-lg font-bold text-gray-900 hover:text-blue-600 dark:text-gray-100">
             DNA CRM
           </Link>
           <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-700">
@@ -45,14 +46,15 @@ export default async function DashboardLayout({
           </span>
         </div>
         <div className="flex items-center gap-3">
+          <ThemeToggle />
           <NotificacoesBell usuarioId={user.id} />
-          <span className="text-sm text-gray-600">
+          <span className="text-sm text-gray-600 dark:text-gray-400">
             {usuario?.nome ?? user.email}
           </span>
           <form action="/auth/signout" method="post">
             <button
               type="submit"
-              className="rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-200"
+              className="rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
             >
               Sair
             </button>
@@ -61,7 +63,7 @@ export default async function DashboardLayout({
       </header>
 
       {/* Navegação secundária */}
-      <nav className="border-b bg-white px-6 py-2">
+      <nav className="border-b bg-white px-6 py-2 dark:bg-gray-900 dark:border-gray-800">
         <div className="flex items-center gap-1 overflow-x-auto">
           <NavLink href="/dashboard">Dashboard</NavLink>
           <NavLink href="/dashboard/operacao">Operação</NavLink>
@@ -93,7 +95,7 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
   return (
     <Link
       href={href}
-      className="rounded-md px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition"
+      className="rounded-md px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
     >
       {children}
     </Link>

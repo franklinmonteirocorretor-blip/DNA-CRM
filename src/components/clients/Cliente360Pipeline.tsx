@@ -17,8 +17,8 @@ function formatarTempo(horas: number | null): string {
 /** Seção 3 — Pipeline visual com etapas */
 export default function Cliente360Pipeline({ pipeline }: Props) {
   return (
-    <div className="rounded-lg bg-white p-5 shadow-sm">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400">Pipeline</h2>
+    <div className="rounded-lg bg-white dark:bg-gray-800 p-5 shadow-sm">
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Pipeline</h2>
       <div className="mt-3 flex flex-wrap gap-2">
         {pipeline.map((e) => {
           const bg = e.status === 'atual'

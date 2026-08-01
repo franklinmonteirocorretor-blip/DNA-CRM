@@ -11,7 +11,7 @@ export default async function OperacaoPage() {
   if (!user) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-gray-400">Você precisa estar autenticado.</p>
+        <p className="text-gray-400 dark:text-gray-500">Você precisa estar autenticado.</p>
       </div>
     )
   }

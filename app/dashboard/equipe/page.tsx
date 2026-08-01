@@ -54,16 +54,16 @@ export default async function EquipePage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Minha Equipe</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Minha Equipe</h1>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Visão geral dos corretores sob sua gestão.
           </p>
         </div>
-        <div className="rounded-lg border-2 border-dashed border-gray-300 bg-white p-12 text-center">
-          <p className="text-lg font-medium text-gray-500">
+        <div className="rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-12 text-center">
+          <p className="text-lg font-medium text-gray-500 dark:text-gray-400">
             Nenhum corretor na sua equipe ainda.
           </p>
-          <p className="mt-1 text-sm text-gray-400">
+          <p className="mt-1 text-sm text-gray-400 dark:text-gray-500">
             Corretores com você como gerente aparecerão aqui automaticamente.
           </p>
         </div>
@@ -175,8 +175,8 @@ export default async function EquipePage() {
     <div className="space-y-6">
       {/* Cabeçalho */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Minha Equipe</h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Minha Equipe</h1>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           {corretores?.length ?? 0} corretor{(corretores?.length ?? 0) !== 1 ? 'es' : ''} na equipe
           {usuario.perfil === 'ADMINISTRADOR' ? ' (visão geral)' : ''}
         </p>
@@ -193,17 +193,17 @@ export default async function EquipePage() {
 
       {/* ── Cards por corretor ──────────────────────────────────────────── */}
       <div>
-        <h2 className="text-lg font-semibold text-gray-900">Desempenho individual</h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Desempenho individual</h2>
         <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {statsPorCorretor.map((s) => (
             <div
               key={s.corretor.id}
-              className="rounded-lg bg-white p-5 shadow-sm"
+              className="rounded-lg bg-white dark:bg-gray-800 p-5 shadow-sm"
             >
               {/* Nome e rank */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="text-sm font-semibold text-gray-900 truncate">
+                  <span className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
                     {s.corretor.nome}
                   </span>
                 </div>
@@ -213,7 +213,7 @@ export default async function EquipePage() {
               </div>
 
               {/* Métricas do dia */}
-              <div className="mt-3 flex gap-3 text-xs text-gray-500">
+              <div className="mt-3 flex gap-3 text-xs text-gray-500 dark:text-gray-400">
                 <span title="Ligações">📞 {s.ligacoes}</span>
                 <span title="WhatsApp">💬 {s.whatsapp}</span>
                 <span title="Agendamentos">📅 {s.agendamentos}</span>
@@ -222,7 +222,7 @@ export default async function EquipePage() {
 
               {/* Clientes e fechamentos */}
               <div className="mt-2 flex items-center gap-4 text-xs">
-                <span className="text-gray-500">
+                <span className="text-gray-500 dark:text-gray-400">
                   {s.totalClientes} cliente{s.totalClientes !== 1 ? 's' : ''}
                 </span>
                 {s.fechamentos > 0 && (
@@ -237,13 +237,13 @@ export default async function EquipePage() {
       </div>
 
       {/* ── Funil consolidado da equipe ──────────────────────────────────── */}
-      <div className="rounded-lg bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-gray-900">
+      <div className="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-sm">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
           Funil consolidado · {totalClientes} cliente{totalClientes !== 1 ? 's' : ''}
         </h2>
 
         {totalClientes === 0 ? (
-          <p className="mt-4 text-sm text-gray-400">
+          <p className="mt-4 text-sm text-gray-400 dark:text-gray-500">
             Nenhum cliente no funil da equipe ainda.
           </p>
         ) : (
@@ -280,7 +280,7 @@ export default async function EquipePage() {
                     <span className="shrink-0 text-sm font-bold" style={{ color: config.cor }}>
                       {qtd}
                     </span>
-                    <span className="shrink-0 text-[11px] text-gray-400">
+                    <span className="shrink-0 text-[11px] text-gray-400 dark:text-gray-500">
                       ({pct}%)
                     </span>
                   </div>
@@ -292,8 +292,8 @@ export default async function EquipePage() {
       </div>
 
       {/* ── Produção semanal da equipe ───────────────────────────────────── */}
-      <div className="rounded-lg bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-gray-900">Produção da semana</h2>
+      <div className="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-sm">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Produção da semana</h2>
         {Object.keys(producaoPorDia).length > 0 ? (
           <div className="mt-4 space-y-2">
             {Object.entries(producaoPorDia)
@@ -301,16 +301,16 @@ export default async function EquipePage() {
               .map(([data, stats]) => (
                 <div
                   key={data}
-                  className="flex items-center justify-between rounded-md bg-gray-50 px-4 py-2 text-sm"
+                  className="flex items-center justify-between rounded-md bg-gray-50 dark:bg-gray-700 px-4 py-2 text-sm"
                 >
-                  <span className="font-medium text-gray-700">
+                  <span className="font-medium text-gray-700 dark:text-gray-300">
                     {new Date(data + 'T00:00:00').toLocaleDateString('pt-BR', {
                       weekday: 'short',
                       day: '2-digit',
                       month: '2-digit',
                     })}
                   </span>
-                  <span className="text-gray-500">
+                  <span className="text-gray-500 dark:text-gray-400">
                     {stats.ligacoes} ligações · {stats.whatsapp} WhatsApp · {stats.agendamentos} agend.
                   </span>
                   <span className="font-bold text-blue-600">
@@ -320,7 +320,7 @@ export default async function EquipePage() {
               ))}
           </div>
         ) : (
-          <p className="mt-4 text-sm text-gray-400">
+          <p className="mt-4 text-sm text-gray-400 dark:text-gray-500">
             Nenhuma atividade registrada pela equipe nos últimos 7 dias.
           </p>
         )}

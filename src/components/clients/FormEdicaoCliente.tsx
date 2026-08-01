@@ -214,12 +214,12 @@ export default function FormEdicaoCliente(props: FormEdicaoClienteProps) {
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-gray-900">{cliente.nome}</h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{cliente.nome}</h1>
             <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${ETAPA_COR[cliente.etapa_atual]}`}>
               {ETAPA_LABEL[cliente.etapa_atual]}
             </span>
           </div>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Cliente desde {criadoEm} · Última atividade: {ultimaAtividade}
             {diasSemContato >= 3 && (
               <span className="ml-2 text-orange-500 font-medium">
@@ -242,7 +242,7 @@ export default function FormEdicaoCliente(props: FormEdicaoClienteProps) {
             <button
               type="button"
               onClick={cancelarEdicao}
-              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
+              className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700"
             >
               Cancelar
             </button>
@@ -252,7 +252,7 @@ export default function FormEdicaoCliente(props: FormEdicaoClienteProps) {
           {!modoEdicao && (
             <Link
               href="/dashboard/clientes"
-              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
+              className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700"
             >
               ← Voltar
             </Link>
@@ -284,19 +284,19 @@ export default function FormEdicaoCliente(props: FormEdicaoClienteProps) {
             </div>
           )}
 
-          <div className="rounded-lg bg-white p-6 shadow-sm">
+          <div className="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-sm">
             <form onSubmit={handleSalvarEdicao} className="space-y-6">
               {/* Seção 1: Dados pessoais */}
               <div className="border-b pb-6">
-                <h2 className="text-base font-semibold text-gray-900">
+                <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">
                   Dados pessoais{' '}
-                  <span className="text-xs font-normal text-gray-400">(obrigatórios)</span>
+                  <span className="text-xs font-normal text-gray-400 dark:text-gray-500">(obrigatórios)</span>
                 </h2>
 
                 <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
                   {/* Nome */}
                   <div>
-                    <label htmlFor="edit-nome" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="edit-nome" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Nome *
                     </label>
                     <input
@@ -308,13 +308,13 @@ export default function FormEdicaoCliente(props: FormEdicaoClienteProps) {
                       value={nome}
                       onChange={(e) => setNome(e.target.value)}
                       placeholder="Nome completo do cliente"
-                      className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
                   </div>
 
                   {/* CPF */}
                   <div>
-                    <label htmlFor="edit-cpf" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="edit-cpf" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       CPF *
                     </label>
                     <input
@@ -326,13 +326,13 @@ export default function FormEdicaoCliente(props: FormEdicaoClienteProps) {
                       onChange={(e) => setCpf(mascaraCPF(e.target.value))}
                       maxLength={14}
                       placeholder="000.000.000-00"
-                      className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
                   </div>
 
                   {/* Telefone */}
                   <div>
-                    <label htmlFor="edit-telefone" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="edit-telefone" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Telefone *
                     </label>
                     <input
@@ -344,14 +344,14 @@ export default function FormEdicaoCliente(props: FormEdicaoClienteProps) {
                       onChange={(e) => setTelefone(mascaraTelefone(e.target.value))}
                       maxLength={15}
                       placeholder="(86) 99999-0000"
-                      className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
                   </div>
 
                   {/* Email */}
                   <div>
-                    <label htmlFor="edit-email" className="block text-sm font-medium text-gray-700">
-                      E-mail <span className="text-xs font-normal text-gray-400">(opcional)</span>
+                    <label htmlFor="edit-email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      E-mail <span className="text-xs font-normal text-gray-400 dark:text-gray-500">(opcional)</span>
                     </label>
                     <input
                       id="edit-email"
@@ -360,7 +360,7 @@ export default function FormEdicaoCliente(props: FormEdicaoClienteProps) {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="cliente@email.com"
-                      className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
                   </div>
                 </div>
@@ -368,19 +368,19 @@ export default function FormEdicaoCliente(props: FormEdicaoClienteProps) {
 
               {/* Seção 2: Informações financeiras */}
               <div className="border-b pb-6">
-                <h2 className="text-base font-semibold text-gray-900">
+                <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">
                   Informações financeiras{' '}
-                  <span className="text-xs font-normal text-gray-400">(opcionais)</span>
+                  <span className="text-xs font-normal text-gray-400 dark:text-gray-500">(opcionais)</span>
                 </h2>
 
                 <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                   {/* Renda */}
                   <div>
-                    <label htmlFor="edit-renda" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="edit-renda" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Renda mensal
                     </label>
                     <div className="relative mt-1">
-                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-sm text-gray-400">
+                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-sm text-gray-400 dark:text-gray-500">
                         R$
                       </span>
                       <input
@@ -392,14 +392,14 @@ export default function FormEdicaoCliente(props: FormEdicaoClienteProps) {
                         value={renda}
                         onChange={(e) => setRenda(e.target.value)}
                         placeholder="0,00"
-                        className="block w-full rounded-md border border-gray-300 py-2 pl-10 pr-3 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="block w-full rounded-md border border-gray-300 dark:border-gray-600 py-2 pl-10 pr-3 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                       />
                     </div>
                   </div>
 
                   {/* Dependentes */}
                   <div>
-                    <label htmlFor="edit-dependentes" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="edit-dependentes" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Dependentes
                     </label>
                     <input
@@ -410,13 +410,13 @@ export default function FormEdicaoCliente(props: FormEdicaoClienteProps) {
                       max={20}
                       value={dependentes}
                       onChange={(e) => setDependentes(e.target.value)}
-                      className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
                   </div>
 
                   {/* Tempo CLT */}
                   <div>
-                    <label htmlFor="edit-tempo-clt" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="edit-tempo-clt" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Tempo CLT (meses)
                     </label>
                     <input
@@ -427,17 +427,17 @@ export default function FormEdicaoCliente(props: FormEdicaoClienteProps) {
                       value={tempoClt}
                       onChange={(e) => setTempoClt(e.target.value)}
                       placeholder="12"
-                      className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
                   </div>
 
                   {/* Saldo FGTS */}
                   <div>
-                    <label htmlFor="edit-saldo-fgts" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="edit-saldo-fgts" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Saldo FGTS
                     </label>
                     <div className="relative mt-1">
-                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-sm text-gray-400">
+                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-sm text-gray-400 dark:text-gray-500">
                         R$
                       </span>
                       <input
@@ -449,7 +449,7 @@ export default function FormEdicaoCliente(props: FormEdicaoClienteProps) {
                         value={saldoFgts}
                         onChange={(e) => setSaldoFgts(e.target.value)}
                         placeholder="0,00"
-                        className="block w-full rounded-md border border-gray-300 py-2 pl-10 pr-3 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="block w-full rounded-md border border-gray-300 dark:border-gray-600 py-2 pl-10 pr-3 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                       />
                     </div>
                   </div>
@@ -458,7 +458,7 @@ export default function FormEdicaoCliente(props: FormEdicaoClienteProps) {
 
               {/* Seção 3: Estado civil + Empreendimento */}
               <div className="border-b pb-6">
-                <h2 className="text-base font-semibold text-gray-900">
+                <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">
                   Estado civil e empreendimento
                 </h2>
 
@@ -471,23 +471,23 @@ export default function FormEdicaoCliente(props: FormEdicaoClienteProps) {
                       type="checkbox"
                       checked={ehCasado}
                       onChange={(e) => setEhCasado(e.target.checked)}
-                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
                     />
-                    <label htmlFor="edit-eh-casado" className="text-sm font-medium text-gray-700">
+                    <label htmlFor="edit-eh-casado" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       Cliente é casado(a)?
                     </label>
                   </div>
 
                   {/* Empreendimento */}
                   <div>
-                    <label htmlFor="edit-empreendimento" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="edit-empreendimento" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Empreendimento de interesse
                     </label>
                     <SelectEmpreendimento
                       key={`emp-${cliente.id}`}
                       name="empreendimento_id"
                       valorSelecionado={cliente.empreendimento_id ?? undefined}
-                      className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
                   </div>
                 </div>
@@ -495,8 +495,8 @@ export default function FormEdicaoCliente(props: FormEdicaoClienteProps) {
 
               {/* Seção 4: Observações */}
               <div>
-                <label htmlFor="edit-observacoes" className="block text-sm font-medium text-gray-700">
-                  Observações <span className="text-xs font-normal text-gray-400">(opcional)</span>
+                <label htmlFor="edit-observacoes" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Observações <span className="text-xs font-normal text-gray-400 dark:text-gray-500">(opcional)</span>
                 </label>
                 <textarea
                   id="edit-observacoes"
@@ -506,7 +506,7 @@ export default function FormEdicaoCliente(props: FormEdicaoClienteProps) {
                   value={observacoes}
                   onChange={(e) => setObservacoes(e.target.value)}
                   placeholder="Anotações livres sobre o cliente..."
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
 
@@ -515,7 +515,7 @@ export default function FormEdicaoCliente(props: FormEdicaoClienteProps) {
                 <button
                   type="button"
                   onClick={cancelarEdicao}
-                  className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
+                  className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700"
                 >
                   Cancelar
                 </button>
@@ -538,8 +538,8 @@ export default function FormEdicaoCliente(props: FormEdicaoClienteProps) {
           {/* Coluna Esquerda — Dados pessoais e financeiros */}
           <div className="space-y-6">
             {/* Card: Dados pessoais */}
-            <div className="rounded-lg bg-white p-5 shadow-sm">
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400">
+            <div className="rounded-lg bg-white dark:bg-gray-800 p-5 shadow-sm">
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
                 Dados pessoais
               </h2>
               <dl className="mt-3 space-y-3">
@@ -551,8 +551,8 @@ export default function FormEdicaoCliente(props: FormEdicaoClienteProps) {
             </div>
 
             {/* Card: Informações financeiras */}
-            <div className="rounded-lg bg-white p-5 shadow-sm">
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400">
+            <div className="rounded-lg bg-white dark:bg-gray-800 p-5 shadow-sm">
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
                 Informações financeiras
               </h2>
               <dl className="mt-3 space-y-3">
@@ -566,11 +566,11 @@ export default function FormEdicaoCliente(props: FormEdicaoClienteProps) {
 
             {/* Card: Observações */}
             {cliente.observacoes && (
-              <div className="rounded-lg bg-white p-5 shadow-sm">
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400">
+              <div className="rounded-lg bg-white dark:bg-gray-800 p-5 shadow-sm">
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
                   Observações
                 </h2>
-                <p className="mt-2 whitespace-pre-wrap text-sm text-gray-700">
+                <p className="mt-2 whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300">
                   {cliente.observacoes}
                 </p>
               </div>
@@ -580,8 +580,8 @@ export default function FormEdicaoCliente(props: FormEdicaoClienteProps) {
           {/* Coluna Direita — Cônjuge + Status do funil */}
           <div className="space-y-6">
             {/* Card: Cônjuge */}
-            <div className="rounded-lg bg-white p-5 shadow-sm">
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400">
+            <div className="rounded-lg bg-white dark:bg-gray-800 p-5 shadow-sm">
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
                 Cônjuge
               </h2>
               {cliente.eh_casado && conjuge ? (
@@ -608,15 +608,15 @@ export default function FormEdicaoCliente(props: FormEdicaoClienteProps) {
                   )}
                 </dl>
               ) : (
-                <p className="mt-2 text-sm text-gray-400">
+                <p className="mt-2 text-sm text-gray-400 dark:text-gray-500">
                   {cliente.eh_casado ? 'Cônjuge ainda não cadastrado.' : 'Cliente não é casado.'}
                 </p>
               )}
             </div>
 
             {/* Card: Status no funil */}
-            <div className="rounded-lg bg-white p-5 shadow-sm">
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400">
+            <div className="rounded-lg bg-white dark:bg-gray-800 p-5 shadow-sm">
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
                 Status no funil
               </h2>
               <dl className="mt-3 space-y-3">
@@ -665,8 +665,8 @@ export default function FormEdicaoCliente(props: FormEdicaoClienteProps) {
 function InfoItem({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-baseline justify-between gap-2">
-      <dt className="text-xs font-medium text-gray-500">{label}</dt>
-      <dd className="text-sm font-semibold text-gray-900 text-right">{value}</dd>
+      <dt className="text-xs font-medium text-gray-500 dark:text-gray-400">{label}</dt>
+      <dd className="text-sm font-semibold text-gray-900 dark:text-gray-100 text-right">{value}</dd>
     </div>
   )
 }

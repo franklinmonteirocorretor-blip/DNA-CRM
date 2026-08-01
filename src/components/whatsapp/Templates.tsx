@@ -48,7 +48,7 @@ export function GerenciadorTemplates({ templates, onCriar, onSelecionar, onExclu
   return (
     <div className="flex flex-col">
       <div className="flex items-center justify-between border-b px-4 py-3">
-        <h3 className="text-sm font-semibold text-gray-900">Templates</h3>
+        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Templates</h3>
         <button
           onClick={() => setMostrandoForm(!mostrandoForm)}
           className="rounded-md bg-blue-600 px-3 py-1 text-xs font-medium text-white hover:bg-blue-700"
@@ -59,17 +59,17 @@ export function GerenciadorTemplates({ templates, onCriar, onSelecionar, onExclu
 
       {/* Formulário de criação */}
       {mostrandoForm && (
-        <div className="border-b bg-gray-50 p-4 space-y-3">
+        <div className="border-b bg-gray-50 dark:bg-gray-700 p-4 space-y-3">
           <input
             value={novoNome}
             onChange={e => setNovoNome(e.target.value)}
             placeholder="Nome do template"
-            className="w-full rounded border border-gray-200 px-3 py-1.5 text-sm"
+            className="w-full rounded border border-gray-200 dark:border-gray-600 px-3 py-1.5 text-sm"
           />
           <select
             value={novaCategoria}
             onChange={e => setNovaCategoria(e.target.value as WhatsAppTemplateCategoria)}
-            className="w-full rounded border border-gray-200 px-3 py-1.5 text-sm"
+            className="w-full rounded border border-gray-200 dark:border-gray-600 px-3 py-1.5 text-sm"
           >
             {CATEGORIAS.map(c => (
               <option key={c.value} value={c.value}>{c.label}</option>
@@ -80,7 +80,7 @@ export function GerenciadorTemplates({ templates, onCriar, onSelecionar, onExclu
             onChange={e => setNovoCorpo(e.target.value)}
             placeholder="Corpo do template. Use {campos} para variáveis."
             rows={4}
-            className="w-full rounded border border-gray-200 px-3 py-1.5 text-sm"
+            className="w-full rounded border border-gray-200 dark:border-gray-600 px-3 py-1.5 text-sm"
           />
           <button
             onClick={handleCriar}
@@ -95,7 +95,7 @@ export function GerenciadorTemplates({ templates, onCriar, onSelecionar, onExclu
       {/* Lista de templates */}
       <div className="flex-1 overflow-y-auto">
         {templates.length === 0 ? (
-          <p className="px-4 py-6 text-center text-xs text-gray-400">
+          <p className="px-4 py-6 text-center text-xs text-gray-400 dark:text-gray-500">
             Nenhum template criado. Crie o primeiro!
           </p>
         ) : (
@@ -103,17 +103,15 @@ export function GerenciadorTemplates({ templates, onCriar, onSelecionar, onExclu
             <div
               key={t.id}
               onClick={() => onSelecionar(t)}
-              className={`cursor-pointer border-b px-4 py-3 transition-colors hover:bg-blue-50 ${
-                selecionadoId === t.id ? 'bg-blue-50 border-l-2 border-l-blue-600' : ''
-              }`}
+              className={`cursor-pointer border-b px-4 py-3 transition-colors hover:bg-blue-50 ${ selecionadoId === t.id ? 'bg-blue-50 border-l-2 border-l-blue-600' : '' }`}
             >
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-900">{t.nome}</span>
-                <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] text-gray-500">
+                <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{t.nome}</span>
+                <span className="rounded-full bg-gray-100 dark:bg-gray-800 px-2 py-0.5 text-[10px] text-gray-500 dark:text-gray-400">
                   {t.categoria}
                 </span>
               </div>
-              <p className="mt-1 text-xs text-gray-500 line-clamp-2">{t.corpo}</p>
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 line-clamp-2">{t.corpo}</p>
               <div className="mt-2 flex items-center justify-between">
                 <div className="flex gap-1">
                   {t.variaveis.map(v => (

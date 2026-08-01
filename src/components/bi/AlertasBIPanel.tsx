@@ -40,7 +40,7 @@ function AlertaCard({ alerta }: { alerta: BIAlerta }) {
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-gray-700 uppercase">
+          <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase">
             {LABELS_ALERTA_TIPO[alerta.tipo] ?? alerta.tipo}
           </span>
           <span
@@ -68,8 +68,8 @@ function AlertaCard({ alerta }: { alerta: BIAlerta }) {
 export default function AlertasBIPanel({ alertas }: { alertas: BIAlerta[] }) {
   if (alertas.length === 0) {
     return (
-      <div className="rounded-xl border border-gray-200 bg-gray-50 p-8 text-center shadow-sm">
-        <p className="text-sm font-medium text-gray-600">Nenhum alerta no momento.</p>
+      <div className="rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-8 text-center shadow-sm">
+        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Nenhum alerta no momento.</p>
       </div>
     )
   }

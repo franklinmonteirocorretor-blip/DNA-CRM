@@ -20,16 +20,16 @@ const prioridadMap: Record<string, string> = {
 export function CopilotRecomendacoes({ recomendacoes }: RecomendacaoProps) {
   if (recomendacoes.length === 0) {
     return (
-      <section className="rounded-lg border bg-white p-5 shadow-sm">
-        <h3 className="text-sm font-semibold text-gray-900">💡 Recomendações</h3>
-        <p className="mt-2 text-xs text-gray-500">Nenhuma recomendação no momento. Tudo em ordem!</p>
+      <section className="rounded-lg border bg-white dark:bg-gray-800 p-5 shadow-sm">
+        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">💡 Recomendações</h3>
+        <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">Nenhuma recomendação no momento. Tudo em ordem!</p>
       </section>
     )
   }
 
   return (
-    <section className="rounded-lg border bg-white p-5 shadow-sm">
-      <h3 className="text-sm font-semibold text-gray-900">💡 Recomendações ({recomendacoes.length})</h3>
+    <section className="rounded-lg border bg-white dark:bg-gray-800 p-5 shadow-sm">
+      <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">💡 Recomendações ({recomendacoes.length})</h3>
 
       <div className="mt-3 space-y-2">
         {recomendacoes.map((r) => (
@@ -37,8 +37,8 @@ export function CopilotRecomendacoes({ recomendacoes }: RecomendacaoProps) {
             <div className="flex items-start gap-2">
               <span className="text-lg">{r.icone}</span>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-gray-900">{r.titulo}</p>
-                <p className="mt-0.5 text-xs text-gray-600">{r.descricao}</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{r.titulo}</p>
+                <p className="mt-0.5 text-xs text-gray-600 dark:text-gray-400">{r.descricao}</p>
               </div>
             </div>
             {r.rota && (

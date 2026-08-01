@@ -58,6 +58,7 @@ export default function ComissaoAcoes({ clienteId, statusAtual, onStatusChange }
 
   // Sincroniza statusLocal quando o pai mudar o status (ex: refresh da página)
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setStatusLocal(statusAtual)
   }, [statusAtual])
 
@@ -86,8 +87,8 @@ export default function ComissaoAcoes({ clienteId, statusAtual, onStatusChange }
       } else {
         setMensagem({ tipo: 'erro', texto: res.erro || 'Erro ao executar ação.' })
       }
-    } catch (err: any) {
-      setMensagem({ tipo: 'erro', texto: err?.message ?? 'Erro inesperado.' })
+    } catch (err: unknown) {
+      setMensagem({ tipo: 'erro', texto: (err as Error)?.message ?? 'Erro inesperado.' })
     } finally {
       setLoadingAcao(null)
     }

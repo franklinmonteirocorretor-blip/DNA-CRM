@@ -15,8 +15,8 @@ export default function SecaoComparecimento({
   if (agendamentos.length === 0) return null
 
   return (
-    <div className="rounded-lg bg-white p-5 shadow-sm space-y-4">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400">
+    <div className="rounded-lg bg-white dark:bg-gray-800 p-5 shadow-sm space-y-4">
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
         Agendamentos
       </h2>
 
@@ -100,16 +100,12 @@ function ComparecimentoItem({
         {jaRegistrado ? (
           <div className="flex items-center gap-2">
             <span
-              className={`rounded px-2 py-0.5 text-[11px] font-semibold ${
-                comparecimento.resultado === 'COMPARECEU'
-                  ? 'bg-green-100 text-green-700'
-                  : 'bg-red-100 text-red-700'
-              }`}
+              className={`rounded px-2 py-0.5 text-[11px] font-semibold ${ comparecimento.resultado === 'COMPARECEU' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }`}
             >
               {comparecimento.resultado === 'COMPARECEU' ? '✓ Compareceu' : '✗ Não compareceu'}
             </span>
             {comparecimento.motivo_ausencia && (
-              <span className="text-[11px] text-gray-400 max-w-[160px] truncate">
+              <span className="text-[11px] text-gray-400 dark:text-gray-500 max-w-[160px] truncate">
                 Motivo: {comparecimento.motivo_ausencia}
               </span>
             )}
@@ -131,7 +127,7 @@ function ComparecimentoItem({
 
       {/* Empreendimento (se houver) */}
       {agendamento.empreendimento_interesse && (
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
           📍 {agendamento.empreendimento_interesse}
         </p>
       )}
@@ -139,11 +135,7 @@ function ComparecimentoItem({
       {/* Feedback */}
       {feedback && (
         <div
-          className={`mt-3 rounded-md px-3 py-1.5 text-xs font-medium ${
-            feedback.tipo === 'sucesso'
-              ? 'bg-green-100 text-green-700'
-              : 'bg-red-100 text-red-700'
-          }`}
+          className={`mt-3 rounded-md px-3 py-1.5 text-xs font-medium ${ feedback.tipo === 'sucesso' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }`}
         >
           {feedback.msg}
         </div>
@@ -154,7 +146,7 @@ function ComparecimentoItem({
         <form onSubmit={handleRegistrar} className="mt-4 space-y-3 pt-3 border-t">
           {/* Compareceu / Não compareceu */}
           <div>
-            <p className="text-xs font-medium text-gray-500 mb-1.5">Resultado</p>
+            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Resultado</p>
             <div className="flex gap-2">
               <button
                 type="button"
@@ -162,22 +154,14 @@ function ComparecimentoItem({
                   setResultado('COMPARECEU')
                   setMotivoAusencia('')
                 }}
-                className={`flex-1 rounded-lg border px-3 py-2 text-xs font-medium transition ${
-                  resultado === 'COMPARECEU'
-                    ? 'border-green-300 bg-green-100 text-green-700'
-                    : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
-                }`}
+                className={`flex-1 rounded-lg border px-3 py-2 text-xs font-medium transition ${ resultado === 'COMPARECEU' ? 'border-green-300 bg-green-100 text-green-700' : 'border-gray-200 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50' }`}
               >
                 ✅ Compareceu
               </button>
               <button
                 type="button"
                 onClick={() => setResultado('NAO_COMPARECEU')}
-                className={`flex-1 rounded-lg border px-3 py-2 text-xs font-medium transition ${
-                  resultado === 'NAO_COMPARECEU'
-                    ? 'border-red-300 bg-red-100 text-red-700'
-                    : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
-                }`}
+                className={`flex-1 rounded-lg border px-3 py-2 text-xs font-medium transition ${ resultado === 'NAO_COMPARECEU' ? 'border-red-300 bg-red-100 text-red-700' : 'border-gray-200 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50' }`}
               >
                 ❌ Não compareceu
               </button>
@@ -187,7 +171,7 @@ function ComparecimentoItem({
           {/* Motivo da ausência (só se não compareceu) */}
           {resultado === 'NAO_COMPARECEU' && (
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
                 Motivo da ausência
               </label>
               <input
@@ -203,7 +187,7 @@ function ComparecimentoItem({
 
           {/* Observação */}
           <div>
-            <label className="block text-xs font-medium text-gray-400 mb-1">
+            <label className="block text-xs font-medium text-gray-400 dark:text-gray-500 mb-1">
               Observação <span className="font-normal">(opcional)</span>
             </label>
             <textarea
@@ -212,7 +196,7 @@ function ComparecimentoItem({
               rows={2}
               maxLength={300}
               placeholder="Anotações sobre a visita..."
-              className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="block w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
 

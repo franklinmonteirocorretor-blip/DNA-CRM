@@ -31,7 +31,7 @@ export default function FiltrosCorretores({
         placeholder="Buscar nome ou e-mail..."
         value={filtros.busca ?? ''}
         onChange={(e) => onFiltrar({ ...filtros, busca: e.target.value || null })}
-        className="rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-700 placeholder-gray-400 focus:border-blue-500 focus:outline-none w-56"
+        className="rounded-md border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 placeholder-gray-400 focus:border-blue-500 focus:outline-none w-56"
       />
 
       {/* Status */}
@@ -40,7 +40,7 @@ export default function FiltrosCorretores({
         onChange={(e) =>
           onFiltrar({ ...filtros, status: (e.target.value === 'TODOS' ? null : e.target.value as StatusUsuario | 'TODOS') })
         }
-        className="rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-700 bg-white"
+        className="rounded-md border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800"
       >
         <option value="TODOS">Todos os status</option>
         <option value="ATIVO">Ativos</option>
@@ -53,7 +53,7 @@ export default function FiltrosCorretores({
       <select
         value={filtros.equipeId ?? ''}
         onChange={(e) => onFiltrar({ ...filtros, equipeId: e.target.value || null })}
-        className="rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-700 bg-white"
+        className="rounded-md border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800"
       >
         <option value="">Todas as equipes</option>
         {equipes.map((eq) => (
@@ -67,7 +67,7 @@ export default function FiltrosCorretores({
       <select
         value={filtros.supervisorId ?? ''}
         onChange={(e) => onFiltrar({ ...filtros, supervisorId: e.target.value || null })}
-        className="rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-700 bg-white"
+        className="rounded-md border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800"
       >
         <option value="">Todos os supervisores</option>
         {supervisores.map((s) => (
@@ -81,7 +81,7 @@ export default function FiltrosCorretores({
       <select
         value={filtros.ordenacao}
         onChange={(e) => onFiltrar({ ...filtros, ordenacao: e.target.value as CorretoresFiltros['ordenacao'] })}
-        className="rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-700 bg-white"
+        className="rounded-md border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800"
       >
         <option value="nome">Nome</option>
         <option value="admissao">Data de admissão</option>

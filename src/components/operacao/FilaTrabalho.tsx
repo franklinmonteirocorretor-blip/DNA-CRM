@@ -44,25 +44,25 @@ export default function FilaTrabalho({ acoes }: FilaTrabalhoProps) {
 
   if (!ordenadas.length) {
     return (
-      <div className="rounded-lg border border-gray-200 bg-white p-6 text-center text-sm text-gray-400">
+      <div className="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 p-6 text-center text-sm text-gray-400 dark:text-gray-500">
         Tudo em dia! Nenhuma ação pendente. 🙂
       </div>
     )
   }
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white overflow-hidden">
-      <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
-        <h3 className="text-sm font-semibold text-gray-900">Fila de Trabalho</h3>
+    <div className="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 overflow-hidden">
+      <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
+        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Fila de Trabalho</h3>
       </div>
-      <div className="divide-y divide-gray-100">
+      <div className="divide-y divide-gray-100 dark:divide-gray-700">
         {ordenadas.map((acao, idx) => {
           const prioridade = idx + 1
           return (
             <Link
               key={acao.clienteId}
               href={`/dashboard/clientes/${acao.clienteId}`}
-              className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
             >
               {/* Score circle */}
               <div
@@ -74,7 +74,7 @@ export default function FilaTrabalho({ acoes }: FilaTrabalhoProps) {
               {/* Info central */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-sm font-medium text-gray-900 truncate">
+                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                     {acao.clienteNome}
                   </span>
                   {prioridade <= 3 && (
@@ -84,18 +84,18 @@ export default function FilaTrabalho({ acoes }: FilaTrabalhoProps) {
                   )}
                 </div>
                 <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className="text-[11px] text-gray-500">{acao.acao}</span>
-                  <span className="text-[10px] text-gray-300">•</span>
-                  <span className="text-[11px] text-gray-400">{acao.etapa}</span>
+                  <span className="text-[11px] text-gray-500 dark:text-gray-400">{acao.acao}</span>
+                  <span className="text-[10px] text-gray-300 dark:text-gray-600">•</span>
+                  <span className="text-[11px] text-gray-400 dark:text-gray-500">{acao.etapa}</span>
                 </div>
-                <p className="text-[10px] text-gray-400 mt-0.5 truncate">
+                <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5 truncate">
                   {acao.corretor} — {acao.motivo}
                 </p>
               </div>
 
               {/* Prazo */}
               {acao.prazo && (
-                <div className="flex items-center gap-1 shrink-0 text-[11px] text-gray-400">
+                <div className="flex items-center gap-1 shrink-0 text-[11px] text-gray-400 dark:text-gray-500">
                   <span>⌛</span>
                   <span>{formatarPrazo(acao.prazo)}</span>
                 </div>
@@ -105,7 +105,7 @@ export default function FilaTrabalho({ acoes }: FilaTrabalhoProps) {
         })}
       </div>
       {acoes.length > 10 && (
-        <div className="px-4 py-2 text-center text-[11px] text-gray-400 bg-gray-50 border-t border-gray-100">
+        <div className="px-4 py-2 text-center text-[11px] text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-700 border-t border-gray-100 dark:border-gray-700">
           +{acoes.length - 10} ações restantes
         </div>
       )}

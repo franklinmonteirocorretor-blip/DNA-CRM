@@ -14,7 +14,7 @@ export default async function PipelinePage() {
   if (!user) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-gray-400">Você precisa estar autenticado.</p>
+        <p className="text-gray-400 dark:text-gray-500">Você precisa estar autenticado.</p>
       </div>
     )
   }
@@ -29,8 +29,8 @@ export default async function PipelinePage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Pipeline Inteligente</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Pipeline Inteligente</h1>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Arraste clientes entre etapas. O sistema atualiza automaticamente.
           </p>
         </div>
@@ -47,7 +47,7 @@ export default async function PipelinePage() {
 
       {/* Board com Drag & Drop */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-900 mb-3">Kanban de Clientes</h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">Kanban de Clientes</h2>
         <LazyPipelineBoard />
       </section>
 

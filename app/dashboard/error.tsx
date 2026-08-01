@@ -20,8 +20,8 @@ export default function DashboardError({
     <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
       <div className="text-center space-y-4 max-w-md">
         <div className="text-6xl">⚠️</div>
-        <h2 className="text-xl font-bold text-gray-900">Algo deu errado</h2>
-        <p className="text-sm text-gray-500">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Algo deu errado</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
           {error.message || 'Um erro inesperado ocorreu ao carregar esta página.'}
         </p>
         <div className="flex gap-3 justify-center">
@@ -33,7 +33,7 @@ export default function DashboardError({
           </button>
           <a
             href="/dashboard"
-            className="px-4 py-2 text-sm font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
+            className="px-4 py-2 text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition"
           >
             Voltar ao início
           </a>

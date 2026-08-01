@@ -28,15 +28,15 @@ function HorizonCard({ cenario }: { cenario: BIHorizonteMeta }) {
       <p className={`text-sm font-semibold ${textStyle}`}>{cenario.cenario}</p>
       <div className="mt-2 space-y-1 text-xs">
         <div className="flex justify-between">
-          <span className="text-gray-600">Vendas necessárias</span>
+          <span className="text-gray-600 dark:text-gray-400">Vendas necessárias</span>
           <span className="font-semibold text-gray-800">{cenario.vendasNecessarias}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-gray-600">Ticket médio</span>
+          <span className="text-gray-600 dark:text-gray-400">Ticket médio</span>
           <span className="font-semibold text-gray-800">{formatarMoeda(cenario.ticketMedioNecessario)}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-gray-600">Probabilidade</span>
+          <span className="text-gray-600 dark:text-gray-400">Probabilidade</span>
           <span className="font-semibold text-gray-800">{formatoPercentual(cenario.probabilidade)}</span>
         </div>
       </div>
@@ -52,7 +52,7 @@ function ClienteLinha({
   isRisco: boolean
 }) {
   return (
-    <tr className="border-b border-gray-100 text-xs text-gray-700">
+    <tr className="border-b border-gray-100 dark:border-gray-700 text-xs text-gray-700 dark:text-gray-300">
       <td className="py-2 pr-3">{cliente.nome}</td>
       <td className="py-2 pr-3">{cliente.etapaLabel}</td>
       <td className="py-2 pr-3">{cliente.corretor}</td>
@@ -84,10 +84,10 @@ export default function PrevisoesBIPanel({
   previsoes: BIPrevisao
 }) {
   return (
-    <div className="rounded-xl bg-white shadow-sm border p-5 space-y-5">
+    <div className="rounded-xl bg-white dark:bg-gray-800 shadow-sm border p-5 space-y-5">
       <div>
-        <h3 className="text-sm font-semibold text-gray-900 mb-1">Previsões</h3>
-        <div className="flex gap-2 text-xs text-gray-500">
+        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">Previsões</h3>
+        <div className="flex gap-2 text-xs text-gray-500 dark:text-gray-400">
           <span>VGV esperado: {formatarMoeda(previsoes.vgvEsperado)}</span>
           <span>|</span>
           <span>Comissão: {formatarMoeda(previsoes.comissaoEsperada)}</span>
@@ -110,7 +110,7 @@ export default function PrevisoesBIPanel({
           <div className="overflow-x-auto">
             <table className="min-w-full text-xs">
               <thead>
-                <tr className="border-b border-gray-200 text-left text-gray-500">
+                <tr className="border-b border-gray-200 dark:border-gray-600 text-left text-gray-500 dark:text-gray-400">
                   <th className="py-2 pr-3 font-medium">Nome</th>
                   <th className="py-2 pr-3 font-medium">Etapa</th>
                   <th className="py-2 pr-3 font-medium">Corretor</th>
@@ -137,7 +137,7 @@ export default function PrevisoesBIPanel({
           <div className="overflow-x-auto">
             <table className="min-w-full text-xs">
               <thead>
-                <tr className="border-b border-gray-200 text-left text-gray-500">
+                <tr className="border-b border-gray-200 dark:border-gray-600 text-left text-gray-500 dark:text-gray-400">
                   <th className="py-2 pr-3 font-medium">Nome</th>
                   <th className="py-2 pr-3 font-medium">Etapa</th>
                   <th className="py-2 pr-3 font-medium">Corretor</th>

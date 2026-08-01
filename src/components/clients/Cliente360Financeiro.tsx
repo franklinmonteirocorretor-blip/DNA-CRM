@@ -15,8 +15,8 @@ function fmt(val: number | null): string {
 /** Seção 6 — Dados financeiros */
 export default function Cliente360Financeiro({ financeiro, vgvFormatado }: Props) {
   return (
-    <div className="rounded-lg bg-white p-5 shadow-sm">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400">Financeiro</h2>
+    <div className="rounded-lg bg-white dark:bg-gray-800 p-5 shadow-sm">
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Financeiro</h2>
       <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Card label="VGV" value={vgvFormatado} />
         <Card label="Comissão" value={financeiro.comissaoValor ? `${fmt(financeiro.comissaoValor)} (${financeiro.comissaoPercentual ?? 0}%)` : '—'} />
@@ -33,9 +33,9 @@ export default function Cliente360Financeiro({ financeiro, vgvFormatado }: Props
 
 function Card({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md bg-gray-50 p-3">
-      <span className="text-[11px] font-medium uppercase text-gray-400">{label}</span>
-      <p className="mt-1 text-sm font-semibold text-gray-900">{value}</p>
+    <div className="rounded-md bg-gray-50 dark:bg-gray-700 p-3">
+      <span className="text-[11px] font-medium uppercase text-gray-400 dark:text-gray-500">{label}</span>
+      <p className="mt-1 text-sm font-semibold text-gray-900 dark:text-gray-100">{value}</p>
     </div>
   )
 }

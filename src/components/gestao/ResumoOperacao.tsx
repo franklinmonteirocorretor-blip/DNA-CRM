@@ -7,7 +7,7 @@ import { formatarMoeda } from '@/src/lib/formatters'
 export default function ResumoOperacao({ dados }: { dados: GestaoResumoOperacao }) {
   return (
     <section>
-      <h2 className="text-lg font-semibold text-gray-900">Resumo da Operação</h2>
+      <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Resumo da Operação</h2>
       <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
         <KpiCard label="Leads Ativos" value={dados.leadsAtivos.toLocaleString('pt-BR')} color="sky" size="md" padding="normal" />
         <KpiCard label="Em Atendimento" value={dados.clientesAtendimento.toLocaleString('pt-BR')} color="violet" size="md" padding="normal" />

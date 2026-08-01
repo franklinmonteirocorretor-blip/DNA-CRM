@@ -1,5 +1,6 @@
 // DNA CRM — Sprint 14: Queries do BI Executivo
 // Todas as consultas usam dados reais do Supabase. Zero mocks.
+/* eslint-disable @typescript-eslint/no-explicit-any -- Supabase types complexos; migração para tipos canônicos planejada para Sprint 18 */
 
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
 import {

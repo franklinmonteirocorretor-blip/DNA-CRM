@@ -17,8 +17,8 @@ function formatarHoras(horas: number): string {
 /** Seção 10 — Painel Gerencial do cliente */
 export default function Cliente360PainelGerencial({ painel }: Props) {
   return (
-    <div className="rounded-lg bg-white p-5 shadow-sm">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400">Painel Gerencial</h2>
+    <div className="rounded-lg bg-white dark:bg-gray-800 p-5 shadow-sm">
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Painel Gerencial</h2>
       <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <KpiCard label="Tempo total no funil" value={formatarHoras(painel.tempoTotalFunilHoras)} size="sm" />
         <KpiCard label="Nº contatos" value={`${painel.totalContatos}`} size="sm" />
@@ -31,10 +31,10 @@ export default function Cliente360PainelGerencial({ painel }: Props) {
         {/* Tempo por etapa */}
         {painel.tempoPorEtapa.length > 0 && (
           <div className="col-span-full mt-1">
-            <span className="text-[11px] font-medium uppercase text-gray-400">Tempo por etapa</span>
+            <span className="text-[11px] font-medium uppercase text-gray-400 dark:text-gray-500">Tempo por etapa</span>
             <div className="mt-1.5 flex flex-wrap gap-1.5">
               {painel.tempoPorEtapa.map((t) => (
-                <span key={t.etapa} className="rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
+                <span key={t.etapa} className="rounded bg-gray-100 dark:bg-gray-800 px-2 py-0.5 text-xs text-gray-600 dark:text-gray-400">
                   {t.etapa}: {formatarHoras(t.horas)}
                 </span>
               ))}

@@ -12,8 +12,8 @@ export default async function FollowUpPage() {
 
   if (!data) {
     return (
-      <div className="rounded-lg bg-white p-8 text-center shadow-sm">
-        <p className="text-sm text-gray-500">Erro ao carregar dados. Verifique sua sessão.</p>
+      <div className="rounded-lg bg-white dark:bg-gray-800 p-8 text-center shadow-sm">
+        <p className="text-sm text-gray-500 dark:text-gray-400">Erro ao carregar dados. Verifique sua sessão.</p>
       </div>
     )
   }
@@ -35,9 +35,9 @@ export default async function FollowUpPage() {
       <FollowUpProximasAcoes acoes={data.proximasAcoes} />
 
       {/* ═══ SEÇÃO 3: Follow-up (registro rápido) reaproveitado ═══ */}
-      <div className="rounded-lg bg-white p-5 shadow-sm">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400">Registrar Follow-up</h2>
-        <p className="mt-1 text-xs text-gray-400">
+      <div className="rounded-lg bg-white dark:bg-gray-800 p-5 shadow-sm">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Registrar Follow-up</h2>
+        <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
           Selecione o cliente na Caixa de Entrada acima e registre a atividade na ficha do cliente.
         </p>
       </div>
@@ -46,9 +46,9 @@ export default async function FollowUpPage() {
       <FollowUpPrioridade />
 
       {/* ═══ SEÇÃO 5: Automações ═══ */}
-      <div className="rounded-lg bg-gray-50 p-5 shadow-sm border border-gray-200">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">Automações Ativas</h2>
-        <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3 text-xs text-gray-600">
+      <div className="rounded-lg bg-gray-50 dark:bg-gray-700 p-5 shadow-sm border border-gray-200 dark:border-gray-600">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Automações Ativas</h2>
+        <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3 text-xs text-gray-600 dark:text-gray-400">
           <div className="flex items-start gap-2">
             <span className="mt-0.5 text-green-500">✓</span>
             <span>Cliente sem próxima ação → alerta automático</span>

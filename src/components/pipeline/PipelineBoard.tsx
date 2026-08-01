@@ -88,7 +88,7 @@ export default function PipelineBoard() {
   if (carregando) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-gray-400 animate-pulse">Carregando pipeline...</p>
+        <p className="text-gray-400 dark:text-gray-500 animate-pulse">Carregando pipeline...</p>
       </div>
     )
   }
@@ -104,9 +104,9 @@ export default function PipelineBoard() {
           placeholder="Buscar nome ou telefone..."
           value={filtros.busca ?? ''}
           onChange={(e) => onFiltrar({ ...filtros, busca: e.target.value || null })}
-          className="rounded-md border border-gray-300 px-3 py-1.5 text-sm w-56"
+          className="rounded-md border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-sm w-56"
         />
-        <span className="text-xs text-gray-400 ml-auto">{totalClientes} clientes no pipeline</span>
+        <span className="text-xs text-gray-400 dark:text-gray-500 ml-auto">{totalClientes} clientes no pipeline</span>
       </div>
 
       {/* Board com colunas */}

@@ -64,8 +64,8 @@ export default function RelatoriosPage() {
     <div className="space-y-6">
       {/* Cabeçalho */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Relatórios</h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Relatórios</h1>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Gere relatórios exportáveis em Excel ou PDF com os dados do período selecionado.
         </p>
       </div>
@@ -78,17 +78,13 @@ export default function RelatoriosPage() {
       )}
 
       {/* Seleção de tipo */}
-      <div className="rounded-lg bg-white p-6 shadow-sm">
-        <h2 className="text-base font-semibold text-gray-900">Tipo de relatório</h2>
+      <div className="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-sm">
+        <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">Tipo de relatório</h2>
         <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
           {TIPOS_RELATORIO.map((t) => (
             <label
               key={t.valor}
-              className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition ${
-                tipo === t.valor
-                  ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500'
-                  : 'border-gray-200 hover:border-gray-300'
-              }`}
+              className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition ${ tipo === t.valor ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500' : 'border-gray-200 hover:border-gray-300' }`}
             >
               <input
                 type="radio"
@@ -99,8 +95,8 @@ export default function RelatoriosPage() {
                 className="mt-0.5 h-4 w-4 text-blue-600"
               />
               <div>
-                <p className="text-sm font-semibold text-gray-900">{t.rotulo}</p>
-                <p className="mt-0.5 text-xs text-gray-500">{t.descricao}</p>
+                <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{t.rotulo}</p>
+                <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{t.descricao}</p>
               </div>
             </label>
           ))}
@@ -108,11 +104,11 @@ export default function RelatoriosPage() {
       </div>
 
       {/* Período */}
-      <div className="rounded-lg bg-white p-6 shadow-sm">
-        <h2 className="text-base font-semibold text-gray-900">Período</h2>
+      <div className="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-sm">
+        <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">Período</h2>
         <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
-            <label htmlFor="dataInicio" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="dataInicio" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Data de início
             </label>
             <input
@@ -120,11 +116,11 @@ export default function RelatoriosPage() {
               type="date"
               value={dataInicio}
               onChange={(e) => setDataInicio(e.target.value)}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
           <div>
-            <label htmlFor="dataFim" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="dataFim" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Data de fim
             </label>
             <input
@@ -132,7 +128,7 @@ export default function RelatoriosPage() {
               type="date"
               value={dataFim}
               onChange={(e) => setDataFim(e.target.value)}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
         </div>
@@ -156,7 +152,7 @@ export default function RelatoriosPage() {
         </button>
       </div>
 
-      <p className="text-xs text-gray-400">
+      <p className="text-xs text-gray-400 dark:text-gray-500">
         O PDF é gerado como HTML formatado. Abra o arquivo no navegador e use Ctrl+P → Salvar como PDF.
       </p>
     </div>

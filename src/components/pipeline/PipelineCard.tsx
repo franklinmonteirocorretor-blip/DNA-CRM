@@ -26,14 +26,12 @@ export default function PipelineCard({
       draggable
       onDragStart={onDragStart}
       onClick={onClick}
-      className={`rounded-md border bg-white p-2 cursor-pointer transition hover:shadow-md ${
-        isDragging ? 'opacity-40 scale-95' : ''
-      } ${alertaTempo ? 'border-red-200' : 'border-gray-200'}`}
+      className={`rounded-md border bg-white dark:bg-gray-800 p-2 cursor-pointer transition hover:shadow-md ${ isDragging ? 'opacity-40 scale-95' : '' } ${alertaTempo ? 'border-red-200' : 'border-gray-200'}`}
       style={{ borderLeftWidth: '3px', borderLeftColor: corEtapa }}
     >
       {/* Nome e alertas */}
       <div className="flex items-center justify-between">
-        <p className="text-xs font-semibold text-gray-900 truncate flex-1">{card.nome}</p>
+        <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate flex-1">{card.nome}</p>
         <div className="flex items-center gap-1 shrink-0">
           {alertaContato && <span className="text-[8px] text-red-500" title="Sem contato">📵</span>}
           {alertaTempo && <span className="text-[8px] text-red-500" title={`${diasNaEtapa}d na etapa`}>⏰</span>}
@@ -43,18 +41,18 @@ export default function PipelineCard({
 
       {/* Meta-info */}
       <div className="mt-1 flex items-center gap-2 text-[9px]">
-        <span className="text-gray-400">{card.corretorNome.split(' ')[0]}</span>
+        <span className="text-gray-400 dark:text-gray-500">{card.corretorNome.split(' ')[0]}</span>
         {card.empreendimentoInteresse && (
-          <span className="text-gray-400 truncate max-w-[80px]">{card.empreendimentoInteresse}</span>
+          <span className="text-gray-400 dark:text-gray-500 truncate max-w-[80px]">{card.empreendimentoInteresse}</span>
         )}
       </div>
 
       {/* VGV + próxima ação */}
       <div className="mt-1 flex items-center justify-between text-[9px]">
         {card.vgv ? (
-          <span className="font-semibold text-gray-600">{formatarMoedaCompacta(card.vgv)}</span>
+          <span className="font-semibold text-gray-600 dark:text-gray-400">{formatarMoedaCompacta(card.vgv)}</span>
         ) : (
-          <span className="text-gray-300">—</span>
+          <span className="text-gray-300 dark:text-gray-600">—</span>
         )}
         {card.proximaAcao && (
           <span className="text-blue-500 truncate max-w-[100px] text-right" title={card.proximaAcao}>

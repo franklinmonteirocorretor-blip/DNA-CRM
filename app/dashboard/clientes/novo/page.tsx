@@ -75,14 +75,14 @@ export default function NovoClientePage() {
       {/* Cabeçalho */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Novo Cliente</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Novo Cliente</h1>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Preencha os dados abaixo para cadastrar um novo lead.
           </p>
         </div>
         <Link
           href="/dashboard/clientes"
-          className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
+          className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700"
         >
           ← Voltar
         </Link>
@@ -103,22 +103,22 @@ export default function NovoClientePage() {
       )}
 
       {/* Formulário */}
-      <div className="rounded-lg bg-white p-6 shadow-sm">
+      <div className="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-sm">
         <form
           action={handleSubmit}
           className="space-y-6"
         >
           {/* Seção 1: Dados obrigatórios */}
           <div className="border-b pb-6">
-            <h2 className="text-base font-semibold text-gray-900">
+            <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">
               Dados do cliente{' '}
-              <span className="text-xs font-normal text-gray-400">(obrigatórios)</span>
+              <span className="text-xs font-normal text-gray-400 dark:text-gray-500">(obrigatórios)</span>
             </h2>
 
             <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
               {/* Nome */}
               <div>
-                <label htmlFor="nome" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="nome" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Nome *
                 </label>
                 <input
@@ -128,13 +128,13 @@ export default function NovoClientePage() {
                   required
                   maxLength={200}
                   placeholder="Nome completo do cliente"
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
 
               {/* CPF */}
               <div>
-                <label htmlFor="cpf" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="cpf" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   CPF *
                 </label>
                 <input
@@ -146,13 +146,13 @@ export default function NovoClientePage() {
                   onChange={(e) => setCpf(mascaraCPF(e.target.value))}
                   maxLength={14}
                   placeholder="000.000.000-00"
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
 
               {/* Telefone */}
               <div>
-                <label htmlFor="telefone" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="telefone" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Telefone *
                 </label>
                 <input
@@ -164,21 +164,21 @@ export default function NovoClientePage() {
                   onChange={(e) => setTelefone(mascaraTelefone(e.target.value))}
                   maxLength={15}
                   placeholder="(86) 99999-0000"
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
 
               {/* Email */}
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                  E-mail <span className="text-xs font-normal text-gray-400">(opcional)</span>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  E-mail <span className="text-xs font-normal text-gray-400 dark:text-gray-500">(opcional)</span>
                 </label>
                 <input
                   id="email"
                   name="email"
                   type="email"
                   placeholder="cliente@email.com"
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
             </div>
@@ -186,19 +186,19 @@ export default function NovoClientePage() {
 
           {/* Seção 2: Dados complementares */}
           <div className="border-b pb-6">
-            <h2 className="text-base font-semibold text-gray-900">
+            <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">
               Informações financeiras{' '}
-              <span className="text-xs font-normal text-gray-400">(opcionais)</span>
+              <span className="text-xs font-normal text-gray-400 dark:text-gray-500">(opcionais)</span>
             </h2>
 
             <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
               {/* Renda */}
               <div>
-                <label htmlFor="renda" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="renda" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Renda mensal
                 </label>
                 <div className="relative mt-1">
-                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-sm text-gray-400">
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-sm text-gray-400 dark:text-gray-500">
                     R$
                   </span>
                   <input
@@ -208,14 +208,14 @@ export default function NovoClientePage() {
                     min={0}
                     step={0.01}
                     placeholder="0,00"
-                    className="block w-full rounded-md border border-gray-300 py-2 pl-10 pr-3 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="block w-full rounded-md border border-gray-300 dark:border-gray-600 py-2 pl-10 pr-3 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
               </div>
 
               {/* Dependentes */}
               <div>
-                <label htmlFor="dependentes" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="dependentes" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Dependentes
                 </label>
                 <input
@@ -225,13 +225,13 @@ export default function NovoClientePage() {
                   min={0}
                   max={20}
                   defaultValue={0}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
 
               {/* Empreendimento */}
               <div>
-                <label htmlFor="empreendimento_id" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="empreendimento_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Empreendimento de interesse
                 </label>
                 <SelectEmpreendimento name="empreendimento_id" />
@@ -241,8 +241,8 @@ export default function NovoClientePage() {
 
           {/* Seção 3: Observações */}
           <div>
-            <label htmlFor="observacoes" className="block text-sm font-medium text-gray-700">
-              Observações <span className="text-xs font-normal text-gray-400">(opcional)</span>
+            <label htmlFor="observacoes" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Observações <span className="text-xs font-normal text-gray-400 dark:text-gray-500">(opcional)</span>
             </label>
             <textarea
               id="observacoes"
@@ -250,7 +250,7 @@ export default function NovoClientePage() {
               rows={3}
               maxLength={1000}
               placeholder="Anotações livres sobre o cliente..."
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
 
@@ -258,7 +258,7 @@ export default function NovoClientePage() {
           <div className="flex items-center justify-end gap-3 border-t pt-4">
             <Link
               href="/dashboard/clientes"
-              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
+              className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700"
             >
               Cancelar
             </Link>

@@ -119,7 +119,7 @@ export default function BarraBuscaFiltros() {
           onChange={(e) => setBusca(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Buscar por nome ou CPF..."
-          className="w-full rounded-l-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="w-full rounded-l-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
         />
         <button
           onClick={handleBuscar}
@@ -133,7 +133,7 @@ export default function BarraBuscaFiltros() {
       <select
         value={etapaAtual}
         onChange={handleMudarEtapa}
-        className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
       >
         {ETAPA_LABELS.map((e) => (
           <option key={e.valor} value={e.valor}>
@@ -146,7 +146,7 @@ export default function BarraBuscaFiltros() {
       <select
         value={empreendimentoAtual}
         onChange={handleMudarEmpreendimento}
-        className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
       >
         <option value="">Todos os empreendimentos</option>
         {empreendimentos.map((emp) => (
@@ -160,7 +160,7 @@ export default function BarraBuscaFiltros() {
       <select
         value={ordemAtual}
         onChange={handleMudarOrdem}
-        className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
       >
         {ORDENACAO_LABELS.map((o) => (
           <option key={o.valor} value={o.valor}>
@@ -173,7 +173,7 @@ export default function BarraBuscaFiltros() {
       {temFiltros && (
         <button
           onClick={handleLimpar}
-          className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+          className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-700"
         >
           ✕ Limpar filtros
         </button>

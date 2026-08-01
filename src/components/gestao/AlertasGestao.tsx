@@ -44,7 +44,7 @@ function PainelAlerta({
         )}
       </div>
       {itens.length === 0 ? (
-        <p className="text-xs text-gray-400">{vazio}</p>
+        <p className="text-xs text-gray-400 dark:text-gray-500">{vazio}</p>
       ) : (
         <ul className="space-y-1.5">
           {itens.map((item, idx) => renderItem(item, idx))}
@@ -57,7 +57,7 @@ function PainelAlerta({
 export default function AlertasGestao({ dados }: { dados: GestaoAlertas }) {
   return (
     <section>
-      <h2 className="text-lg font-semibold text-gray-900">Alertas</h2>
+      <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Alertas</h2>
       <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
         <PainelAlerta
           titulo="Sem contato +3 dias"
@@ -69,10 +69,10 @@ export default function AlertasGestao({ dados }: { dados: GestaoAlertas }) {
             const i = item as GestaoAlertas['clientesSemContato3dias'][0]
             return (
               <li key={i.clienteId} className="text-xs">
-                <Link href={`/dashboard/clientes/${i.clienteId}`} className="text-gray-700 hover:text-red-600 transition">
+                <Link href={`/dashboard/clientes/${i.clienteId}`} className="text-gray-700 dark:text-gray-300 hover:text-red-600 transition">
                   {i.nome}
                 </Link>
-                <span className="ml-2 text-gray-400">
+                <span className="ml-2 text-gray-400 dark:text-gray-500">
                   {i.diasSemContato}d · {i.corretorNome} · {i.etapa}
                 </span>
               </li>
@@ -91,8 +91,8 @@ export default function AlertasGestao({ dados }: { dados: GestaoAlertas }) {
             const data = new Date(i.dataHora).toLocaleDateString('pt-BR')
             return (
               <li key={i.agendamentoId} className="text-xs">
-                <span className="text-gray-700">{i.clienteNome}</span>
-                <span className="ml-2 text-gray-400">
+                <span className="text-gray-700 dark:text-gray-300">{i.clienteNome}</span>
+                <span className="ml-2 text-gray-400 dark:text-gray-500">
                   {data} · {i.corretorNome} · Cancelado
                 </span>
               </li>
@@ -110,10 +110,10 @@ export default function AlertasGestao({ dados }: { dados: GestaoAlertas }) {
             const i = item as GestaoAlertas['pendenciasDocumentais'][0]
             return (
               <li key={i.clienteId} className="text-xs">
-                <Link href={`/dashboard/clientes/${i.clienteId}`} className="text-gray-700 hover:text-blue-600 transition">
+                <Link href={`/dashboard/clientes/${i.clienteId}`} className="text-gray-700 dark:text-gray-300 hover:text-blue-600 transition">
                   {i.clienteNome}
                 </Link>
-                <span className="ml-2 text-gray-400">
+                <span className="ml-2 text-gray-400 dark:text-gray-500">
                   {i.qtdDocumentosPendentes} doc(s) · {i.etapa}
                 </span>
               </li>
@@ -131,10 +131,10 @@ export default function AlertasGestao({ dados }: { dados: GestaoAlertas }) {
             const i = item as GestaoAlertas['clientesParadosFunil'][0]
             return (
               <li key={i.clienteId} className="text-xs">
-                <Link href={`/dashboard/clientes/${i.clienteId}`} className="text-gray-700 hover:text-purple-600 transition">
+                <Link href={`/dashboard/clientes/${i.clienteId}`} className="text-gray-700 dark:text-gray-300 hover:text-purple-600 transition">
                   {i.nome}
                 </Link>
-                <span className="ml-2 text-gray-400">
+                <span className="ml-2 text-gray-400 dark:text-gray-500">
                   {i.diasNaEtapa}d · {i.etapa} · {i.corretorNome}
                 </span>
               </li>
@@ -158,10 +158,10 @@ export default function AlertasGestao({ dados }: { dados: GestaoAlertas }) {
           <ul className="space-y-1.5">
             {dados.aguardandoRetorno.map((i) => (
               <li key={i.clienteId} className="text-xs">
-                <Link href={`/dashboard/clientes/${i.clienteId}`} className="text-gray-700 hover:text-amber-600 transition">
+                <Link href={`/dashboard/clientes/${i.clienteId}`} className="text-gray-700 dark:text-gray-300 hover:text-amber-600 transition">
                   {i.nome}
                 </Link>
-                <span className="ml-2 text-gray-400">
+                <span className="ml-2 text-gray-400 dark:text-gray-500">
                   {i.proximaAcao} · {i.corretorNome}
                 </span>
                 <span className="ml-2 text-amber-500">

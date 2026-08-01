@@ -12,7 +12,7 @@ export default async function CorretoresPage() {
   if (!user) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-gray-400">Você precisa estar autenticado.</p>
+        <p className="text-gray-400 dark:text-gray-500">Você precisa estar autenticado.</p>
       </div>
     )
   }
@@ -23,8 +23,8 @@ export default async function CorretoresPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Corretores</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Corretores</h1>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Gestão completa da equipe de corretores.
           </p>
         </div>

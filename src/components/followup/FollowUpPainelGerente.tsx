@@ -16,8 +16,8 @@ function formatarMinutos(minutos: number): string {
 /** Seção 7 — Painel do Gerente (visão global) */
 export default function FollowUpPainelGerente({ painel }: Props) {
   return (
-    <div className="rounded-lg bg-white p-5 shadow-sm">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400">Painel Gerencial</h2>
+    <div className="rounded-lg bg-white dark:bg-gray-800 p-5 shadow-sm">
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Painel Gerencial</h2>
 
       {/* KPIs */}
       <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -41,7 +41,7 @@ export default function FollowUpPainelGerente({ painel }: Props) {
                 <span>💀</span>
                 <span className="font-medium">{c.nome}</span>
                 <span className="text-red-500">{c.diasSemContato}d</span>
-                <span className="ml-auto text-gray-400">{c.corretorNome}</span>
+                <span className="ml-auto text-gray-400 dark:text-gray-500">{c.corretorNome}</span>
               </Link>
             ))}
           </div>
@@ -67,8 +67,8 @@ export default function FollowUpPainelGerente({ painel }: Props) {
 
 function Card({ label, value, destaque }: { label: string; value: string; destaque?: string }) {
   return (
-    <div className="rounded-md bg-gray-50 p-3">
-      <span className="text-[11px] font-medium uppercase text-gray-400">{label}</span>
+    <div className="rounded-md bg-gray-50 dark:bg-gray-700 p-3">
+      <span className="text-[11px] font-medium uppercase text-gray-400 dark:text-gray-500">{label}</span>
       <p className={`mt-1 text-sm font-semibold ${destaque ?? 'text-gray-900'}`}>{value}</p>
     </div>
   )

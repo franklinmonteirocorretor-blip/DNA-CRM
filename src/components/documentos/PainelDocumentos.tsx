@@ -23,7 +23,7 @@ export default function PainelDocumentos({ dados }: { dados: PainelDocumentosTyp
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-gray-200 text-left text-[10px] font-medium uppercase tracking-wide text-gray-400">
+            <tr className="border-b border-gray-200 dark:border-gray-600 text-left text-[10px] font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">
               <th className="pb-3">Cliente</th>
               <th className="pb-3">Corretor</th>
               <th className="pb-3">Etapa</th>
@@ -36,14 +36,14 @@ export default function PainelDocumentos({ dados }: { dados: PainelDocumentosTyp
           </thead>
           <tbody>
             {dados.clientesResumo.map((c) => (
-              <tr key={c.clienteId} className="border-b border-gray-100 hover:bg-gray-50 transition">
+              <tr key={c.clienteId} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
                 <td className="py-2">
                   <Link href={`/dashboard/clientes/${c.clienteId}`} className="font-medium text-blue-600 hover:underline">
                     {c.nome}
                   </Link>
                 </td>
-                <td className="py-2 text-gray-500">{c.corretorNome}</td>
-                <td className="py-2 text-gray-500 text-xs">{c.etapaAtual}</td>
+                <td className="py-2 text-gray-500 dark:text-gray-400">{c.corretorNome}</td>
+                <td className="py-2 text-gray-500 dark:text-gray-400 text-xs">{c.etapaAtual}</td>
                 <td className="py-2 text-right tabular-nums text-emerald-600 font-semibold">{c.docsAprovados}</td>
                 <td className="py-2 text-right tabular-nums text-amber-600">{c.docsPendentes}</td>
                 <td className="py-2 text-right tabular-nums text-red-500">{c.docsRejeitados}</td>
@@ -54,7 +54,7 @@ export default function PainelDocumentos({ dados }: { dados: PainelDocumentosTyp
                     <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">Pendente</span>
                   )}
                 </td>
-                <td className="py-2 text-xs text-gray-400">
+                <td className="py-2 text-xs text-gray-400 dark:text-gray-500">
                   {c.ultimaAtualizacao ? new Date(c.ultimaAtualizacao).toLocaleDateString('pt-BR') : '—'}
                 </td>
               </tr>
@@ -64,8 +64,8 @@ export default function PainelDocumentos({ dados }: { dados: PainelDocumentosTyp
       </div>
 
       {dados.clientesResumo.length === 0 && (
-        <div className="rounded-lg border border-dashed border-gray-300 p-8 text-center">
-          <p className="text-sm text-gray-400">Nenhum cliente em etapas que exigem documentação.</p>
+        <div className="rounded-lg border border-dashed border-gray-300 dark:border-gray-600 p-8 text-center">
+          <p className="text-sm text-gray-400 dark:text-gray-500">Nenhum cliente em etapas que exigem documentação.</p>
         </div>
       )}
     </div>
