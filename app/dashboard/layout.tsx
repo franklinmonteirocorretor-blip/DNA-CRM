@@ -1,103 +1,140 @@
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
-import NotificacoesBell from '@/src/components/layout/NotificacoesBell'
-import ThemeToggle from '@/src/components/layout/ThemeToggle'
+import { Sidebar, DashboardHeader } from '@/src/components/layout'
+import type { SidebarGroupData } from '@/src/components/layout'
+import {
+  LayoutDashboard,
+  Users,
+  Funnel,
+  CalendarDays,
+  Clock4,
+  FileText,
+  DollarSign,
+  Star,
+  BarChart3,
+  Settings,
+  MessageCircle,
+  Zap,
+  Building2,
+  FileSpreadsheet,
+} from 'lucide-react'
 
-// Layout do Dashboard — protege todas as páginas dentro de /dashboard/*
-// Se o usuário não estiver logado, redireciona para /login automaticamente.
-// Isso é uma segunda camada de segurança (além do middleware).
+// ─── DNA CRM v2.0 — Layout Principal (Sidebar + Header) ─────────────────
+// Elimina a navbar horizontal. Sidebar fixa + Header compacto.
+// Referências: Linear, Vercel, Stripe, Clerk, GitHub, Supabase Studio, Raycast.
 
+// ─── Helper: wrapper de ícone lucide com tamanho padrão ────────────────
+const i = (Icon: React.ComponentType<{ className?: string }>) => (
+  <Icon className="h-[18px] w-[18px]" />
+)
+
+// ─── Sidebar Groups ─────────────────────────────────────────────────────
+function buildGroups(isManager: boolean, canSeeFinance: boolean): SidebarGroupData[] {
+  return [
+    {
+      label: 'Principal',
+      items: [
+        { label: 'Dashboard', href: '/dashboard',          icon: i(LayoutDashboard) },
+        { label: 'Operação',  href: '/dashboard/operacao', icon: i(Clock4) },
+      ],
+    },
+    {
+      label: 'CRM',
+      items: [
+        { label: 'Clientes',   href: '/dashboard/clientes',   icon: i(Users) },
+        { label: 'Funil',       href: '/dashboard/funil',     icon: i(Funnel) },
+        { label: 'Agenda',      href: '/dashboard/agenda',    icon: i(CalendarDays) },
+        { label: 'Follow-up',   href: '/dashboard/followup',  icon: i(Clock4) },
+        { label: 'Documentos',  href: '/dashboard/documentos',icon: i(FileText) },
+      ],
+    },
+    {
+      label: 'Gestão',
+      items: [
+        ...(canSeeFinance
+          ? [{ label: 'Financeiro', href: '/dashboard/financeiro', icon: i(DollarSign) }]
+          : []),
+        { label: 'Corretores', href: '/dashboard/corretores', icon: i(Users) },
+        { label: 'Rankings',   href: '/dashboard/rankings',   icon: i(Star) },
+        { label: 'BI',         href: '/dashboard/bi',         icon: i(BarChart3) },
+        { label: 'Gestão',     href: '/dashboard/gestao',     icon: i(Settings) },
+      ],
+    },
+    {
+      label: 'Comunicação',
+      items: [
+        { label: 'WhatsApp',  href: '/dashboard/whatsapp',  icon: i(MessageCircle) },
+        { label: 'Copiloto',  href: '/dashboard/copiloto',  icon: i(Zap) },
+      ],
+    },
+    {
+      label: 'Configuração',
+      items: [
+        { label: 'Empreendimentos', href: '/dashboard/empreendimentos', icon: i(Building2) },
+        { label: 'Automações',      href: '/dashboard/automacoes',      icon: i(Settings) },
+        { label: 'Relatórios',      href: '/dashboard/relatorios',       icon: i(FileSpreadsheet) },
+        ...(isManager
+          ? [{ label: 'Equipe', href: '/dashboard/equipe', icon: i(Users) }]
+          : []),
+      ],
+    },
+  ]
+}
+
+// ─── Layout Component ────────────────────────────────────────────────────
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
   const supabase = await createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/login')
-  }
-
-  // Busca o perfil do usuário para exibir no header
   const { data: usuario } = await supabase
     .from('usuarios')
     .select('nome, perfil, avatar_url')
     .eq('id', user.id)
     .single()
 
-  const ehGerente = usuario?.perfil === 'GERENTE' || usuario?.perfil === 'ADMINISTRADOR'
-  const podeVerFinanceiro = ehGerente || usuario?.perfil === 'SUPERVISOR'
+  const isManager = usuario?.perfil === 'GERENTE' || usuario?.perfil === 'ADMINISTRADOR'
+  const canSeeFinance = isManager || usuario?.perfil === 'SUPERVISOR'
+  const groups = buildGroups(isManager, canSeeFinance)
+
+  const displayName = usuario?.nome ?? user.email ?? 'Usuário'
+  const initials = displayName
+    .split(' ')
+    .slice(0, 2)
+    .map((s: string) => s[0])
+    .join('')
+    .toUpperCase()
 
   return (
-    <div className="flex h-screen flex-col bg-gray-50 dark:bg-gray-950">
-      {/* Header simples */}
-      <header className="flex items-center justify-between border-b bg-white px-6 py-3 shadow-sm dark:bg-gray-900 dark:border-gray-800">
-        <div className="flex items-center gap-3">
-          <Link href="/dashboard" className="text-lg font-bold text-gray-900 hover:text-blue-600 dark:text-gray-100">
-            DNA CRM
-          </Link>
-          <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-700">
-            {usuario?.perfil ?? 'CORRETOR'}
-          </span>
-        </div>
-        <div className="flex items-center gap-3">
-          <ThemeToggle />
-          <NotificacoesBell usuarioId={user.id} />
-          <span className="text-sm text-gray-600 dark:text-gray-400">
-            {usuario?.nome ?? user.email}
-          </span>
-          <form action="/auth/signout" method="post">
-            <button
-              type="submit"
-              className="rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-            >
-              Sair
-            </button>
-          </form>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+      {/* ── Header compacto ── */}
+      <DashboardHeader
+        userId={user.id}
+        userName={displayName}
+        userEmail={user.email ?? ''}
+        userInitials={initials}
+      />
 
-      {/* Navegação secundária */}
-      <nav className="border-b bg-white px-6 py-2 dark:bg-gray-900 dark:border-gray-800">
-        <div className="flex items-center gap-1 overflow-x-auto">
-          <NavLink href="/dashboard">Dashboard</NavLink>
-          <NavLink href="/dashboard/operacao">Operação</NavLink>
-          <NavLink href="/dashboard/clientes">Clientes</NavLink>
-          <NavLink href="/dashboard/documentos">Documentos</NavLink>
-          <NavLink href="/dashboard/followup">Follow-up</NavLink>
-          <NavLink href="/dashboard/corretores">Corretores</NavLink>
-          <NavLink href="/dashboard/agenda">Agenda</NavLink>
-          <NavLink href="/dashboard/gestao">Gestão</NavLink>
-          <NavLink href="/dashboard/bi">BI</NavLink>
-          {podeVerFinanceiro && <NavLink href="/dashboard/financeiro">Financeiro</NavLink>}
-          <NavLink href="/dashboard/funil">Funil</NavLink>
-          <NavLink href="/dashboard/empreendimentos">Empreendimentos</NavLink>
-          <NavLink href="/dashboard/rankings">Rankings</NavLink>
-          <NavLink href="/dashboard/copiloto">Copiloto</NavLink>
-          <NavLink href="/dashboard/whatsapp">WhatsApp</NavLink>
-          <NavLink href="/dashboard/relatorios">Relatórios</NavLink>
-          {ehGerente && <NavLink href="/dashboard/equipe">Equipe</NavLink>}
-        </div>
-      </nav>
+      <div className="flex">
+        {/* ── Sidebar ── */}
+        <Sidebar
+          groups={groups}
+          usuarioNome={displayName}
+          usuarioPerfil={usuario?.perfil ?? 'CORRETOR'}
+        />
 
-      {/* Conteúdo da página */}
-      <main className="flex-1 overflow-auto p-6">{children}</main>
+        {/* ── Conteúdo ── */}
+        <main
+          className="flex-1 min-h-[calc(100vh-48px)] p-6"
+          style={{ minWidth: 0 }}
+        >
+          {children}
+        </main>
+      </div>
     </div>
-  )
-}
-
-function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
-  return (
-    <Link
-      href={href}
-      className="rounded-md px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
-    >
-      {children}
-    </Link>
   )
 }
