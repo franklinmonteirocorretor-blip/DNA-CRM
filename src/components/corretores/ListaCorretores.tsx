@@ -1,4 +1,5 @@
 import { CorretorGestao } from '@/src/types'
+import { EmptyState } from '@/src/components/ui/EmptyState'
 import Link from 'next/link'
 import { formatarMoeda } from '@/src/lib/formatters'
 
@@ -20,9 +21,7 @@ function StatusBadge({ status }: { status: string }) {
 export default function ListaCorretores({ corretores }: { corretores: CorretorGestao[] }) {
   if (corretores.length === 0) {
     return (
-      <div className="rounded-lg border border-dashed border-gray-300 dark:border-gray-600 p-8 text-center">
-        <p className="text-sm text-gray-400 dark:text-gray-500">Nenhum corretor encontrado.</p>
-      </div>
+      <EmptyState variant="dashed" title="Nenhum corretor encontrado." />
     )
   }
 

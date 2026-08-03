@@ -18,7 +18,7 @@ export function CopilotResumo({ resumo }: ResumoProps) {
   }
 
   return (
-    <section className="mb-6 rounded-lg bg-white dark:bg-gray-800 p-5 shadow-sm border">
+    <section className="mb-6 rounded-lg bg-white dark:bg-gray-900 p-5 shadow-sm border">
       {/* Saudação */}
       <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">{resumo.titulo}</h2>
       <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{resumo.saudacao}</p>

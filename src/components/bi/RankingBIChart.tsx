@@ -12,9 +12,9 @@ function formatoPercentual(valor: number): string {
 }
 
 const CORES_PODIO = [
-  'border-amber-400 bg-amber-50',
-  'border-gray-300 bg-gray-50',
-  'border-orange-400 bg-orange-50',
+  'border-amber-400 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-700/30',
+  'border-gray-300 bg-gray-50 dark:bg-gray-800 dark:border-gray-600',
+  'border-orange-400 bg-orange-50 dark:bg-orange-950/20 dark:border-orange-700/30',
 ]
 
 const ICONES_PODIO = ['1', '2', '3']
@@ -28,7 +28,7 @@ function PodioItem({
 }) {
   return (
     <div
-      className={`rounded-xl border-2 ${CORES_PODIO[posicao] ?? 'border-gray-200 bg-white'} p-4 shadow-sm`}
+      className={`rounded-lg border-2 ${CORES_PODIO[posicao] ?? 'border-gray-200 bg-white'} p-4 shadow-sm`}
     >
       <div className="flex items-center gap-3">
         <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white dark:bg-gray-800 text-lg font-bold shadow-sm text-gray-800">
@@ -64,7 +64,7 @@ export default function RankingBIChart({ items }: { items: BIRankingItem[] }) {
   const tabela = items.slice(3)
 
   return (
-    <div className="rounded-xl bg-white dark:bg-gray-800 shadow-sm border p-5">
+    <div className="rounded-lg bg-white dark:bg-gray-800 shadow-sm border p-5">
       <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">Ranking de Corretores</h3>
 
       {top3.length > 0 && (

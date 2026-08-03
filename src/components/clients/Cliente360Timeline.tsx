@@ -29,7 +29,7 @@ const TIPO_LABEL: Record<Cliente360Evento['tipo'], string> = {
 /** Seção 2 — Timeline cronológica completa */
 export default function Cliente360Timeline({ timeline }: Props) {
   return (
-    <div className="rounded-lg bg-white dark:bg-gray-800 p-5 shadow-sm">
+    <div className="rounded-lg bg-white dark:bg-gray-900 p-5 shadow-sm">
       <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
         Timeline ({timeline.length} eventos)
       </h2>

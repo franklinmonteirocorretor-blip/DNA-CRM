@@ -28,7 +28,7 @@ function formatarTempo(minutos: number): string {
 /** Seção 2 — Próximas ações agendadas */
 export default function FollowUpProximasAcoes({ acoes }: Props) {
   return (
-    <div className="rounded-lg bg-white dark:bg-gray-800 p-5 shadow-sm">
+    <div className="rounded-lg bg-white dark:bg-gray-900 p-5 shadow-sm">
       <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
         Próximas Ações ({acoes.length})
       </h2>

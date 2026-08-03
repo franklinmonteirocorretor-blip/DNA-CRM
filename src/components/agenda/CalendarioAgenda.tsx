@@ -5,6 +5,7 @@ import { listarAgendamentos, buscarOpcoesFiltros } from '@/app/dashboard/agenda/
 import { AgendaEvent, AgendaFiltros, AgendaView } from '@/src/types'
 import PainelLateralAgenda from './PainelLateralAgenda'
 import AlertasAgenda from './AlertasAgenda'
+import { LoadingIndicator } from '@/src/components/ui/LoadingIndicator'
 
 // Labels e cores dos status
 const STATUS_LABEL: Record<string, string> = {
@@ -287,9 +288,7 @@ export default function CalendarioAgenda() {
 
       {/* Loading */}
       {carregando && (
-        <div className="rounded-lg bg-white dark:bg-gray-800 p-12 text-center shadow-sm">
-          <p className="text-sm text-gray-400 dark:text-gray-500 animate-pulse">Carregando agenda...</p>
-        </div>
+        <LoadingIndicator text="Carregando agenda..." size="md" />
       )}
 
       {/* ─── Conteúdo da View ─── */}
@@ -547,7 +546,7 @@ function CalendarioDiario({
           )
         })}
         {eventosDia.length === 0 && (
-          <div className="p-8 text-center text-sm text-gray-400 dark:text-gray-500">Nenhum compromisso neste dia.</div>
+          <LoadingIndicator text="Nenhum compromisso neste dia." size="sm" />
         )}
       </div>
     </div>

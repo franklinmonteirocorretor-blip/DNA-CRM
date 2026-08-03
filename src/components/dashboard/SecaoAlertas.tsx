@@ -94,10 +94,10 @@ function labelTipoDocumento(tipo: string): string {
 
 function Badge({ children, cor }: { children: React.ReactNode; cor: 'vermelho' | 'amarelo' | 'azul' | 'roxo' }) {
   const cores = {
-    vermelho: 'bg-red-100 text-red-700 border-red-200',
-    amarelo: 'bg-amber-100 text-amber-700 border-amber-200',
-    azul: 'bg-blue-100 text-blue-700 border-blue-200',
-    roxo: 'bg-purple-100 text-purple-700 border-purple-200',
+    vermelho: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800',
+    amarelo: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800',
+    azul: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800',
+    roxo: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800',
   }
   return (
     <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium ${cores[cor]}`}>
@@ -138,14 +138,14 @@ export default function SecaoAlertas({
     <div className="space-y-4">
       {/* ── 1. CLIENTES SEM CONTATO (URGENTE) ────────────────────────────── */}
       {clientesParados.length > 0 && (
-        <div className="rounded-xl border-2 border-red-200 bg-red-50 p-5 shadow-sm">
+        <div className="rounded-lg border-2 border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-5 shadow-sm">
           <TituloSecao
             icone="🚨"
             texto="Clientes sem contato"
-            cor="text-red-800"
+            cor="text-red-800 dark:text-red-300"
             count={clientesParados.length}
           />
-          <p className="mt-1 text-xs text-red-600">
+          <p className="mt-1 text-xs text-red-600 dark:text-red-400">
             Estes clientes estão parados há 5+ dias sem nenhuma atividade registrada.
           </p>
           <ul className="mt-3 space-y-2">
@@ -153,7 +153,7 @@ export default function SecaoAlertas({
               <li key={c.id}>
                 <Link
                   href={`/dashboard/clientes/${c.id}`}
-                  className="flex items-center justify-between rounded-lg border border-red-200 bg-white dark:bg-gray-800 px-4 py-2.5 transition hover:bg-red-100"
+                  className="flex items-center justify-between rounded-lg border border-red-200 dark:border-red-800 bg-white dark:bg-gray-800 px-4 py-2.5 transition hover:bg-red-100 dark:hover:bg-red-900/30"
                 >
                   <div>
                     <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{c.nome}</span>
@@ -170,7 +170,7 @@ export default function SecaoAlertas({
           </ul>
           <Link
             href="/dashboard/clientes"
-            className="mt-3 inline-block text-xs font-medium text-red-700 underline hover:text-red-900"
+            className="mt-3 inline-block text-xs font-medium text-red-700 dark:text-red-400 underline hover:text-red-900 dark:hover:text-red-300"
           >
             Ver todos os clientes →
           </Link>
@@ -179,14 +179,14 @@ export default function SecaoAlertas({
 
       {/* ── 2. AGENDAMENTOS HOJE / AMANHÃ ────────────────────────────────── */}
       {agendamentosProximos.length > 0 && (
-        <div className="rounded-xl border-2 border-blue-200 bg-blue-50 p-5 shadow-sm">
+        <div className="rounded-lg border-2 border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 p-5 shadow-sm">
           <TituloSecao
             icone="📅"
             texto="Agendamentos próximos"
-            cor="text-blue-800"
+            cor="text-blue-800 dark:text-blue-300"
             count={agendamentosProximos.length}
           />
-          <p className="mt-1 text-xs text-blue-600">
+          <p className="mt-1 text-xs text-blue-600 dark:text-blue-400">
             Compromissos para hoje e amanhã.
           </p>
           <ul className="mt-3 space-y-2">
@@ -194,7 +194,7 @@ export default function SecaoAlertas({
               <li key={a.id}>
                 <Link
                   href={`/dashboard/clientes/${a.cliente_id}`}
-                  className="flex items-center justify-between rounded-lg border border-blue-200 bg-white dark:bg-gray-800 px-4 py-2.5 transition hover:bg-blue-100"
+                  className="flex items-center justify-between rounded-lg border border-blue-200 dark:border-blue-800 bg-white dark:bg-gray-800 px-4 py-2.5 transition hover:bg-blue-100 dark:hover:bg-blue-900/30"
                 >
                   <div>
                     <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
@@ -216,14 +216,14 @@ export default function SecaoAlertas({
 
       {/* ── 3. DOCUMENTOS PENDENTES ──────────────────────────────────────── */}
       {docsPendentes.length > 0 && (
-        <div className="rounded-xl border-2 border-amber-200 bg-amber-50 p-5 shadow-sm">
+        <div className="rounded-lg border-2 border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 p-5 shadow-sm">
           <TituloSecao
             icone="📄"
             texto="Documentos pendentes de validação"
-            cor="text-amber-800"
+            cor="text-amber-800 dark:text-amber-300"
             count={docsPendentes.length}
           />
-          <p className="mt-1 text-xs text-amber-600">
+          <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">
             Documentos enviados que aguardam validação.
           </p>
           <ul className="mt-3 space-y-2">
@@ -231,7 +231,7 @@ export default function SecaoAlertas({
               <li key={d.id}>
                 <Link
                   href={`/dashboard/clientes/${d.cliente_id}`}
-                  className="flex items-center justify-between rounded-lg border border-amber-200 bg-white dark:bg-gray-800 px-4 py-2.5 transition hover:bg-amber-100"
+                  className="flex items-center justify-between rounded-lg border border-amber-200 dark:border-amber-800 bg-white dark:bg-gray-800 px-4 py-2.5 transition hover:bg-amber-100 dark:hover:bg-amber-900/30"
                 >
                   <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
                     {labelTipoDocumento(d.tipo)}
@@ -246,14 +246,14 @@ export default function SecaoAlertas({
 
       {/* ── 4. PÓS-VENDA COM PRAZO ──────────────────────────────────────── */}
       {posVendaAlertas.length > 0 && (
-        <div className="rounded-xl border-2 border-purple-200 bg-purple-50 p-5 shadow-sm">
+        <div className="rounded-lg border-2 border-purple-200 dark:border-purple-800 bg-purple-50 dark:bg-purple-900/20 p-5 shadow-sm">
           <TituloSecao
             icone="🏠"
             texto="Pós-venda — prazos próximos"
-            cor="text-purple-800"
+            cor="text-purple-800 dark:text-purple-300"
             count={posVendaAlertas.length}
           />
-          <p className="mt-1 text-xs text-purple-600">
+          <p className="mt-1 text-xs text-purple-600 dark:text-purple-400">
             Próximas ações com prazo vencendo ou vencido.
           </p>
           <ul className="mt-3 space-y-2">
@@ -261,7 +261,7 @@ export default function SecaoAlertas({
               <li key={pv.id}>
                 <Link
                   href={`/dashboard/clientes/${pv.id}`}
-                  className="flex items-center justify-between rounded-lg border border-purple-200 bg-white dark:bg-gray-800 px-4 py-2.5 transition hover:bg-purple-100"
+                  className="flex items-center justify-between rounded-lg border border-purple-200 dark:border-purple-800 bg-white dark:bg-gray-800 px-4 py-2.5 transition hover:bg-purple-100 dark:hover:bg-purple-900/30"
                 >
                   <div>
                     <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{pv.nome}</span>
@@ -283,7 +283,7 @@ export default function SecaoAlertas({
 
       {/* ── Estado vazio ─────────────────────────────────────────────────── */}
       {!temAlgumAlerta && (
-        <div className="rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-8 text-center shadow-sm">
+        <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50 p-4 text-center">
           <span className="text-3xl">✅</span>
           <p className="mt-2 text-sm font-medium text-gray-600 dark:text-gray-400">
             Tudo em dia! Nenhum alerta no momento.

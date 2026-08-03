@@ -123,7 +123,7 @@ export default function SecaoDocumentos({
   const pastaOk = pastaCompleta
 
   return (
-    <div className="rounded-lg bg-white dark:bg-gray-800 p-5 shadow-sm space-y-5">
+    <div className="rounded-lg bg-white dark:bg-gray-900 p-5 shadow-sm space-y-5">
       {/* Cabeçalho */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">

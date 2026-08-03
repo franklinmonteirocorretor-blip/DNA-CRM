@@ -1,4 +1,5 @@
 import { GestaoMeta } from '@/src/types'
+import { SectionHeader } from '@/src/components/ui/SectionHeader'
 
 export default function SecaoMetas({ dados }: { dados: GestaoMeta }) {
   const calcPct = (real: number, meta: number) =>
@@ -12,7 +13,7 @@ export default function SecaoMetas({ dados }: { dados: GestaoMeta }) {
 
   return (
     <section>
-      <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Metas</h2>
+      <SectionHeader title="Metas" />
       <div className="mt-3 space-y-4">
         {/* Meta da Equipe */}
         <div className="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 p-4">

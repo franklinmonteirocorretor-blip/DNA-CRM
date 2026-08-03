@@ -1,5 +1,6 @@
 import { GestaoAlertas } from '@/src/types'
 import Link from 'next/link'
+import { SectionHeader } from '@/src/components/ui/SectionHeader'
 
 function PainelAlerta({
   titulo,
@@ -57,7 +58,7 @@ function PainelAlerta({
 export default function AlertasGestao({ dados }: { dados: GestaoAlertas }) {
   return (
     <section>
-      <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Alertas</h2>
+      <SectionHeader title="Alertas" />
       <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
         <PainelAlerta
           titulo="Sem contato +3 dias"

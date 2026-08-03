@@ -534,11 +534,11 @@ export default function FormEdicaoCliente(props: FormEdicaoClienteProps) {
 
       {/* ──── Modo VISUALIZAÇÃO (cards originais) ──── */}
       {!modoEdicao && (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {/* Coluna Esquerda — Dados pessoais e financeiros */}
           <div className="space-y-6">
             {/* Card: Dados pessoais */}
-            <div className="rounded-lg bg-white dark:bg-gray-800 p-5 shadow-sm">
+            <div className="rounded-lg bg-white dark:bg-gray-900 p-5 shadow-sm">
               <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
                 Dados pessoais
               </h2>
@@ -551,7 +551,7 @@ export default function FormEdicaoCliente(props: FormEdicaoClienteProps) {
             </div>
 
             {/* Card: Informações financeiras */}
-            <div className="rounded-lg bg-white dark:bg-gray-800 p-5 shadow-sm">
+            <div className="rounded-lg bg-white dark:bg-gray-900 p-5 shadow-sm">
               <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
                 Informações financeiras
               </h2>
@@ -566,7 +566,7 @@ export default function FormEdicaoCliente(props: FormEdicaoClienteProps) {
 
             {/* Card: Observações */}
             {cliente.observacoes && (
-              <div className="rounded-lg bg-white dark:bg-gray-800 p-5 shadow-sm">
+              <div className="rounded-lg bg-white dark:bg-gray-900 p-5 shadow-sm">
                 <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
                   Observações
                 </h2>
@@ -580,7 +580,7 @@ export default function FormEdicaoCliente(props: FormEdicaoClienteProps) {
           {/* Coluna Direita — Cônjuge + Status do funil */}
           <div className="space-y-6">
             {/* Card: Cônjuge */}
-            <div className="rounded-lg bg-white dark:bg-gray-800 p-5 shadow-sm">
+            <div className="rounded-lg bg-white dark:bg-gray-900 p-5 shadow-sm">
               <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
                 Cônjuge
               </h2>
@@ -615,7 +615,7 @@ export default function FormEdicaoCliente(props: FormEdicaoClienteProps) {
             </div>
 
             {/* Card: Status no funil */}
-            <div className="rounded-lg bg-white dark:bg-gray-800 p-5 shadow-sm">
+            <div className="rounded-lg bg-white dark:bg-gray-900 p-5 shadow-sm">
               <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
                 Status no funil
               </h2>

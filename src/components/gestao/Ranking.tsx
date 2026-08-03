@@ -1,4 +1,5 @@
 import { GestaoRankingItem } from '@/src/types'
+import { SectionHeader } from '@/src/components/ui/SectionHeader'
 
 function Trofeu({ posicao }: { posicao: number }) {
   if (posicao === 1) return <span className="text-lg">🥇</span>
@@ -11,7 +12,7 @@ export default function Ranking({ itens }: { itens: GestaoRankingItem[] }) {
   if (itens.length === 0) {
     return (
       <section>
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Ranking</h2>
+        <SectionHeader title="Ranking" />
         <p className="mt-3 text-sm text-gray-400 dark:text-gray-500">Nenhum dado de ranking disponível.</p>
       </section>
     )
@@ -21,14 +22,14 @@ export default function Ranking({ itens }: { itens: GestaoRankingItem[] }) {
 
   return (
     <section>
-      <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Ranking</h2>
+      <SectionHeader title="Ranking" />
 
       {/* Top 3 destacado */}
       <div className="mt-3 grid grid-cols-3 gap-3">
         {top3.map((item) => (
           <div
             key={item.usuarioId}
-            className={`rounded-lg border p-4 text-center ${ item.posicao === 1 ? 'border-yellow-300 bg-yellow-50' : item.posicao === 2 ? 'border-gray-300 bg-gray-50' : 'border-amber-300 bg-amber-50' }`}
+            className={`rounded-lg border p-4 text-center ${ item.posicao === 1 ? 'border-yellow-300 bg-yellow-50 dark:bg-yellow-950/20 dark:border-yellow-700/30' : item.posicao === 2 ? 'border-gray-300 bg-gray-50 dark:bg-gray-800 dark:border-gray-600' : 'border-amber-300 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-700/30' }`}
           >
             <Trofeu posicao={item.posicao} />
             <p className="mt-1 text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{item.nome}</p>

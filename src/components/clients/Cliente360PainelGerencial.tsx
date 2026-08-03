@@ -17,7 +17,7 @@ function formatarHoras(horas: number): string {
 /** Seção 10 — Painel Gerencial do cliente */
 export default function Cliente360PainelGerencial({ painel }: Props) {
   return (
-    <div className="rounded-lg bg-white dark:bg-gray-800 p-5 shadow-sm">
+    <div className="rounded-lg bg-white dark:bg-gray-900 p-5 shadow-sm">
       <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Painel Gerencial</h2>
       <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <KpiCard label="Tempo total no funil" value={formatarHoras(painel.tempoTotalFunilHoras)} size="sm" />

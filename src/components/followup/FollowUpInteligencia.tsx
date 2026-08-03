@@ -10,7 +10,7 @@ interface Props {
 /** Seção 8 — Sugestões inteligentes */
 export default function FollowUpInteligencia({ sugestoes }: Props) {
   return (
-    <div className="rounded-lg bg-white dark:bg-gray-800 p-5 shadow-sm">
+    <div className="rounded-lg bg-white dark:bg-gray-900 p-5 shadow-sm">
       <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
         Sugestões Inteligentes ({sugestoes.length})
       </h2>

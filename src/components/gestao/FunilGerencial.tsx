@@ -1,4 +1,5 @@
 import { GestaoFunilEtapa } from '@/src/types'
+import { SectionHeader } from '@/src/components/ui/SectionHeader'
 
 const CORES_ETAPA: Record<string, string> = {
   NOVO_LEAD: 'bg-sky-500',
@@ -17,7 +18,7 @@ export default function FunilGerencial({ etapas }: { etapas: GestaoFunilEtapa[] 
   if (etapas.length === 0) {
     return (
       <section>
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Funil Gerencial</h2>
+        <SectionHeader title="Funil Gerencial" />
         <p className="mt-3 text-sm text-gray-400 dark:text-gray-500">Nenhum dado disponível.</p>
       </section>
     )
@@ -25,7 +26,7 @@ export default function FunilGerencial({ etapas }: { etapas: GestaoFunilEtapa[] 
 
   return (
     <section>
-      <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Funil Gerencial</h2>
+      <SectionHeader title="Funil Gerencial" />
 
       <div className="mt-3 space-y-1.5">
         {etapas.map((e) => (

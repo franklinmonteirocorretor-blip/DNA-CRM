@@ -92,7 +92,7 @@ export default function FormAnalise({
   const opcaoAtual = jaAnalisado ? OPCOES.find((o) => o.valor === resultadoAtual) : null
 
   return (
-    <div className="rounded-lg bg-white dark:bg-gray-800 p-5 shadow-sm space-y-4">
+    <div className="rounded-lg bg-white dark:bg-gray-900 p-5 shadow-sm space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
           Análise de Crédito

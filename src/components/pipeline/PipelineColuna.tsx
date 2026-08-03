@@ -27,7 +27,7 @@ export default function PipelineColuna({
 
   return (
     <div
-      className={`flex flex-col rounded-lg border w-60 shrink-0 transition ${ isTarget ? 'border-blue-400 bg-blue-50 shadow-md' : 'border-gray-200 bg-gray-50' }`}
+      className={`flex flex-col rounded-lg border w-60 shrink-0 transition ${ isTarget ? 'border-blue-400 bg-blue-50 shadow-sm' : 'border-gray-200 bg-gray-50' }`}
       onDragOver={onDragOver}
       onDrop={(e) => onDrop(e, etapa)}
     >

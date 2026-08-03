@@ -3,6 +3,7 @@
 // Integrado com dark mode via Tailwind `dark:` classes.
 
 import Link from 'next/link'
+import { SectionHeader } from '@/src/components/ui/SectionHeader'
 
 interface ComandoLink {
   href: string
@@ -37,8 +38,7 @@ const LINKS: ComandoLink[] = [
 export default function CentroComando() {
   return (
     <section>
-      <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Centro de Comando</h2>
-      <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">Acesso rápido aos módulos do CRM</p>
+      <SectionHeader title="Centro de Comando" subtitle="Acesso rápido aos módulos do CRM" />
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
         {LINKS.map((link) => (
           <Link

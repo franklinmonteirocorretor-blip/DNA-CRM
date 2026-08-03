@@ -1,11 +1,12 @@
 import { GestaoKPI } from '@/src/types'
 import BarraProgresso from './BarraProgresso'
+import { SectionHeader } from '@/src/components/ui/SectionHeader'
 
 export default function TabelaKPIs({ kpis }: { kpis: GestaoKPI[] }) {
   if (kpis.length === 0) {
     return (
       <section>
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">KPIs Diários</h2>
+        <SectionHeader title="KPIs Diários" />
         <p className="mt-3 text-sm text-gray-400 dark:text-gray-500">Nenhum corretor encontrado.</p>
       </section>
     )
@@ -13,7 +14,7 @@ export default function TabelaKPIs({ kpis }: { kpis: GestaoKPI[] }) {
 
   return (
     <section>
-      <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">KPIs Diários</h2>
+      <SectionHeader title="KPIs Diários" />
       <div className="mt-3 space-y-4">
         {kpis.map((kpi) => (
           <div

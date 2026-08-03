@@ -1,4 +1,5 @@
 import { PainelDocumentos as PainelDocumentosType } from '@/src/types'
+import { EmptyState } from '@/src/components/ui/EmptyState'
 import Link from 'next/link'
 import KpiCard from '@/src/components/ui/KpiCard'
 
@@ -64,9 +65,7 @@ export default function PainelDocumentos({ dados }: { dados: PainelDocumentosTyp
       </div>
 
       {dados.clientesResumo.length === 0 && (
-        <div className="rounded-lg border border-dashed border-gray-300 dark:border-gray-600 p-8 text-center">
-          <p className="text-sm text-gray-400 dark:text-gray-500">Nenhum cliente em etapas que exigem documentação.</p>
-        </div>
+        <EmptyState variant="dashed" title="Nenhum cliente em etapas que exigem documentação." />
       )}
     </div>
   )

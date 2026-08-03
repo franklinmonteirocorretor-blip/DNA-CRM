@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { CorretorGestao, CorretoresFiltros } from '@/src/types'
+import { EmptyState } from '@/src/components/ui/EmptyState'
 import { listarCorretores } from '@/app/dashboard/corretores/actions'
 import FiltrosCorretores from './FiltrosCorretores'
 import ListaCorretores from './ListaCorretores'
@@ -31,9 +32,7 @@ export default function FiltrosWrapper({ corretoresIniciais }: { corretoresInici
     <div className="space-y-4">
       <FiltrosCorretores filtros={filtros} onFiltrar={onFiltrar} />
       {carregando ? (
-        <div className="rounded-lg border border-dashed border-gray-300 dark:border-gray-600 p-8 text-center">
-          <p className="text-sm text-gray-400 dark:text-gray-500 animate-pulse">Carregando...</p>
-        </div>
+        <EmptyState variant="dashed" title="Carregando..." />
       ) : (
         <ListaCorretores corretores={corretores} />
       )}

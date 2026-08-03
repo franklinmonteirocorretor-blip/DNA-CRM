@@ -130,16 +130,16 @@ export default function CentralOperacao({ dadosIniciais }: { dadosIniciais: Oper
   }, [])
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Cabeçalho */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Central de Operações</h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Atualização em tempo real via Supabase Realtime.</p>
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Central de Operações</h1>
+          <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Atualização em tempo real via Supabase Realtime.</p>
         </div>
         <div className="flex items-center gap-2">
           <BuscaGlobal />
-          <button onClick={recarregar} className="rounded-md border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-xs text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 shrink-0">
+          <button onClick={recarregar} className="rounded-md border border-gray-200 dark:border-gray-800 px-2.5 py-1 text-[11px] text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-150 shrink-0">
             ↻ Atualizar
           </button>
         </div>
@@ -147,8 +147,8 @@ export default function CentralOperacao({ dadosIniciais }: { dadosIniciais: Oper
 
       {/* ════ Seção 1: KPIs em Tempo Real (12 cards) ════ */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">KPIs em Tempo Real</h2>
-        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2.5">KPIs em Tempo Real</h2>
+        <div className="grid grid-cols-2 gap-2 sm:gap-2.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
           <KpiOperacaoCard label="Leads Hoje" value={resumo.leadsHoje} color="sky" />
           <KpiOperacaoCard label="Ligações" value={resumo.ligacoesHoje} color="blue" />
           <KpiOperacaoCard label="WhatsApp" value={resumo.whatsAppsHoje} color="green" />
@@ -166,8 +166,8 @@ export default function CentralOperacao({ dadosIniciais }: { dadosIniciais: Oper
 
       {/* ════ Seção Intermediária: Fila de Trabalho ════ */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Fila de Trabalho — Suas Próximas Ações</h2>
-        <p className="text-xs text-gray-400 dark:text-gray-500 mb-2">Priorizado por urgência: clientes sem contato e prazos vencidos primeiro.</p>
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2.5">Fila de Trabalho</h2>
+        <p className="text-[10px] text-gray-400 dark:text-gray-500 mb-2">Suas próximas ações priorizadas por urgência.</p>
         <FilaTrabalho acoes={filaTrabalho} />
       </section>
 
@@ -179,33 +179,37 @@ export default function CentralOperacao({ dadosIniciais }: { dadosIniciais: Oper
 
       {/* ════ Seção 3: Monitor da Equipe ════ */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Monitor da Equipe</h2>
-        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2.5">Monitor da Equipe</h2>
+        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {corretores.map((c) => {
+            const statusColor = c.minutosSemAtividade < 15 ? 'bg-emerald-500' : c.minutosSemAtividade < 60 ? 'bg-amber-500' : 'bg-red-500'
             return (
-              <div key={c.id} className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4">
-                <div className="flex items-center gap-2">
-                  <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-xs font-bold">{c.nome.charAt(0)}</div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{c.nome}</p>
-                    <p className="text-[10px] text-gray-400 dark:text-gray-500">
-                      {c.minutosSemAtividade < 15 ? '🟢 Produzindo' : c.minutosSemAtividade < 60 ? '🟡 Baixa atividade' : '🔴 Sem atividade'} · {formatarMoedain(c.minutosSemAtividade)}
+              <div key={c.id} className="rounded-lg bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-3 hover:border-gray-200 dark:hover:border-gray-700 transition-all duration-150">
+                <div className="flex items-center gap-2.5">
+                  <div className="shrink-0 relative">
+                    <div className="h-7 w-7 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-[11px] font-bold">{c.nome.charAt(0)}</div>
+                    <div className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white dark:border-gray-900 ${statusColor}`} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate">{c.nome}</p>
+                    <p className="text-[9px] text-gray-400 dark:text-gray-500">
+                      {c.minutosSemAtividade < 15 ? 'Ativo' : c.minutosSemAtividade < 60 ? 'Baixa' : 'Inativo'} · {formatarMoedain(c.minutosSemAtividade)}
                     </p>
                   </div>
                 </div>
-                <div className="mt-2 grid grid-cols-3 gap-1 text-[10px]">
-                  <span className="text-gray-400 dark:text-gray-500">📞 {c.ligacoes}</span>
-                  <span className="text-gray-400 dark:text-gray-500">💬 {c.whatsapps}</span>
-                  <span className="text-gray-400 dark:text-gray-500">🔄 {c.followUps}</span>
-                  <span className="text-gray-400 dark:text-gray-500">📅 {c.agendamentos}</span>
-                  <span className="text-gray-400 dark:text-gray-500">🏠 {c.comparecimentos}</span>
-                  <span className="text-gray-400 dark:text-gray-500">📁 {c.pastas}</span>
+                <div className="mt-2 grid grid-cols-3 gap-x-1 gap-y-0.5 text-[9px]">
+                  <span className="text-gray-400 dark:text-gray-500"><span className="font-medium text-gray-500 dark:text-gray-400">{c.ligacoes}</span> lig.</span>
+                  <span className="text-gray-400 dark:text-gray-500"><span className="font-medium text-gray-500 dark:text-gray-400">{c.whatsapps}</span> wpp</span>
+                  <span className="text-gray-400 dark:text-gray-500"><span className="font-medium text-gray-500 dark:text-gray-400">{c.followUps}</span> fup</span>
+                  <span className="text-gray-400 dark:text-gray-500"><span className="font-medium text-gray-500 dark:text-gray-400">{c.agendamentos}</span> agd</span>
+                  <span className="text-gray-400 dark:text-gray-500"><span className="font-medium text-gray-500 dark:text-gray-400">{c.comparecimentos}</span> cmp</span>
+                  <span className="text-gray-400 dark:text-gray-500"><span className="font-medium text-gray-500 dark:text-gray-400">{c.pastas}</span> pst</span>
                 </div>
                 <div className="mt-2 flex items-center gap-2">
-                  <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div className="flex-1 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
                     <div className={`h-full rounded-full ${c.percentualMeta >= 100 ? 'bg-emerald-500' : c.percentualMeta >= 70 ? 'bg-amber-500' : 'bg-red-500'}`} style={{ width: `${c.percentualMeta}%` }} />
                   </div>
-                  <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{c.percentualMeta}%</span>
+                  <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300">{c.percentualMeta}%</span>
                 </div>
               </div>
             )
@@ -215,34 +219,34 @@ export default function CentralOperacao({ dadosIniciais }: { dadosIniciais: Oper
 
       {/* ════ Seção 4: Clientes Prioritários ════ */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Clientes Prioritários</h2>
-        <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
-          <AlertaPainel titulo="Sem contato +3d" icone="📞" cor="red" itens={dados.alertas.clientesSemContato3dias.map(c => ({ id: c.clienteId, nome: c.nome, subtitulo: `${c.diasSemContato}d sem contato · ${c.corretorNome}` }))} vazio="Todos contatados." />
-          <AlertaPainel titulo="Doc. pendentes" icone="📄" cor="amber" itens={dados.alertas.pendenciasDocumentais.map(c => ({ id: c.clienteId, nome: c.clienteNome, subtitulo: `${c.qtdDocumentosPendentes} docs · ${c.etapa}` }))} vazio="Nenhum pendente." />
-          <AlertaPainel titulo="Aguardando retorno" icone="⏳" cor="purple" itens={dados.alertas.aguardandoRetorno.map(c => ({ id: c.clienteId, nome: c.nome, subtitulo: `${c.proximaAcao} · ${c.corretorNome}` }))} vazio="Nenhum aguardando." />
-          <AlertaPainel titulo="Parados no funil +7d" icone="⏸️" cor="orange" itens={dados.alertas.clientesParadosFunil.map(c => ({ id: c.clienteId, nome: c.nome, subtitulo: `${c.diasNaEtapa}d · ${c.etapa} · ${c.corretorNome}` }))} vazio="Nenhum parado." />
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2.5">Clientes Prioritários</h2>
+        <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2">
+          <AlertaPainel titulo="Sem contato +3d" cor="red" itens={dados.alertas.clientesSemContato3dias.map(c => ({ id: c.clienteId, nome: c.nome, subtitulo: `${c.diasSemContato}d sem contato · ${c.corretorNome}` }))} vazio="Todos contatados." />
+          <AlertaPainel titulo="Doc. pendentes" cor="amber" itens={dados.alertas.pendenciasDocumentais.map(c => ({ id: c.clienteId, nome: c.clienteNome, subtitulo: `${c.qtdDocumentosPendentes} docs · ${c.etapa}` }))} vazio="Nenhum pendente." />
+          <AlertaPainel titulo="Aguardando retorno" cor="purple" itens={dados.alertas.aguardandoRetorno.map(c => ({ id: c.clienteId, nome: c.nome, subtitulo: `${c.proximaAcao} · ${c.corretorNome}` }))} vazio="Nenhum aguardando." />
+          <AlertaPainel titulo="Parados no funil +7d" cor="orange" itens={dados.alertas.clientesParadosFunil.map(c => ({ id: c.clienteId, nome: c.nome, subtitulo: `${c.diasNaEtapa}d · ${c.etapa} · ${c.corretorNome}` }))} vazio="Nenhum parado." />
         </div>
       </section>
 
       {/* ════ Seção 5: Metas ════ */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Metas da Empresa</h2>
-        <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 text-xs">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2.5">Metas da Empresa</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5 text-xs">
           {(['vendas', 'aprovacoes', 'agendamentos', 'comparecimentos', 'pastas'] as const).map((k) => {
             const meta = dados.metas.metaEquipe[k]; const real = dados.metas.realizadoEquipe[k]
             const pct = meta > 0 ? Math.min(100, Math.round((real / meta) * 100)) : 0
             return (
-              <div key={k} className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3 text-center">
-                <p className="text-gray-400 dark:text-gray-500 capitalize">{k}</p>
-                <p className="text-lg font-bold text-gray-700 dark:text-gray-200">{real}<span className="text-xs text-gray-400 dark:text-gray-500">/{meta}</span></p>
-                <div className="mt-1 h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden"><div className={`h-full rounded-full ${pct >= 100 ? 'bg-emerald-500' : pct >= 70 ? 'bg-amber-500' : 'bg-red-500'}`} style={{ width: `${pct}%` }} /></div>
-                <p className="mt-0.5 text-[10px] text-gray-400 dark:text-gray-500">{pct}%</p>
+              <div key={k} className="rounded-lg bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-2.5 text-center transition-all duration-150 hover:border-gray-200 dark:hover:border-gray-700">
+                <p className="text-[10px] text-gray-400 dark:text-gray-500 capitalize">{k}</p>
+                <p className="text-sm font-bold text-gray-700 dark:text-gray-200">{real}<span className="text-[10px] text-gray-400 dark:text-gray-500">/{meta}</span></p>
+                <div className="mt-1 h-1 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden"><div className={`h-full rounded-full ${pct >= 100 ? 'bg-emerald-500' : pct >= 70 ? 'bg-amber-500' : 'bg-red-500'}`} style={{ width: `${pct}%` }} /></div>
+                <p className="mt-0.5 text-[9px] text-gray-400 dark:text-gray-500">{pct}%</p>
               </div>
             )
           })}
-          <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3 text-center">
-            <p className="text-gray-400 dark:text-gray-500">VGV</p>
-            <p className="text-lg font-bold text-gray-700 dark:text-gray-200">{formatarMoeda(resumo.vgvMes)}</p>
+          <div className="rounded-lg bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-2.5 text-center transition-all duration-150 hover:border-gray-200 dark:hover:border-gray-700">
+            <p className="text-[10px] text-gray-400 dark:text-gray-500">VGV</p>
+            <p className="text-sm font-bold text-gray-700 dark:text-gray-200">{formatarMoeda(resumo.vgvMes)}</p>
             <p className="text-[10px] text-gray-400 dark:text-gray-500">{dados.metas.diasRestantes}d restantes</p>
           </div>
         </div>
@@ -250,22 +254,22 @@ export default function CentralOperacao({ dadosIniciais }: { dadosIniciais: Oper
 
       {/* ════ Seção 6: Ranking ao Vivo ════ */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Ranking ao Vivo — Top 10</h2>
-        <div className="mt-3 overflow-x-auto">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2.5">Ranking ao Vivo — Top 10</h2>
+        <div className="overflow-x-auto rounded-lg bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800">
           <table className="w-full text-xs">
             <thead>
-              <tr className="border-b border-gray-200 dark:border-gray-700 text-left text-[10px] font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">
-                <th className="pb-2 w-8">#</th><th className="pb-2">Corretor</th><th className="pb-2 text-right">Pontos</th><th className="pb-2 text-right">Vendas</th><th className="pb-2 text-right">Aprovações</th>
+              <tr className="border-b border-gray-100 dark:border-gray-800 text-left text-[10px] font-medium uppercase text-gray-400 dark:text-gray-500">
+                <th className="px-3 py-2 w-8">#</th><th className="px-3 py-2">Corretor</th><th className="px-3 py-2 text-right">Pontos</th><th className="px-3 py-2 text-right">Vendas</th><th className="px-3 py-2 text-right">Aprovações</th>
               </tr>
             </thead>
             <tbody>
               {ranking.slice(0, 10).map((r) => (
-                <tr key={r.usuarioId} className="border-b border-gray-100 dark:border-gray-800">
-                  <td className="py-2 font-bold text-gray-700 dark:text-gray-300">{r.posicao === 1 ? '🥇' : r.posicao === 2 ? '🥈' : r.posicao === 3 ? '🥉' : `${r.posicao}º`}</td>
-                  <td className="py-2 text-gray-900 dark:text-gray-200">{r.nome}</td>
-                  <td className="py-2 text-right tabular-nums font-semibold text-blue-600 dark:text-blue-400">{r.pontuacao.toLocaleString('pt-BR')}</td>
-                  <td className="py-2 text-right tabular-nums text-teal-600 dark:text-teal-400">{r.vendas}</td>
-                  <td className="py-2 text-right tabular-nums text-indigo-600 dark:text-indigo-400">{r.aprovacoes}</td>
+                <tr key={r.usuarioId} className="border-b border-gray-50 dark:border-gray-800/60 hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-all duration-150">
+                  <td className="px-3 py-1.5 text-[10px] font-bold text-gray-700 dark:text-gray-300">{r.posicao === 1 ? '🥇' : r.posicao === 2 ? '🥈' : r.posicao === 3 ? '🥉' : `${r.posicao}º`}</td>
+                  <td className="px-3 py-1.5 text-[11px] text-gray-900 dark:text-gray-200">{r.nome}</td>
+                  <td className="px-3 py-1.5 text-right tabular-nums text-[11px] font-semibold text-blue-600 dark:text-blue-400">{r.pontuacao.toLocaleString('pt-BR')}</td>
+                  <td className="px-3 py-1.5 text-right tabular-nums text-[11px] text-teal-600 dark:text-teal-400">{r.vendas}</td>
+                  <td className="px-3 py-1.5 text-right tabular-nums text-[11px] text-indigo-600 dark:text-indigo-400">{r.aprovacoes}</td>
                 </tr>
               ))}
             </tbody>
@@ -275,16 +279,16 @@ export default function CentralOperacao({ dadosIniciais }: { dadosIniciais: Oper
 
       {/* ════ Seção 7: Mapa do Pipeline ════ */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Mapa do Pipeline</h2>
-        <div className="mt-3 space-y-1.5">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2.5">Mapa do Pipeline</h2>
+        <div className="space-y-1">
           {dados.funil.map((e) => (
-            <div key={e.etapa} className="flex items-center gap-3 text-xs">
+            <div key={e.etapa} className="flex items-center gap-2 text-[11px]">
               <span className="w-28 shrink-0 text-gray-500 dark:text-gray-400">{e.label}</span>
-              <div className="flex-1 h-5 bg-gray-100 dark:bg-gray-800 rounded overflow-hidden">
-                <div className="h-full bg-blue-400 dark:bg-blue-600 rounded" style={{ width: `${Math.max(1, e.percentual)}%` }} />
+              <div className="flex-1 h-3 bg-gray-100 dark:bg-gray-800 rounded overflow-hidden">
+                <div className="h-full bg-blue-400 dark:bg-blue-600 rounded transition-all duration-300" style={{ width: `${Math.max(1, e.percentual)}%` }} />
               </div>
               <span className="w-10 text-right font-semibold text-gray-700 dark:text-gray-300">{e.quantidade}</span>
-              {e.taxaConversao !== null && <span className="w-14 text-right text-[10px] text-gray-400 dark:text-gray-500">{e.taxaConversao}% conv.</span>}
+              {e.taxaConversao !== null && <span className="w-14 text-right text-[9px] text-gray-400 dark:text-gray-500">{e.taxaConversao}% conv.</span>}
             </div>
           ))}
         </div>
@@ -295,7 +299,7 @@ export default function CentralOperacao({ dadosIniciais }: { dadosIniciais: Oper
       {/* ════ Seção 8A: Heatmap de Produção ════ */}
       {dados.heatmap.length > 0 && (
         <section>
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Heatmap de Produção (7 dias)</h2>
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2.5">Heatmap de Produção (7 dias)</h2>
           <p className="text-xs text-gray-400 dark:text-gray-500 mb-2">Intensidade de atividade por corretor × hora do dia.</p>
           <HeatmapProducao dados={dados.heatmap} />
         </section>
@@ -304,7 +308,7 @@ export default function CentralOperacao({ dadosIniciais }: { dadosIniciais: Oper
       {/* ════ Seção 8B: Produtividade por Equipe ════ */}
       {dados.produtividadeEquipe.length > 0 && (
         <section>
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Produtividade por Equipe (30 dias)</h2>
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2.5">Produtividade por Equipe (30 dias)</h2>
           <p className="text-xs text-gray-400 dark:text-gray-500 mb-2">Tendência de atividades por equipe ao longo do mês.</p>
           <ProdutividadeChart series={dados.produtividadeEquipe} />
         </section>
@@ -312,9 +316,9 @@ export default function CentralOperacao({ dadosIniciais }: { dadosIniciais: Oper
 
       {/* ════ Seção 8: Alertas (Painel Vermelho) ════ */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">⚠️ Alertas</h2>
-        <div className="mt-3 rounded-lg border-2 border-red-300 bg-red-50 p-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2.5">Alertas</h2>
+        <div className="rounded-lg border border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-950/20 p-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 text-[11px]">
             <div>
               <p className="font-semibold text-red-800 mb-1">Clientes esquecidos</p>
               {dados.alertas.clientesSemContato3dias.length === 0 ? <p className="text-red-400">Nenhum.</p> :
@@ -361,14 +365,17 @@ export default function CentralOperacao({ dadosIniciais }: { dadosIniciais: Oper
 
 // ─── Subcomponentes inline ───
 
-function AlertaPainel({ titulo, icone, cor, itens, vazio }: { titulo: string; icone: string; cor: string; itens: { id: string; nome: string; subtitulo: string }[]; vazio: string }) {
-  const pals: Record<string, string> = { red: 'border-red-200 bg-red-50', amber: 'border-amber-200 bg-amber-50', purple: 'border-purple-200 bg-purple-50', orange: 'border-orange-200 bg-orange-50' }
-  const bgs: Record<string, string> = { red: 'bg-red-100 text-red-700', amber: 'bg-amber-100 text-amber-700', purple: 'bg-purple-100 text-purple-700', orange: 'bg-orange-100 text-orange-700' }
+function AlertaPainel({ titulo, cor, itens, vazio }: { titulo: string; cor: string; itens: { id: string; nome: string; subtitulo: string }[]; vazio: string }) {
+  const pals: Record<string, string> = { red: 'border-red-200 dark:border-red-900/30 bg-red-50 dark:bg-red-950/20', amber: 'border-amber-200 dark:border-amber-900/30 bg-amber-50 dark:bg-amber-950/20', purple: 'border-purple-200 dark:border-purple-900/30 bg-purple-50 dark:bg-purple-950/20', orange: 'border-orange-200 dark:border-orange-900/30 bg-orange-50 dark:bg-orange-950/20' }
+  const bgs: Record<string, string> = { red: 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300', amber: 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300', purple: 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300', orange: 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300' }
   return (
-    <div className={`rounded-lg border p-3 ${pals[cor] ?? ''}`}>
-      <div className="flex items-center justify-between mb-1.5"><h3 className="text-xs font-semibold text-gray-800"><span className="mr-1">{icone}</span>{titulo}</h3>{itens.length > 0 && <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-bold ${bgs[cor] ?? ''}`}>{itens.length}</span>}</div>
+    <div className={`rounded-lg border p-2.5 transition-all duration-150 ${pals[cor] ?? ''}`}>
+      <div className="flex items-center justify-between mb-1">
+        <h3 className="text-[11px] font-semibold text-gray-700 dark:text-gray-200">{titulo}</h3>
+        {itens.length > 0 && <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-bold ${bgs[cor] ?? ''}`}>{itens.length}</span>}
+      </div>
       {itens.length === 0 ? <p className="text-[10px] text-gray-400 dark:text-gray-500">{vazio}</p> : itens.slice(0, 8).map(i => (
-        <p key={i.id} className="text-[10px]"><Link href={`/dashboard/clientes/${i.id}`} className="text-gray-700 dark:text-gray-300 hover:text-blue-600">{i.nome}</Link><span className="ml-1.5 text-gray-400 dark:text-gray-500">{i.subtitulo}</span></p>
+        <p key={i.id} className="text-[10px] leading-relaxed"><Link href={`/dashboard/clientes/${i.id}`} className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-150">{i.nome}</Link><span className="ml-1.5 text-gray-400 dark:text-gray-500">{i.subtitulo}</span></p>
       ))}
     </div>
   )

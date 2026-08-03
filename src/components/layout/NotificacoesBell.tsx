@@ -73,7 +73,7 @@ export default function NotificacoesBell({ usuarioId }: { usuarioId: string }) {
 
       {/* Dropdown */}
       {aberto && (
-        <div className="absolute right-0 top-full mt-2 w-80 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-lg z-50">
+        <div className="absolute right-0 top-full mt-2 w-80 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-lg z-50">
           {/* Cabeçalho */}
           <div className="flex items-center justify-between border-b px-4 py-3">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Notificações</h3>

@@ -49,7 +49,7 @@ function InsightCard({ insight }: { insight: BIInsight }) {
 export default function InsightsBICard({ insights }: { insights: BIInsight[] }) {
   if (insights.length === 0) {
     return (
-      <div className="rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-8 text-center shadow-sm">
+      <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50 p-4 text-center">
         <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Nenhum insight disponível.</p>
       </div>
     )

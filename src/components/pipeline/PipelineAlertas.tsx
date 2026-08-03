@@ -1,5 +1,6 @@
 import { PipelineAlertas as PipelineAlertasType } from '@/src/types'
 import Link from 'next/link'
+import { SectionHeader } from '@/src/components/ui/SectionHeader'
 
 function AlertaBloco({
   titulo,
@@ -67,7 +68,7 @@ function AlertaBloco({
 export default function PipelineAlertas({ alertas }: { alertas: PipelineAlertasType }) {
   return (
     <section>
-      <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Alertas</h2>
+      <SectionHeader title="Alertas" />
       <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
         <AlertaBloco titulo="Sem contato +3 dias" icone="📞" cor="red" itens={alertas.semContato} vazio="Todos foram contatados recentemente." />
         <AlertaBloco titulo="Parados na etapa +7d" icone="⏸️" cor="amber" itens={alertas.paradosNaEtapa} vazio="Nenhum cliente parado." />

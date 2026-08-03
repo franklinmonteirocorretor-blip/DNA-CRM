@@ -15,7 +15,7 @@ function formatarMinutos(minutos: number): string {
 /** Seção 6 — Painel do Corretor (visão pessoal) */
 export default function FollowUpPainelCorretor({ painel }: Props) {
   return (
-    <div className="rounded-lg bg-white dark:bg-gray-800 p-5 shadow-sm">
+    <div className="rounded-lg bg-white dark:bg-gray-900 p-5 shadow-sm">
       <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Meu Painel</h2>
       <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-5">
         <Card label="Minhas tarefas" value={`${painel.minhasTarefas}`} />

@@ -20,7 +20,7 @@ export default function Cliente360Comunicacao({ cliente }: Props) {
   const whatsappLink = `https://wa.me/55${cliente.telefone}`
 
   return (
-    <div className="rounded-lg bg-white dark:bg-gray-800 p-5 shadow-sm">
+    <div className="rounded-lg bg-white dark:bg-gray-900 p-5 shadow-sm">
       <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
         Comunicação rápida
       </h2>

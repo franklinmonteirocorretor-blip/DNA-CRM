@@ -41,26 +41,26 @@ export default function BIDashboardClient({ dados }: { dados: BIDadosCompletos }
       <ResumoExecutivoBI resumo={dados.resumo} />
 
       {/* Seção 2: Funil + Metas lado a lado */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {temFunil && (
-          <div className="rounded-xl bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+          <div className="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-100 dark:border-gray-700">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Funil de Vendas</h2>
             <FunilBIChart etapas={dados.funil} />
           </div>
         )}
-        <div className="rounded-xl bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+        <div className="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-100 dark:border-gray-700">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Metas</h2>
           <MetasBIChart metas={dados.metas} />
         </div>
       </div>
 
       {/* Seção 3: Previsões + Gargalos */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="rounded-xl bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div className="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-100 dark:border-gray-700">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Previsões</h2>
           <PrevisoesBIPanel previsoes={dados.previsões} />
         </div>
-        <div className="rounded-xl bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+        <div className="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-100 dark:border-gray-700">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Gargalos</h2>
           <GargalosBIPanel gargalos={dados.gargalos} />
         </div>
@@ -68,7 +68,7 @@ export default function BIDashboardClient({ dados }: { dados: BIDadosCompletos }
 
       {/* Seção 4: Alertas Estratégicos */}
       {dados.alertas.length > 0 && (
-        <div className="rounded-xl bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+        <div className="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-100 dark:border-gray-700">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Alertas Estratégicos</h2>
           <AlertasBIPanel alertas={dados.alertas} />
         </div>
@@ -76,7 +76,7 @@ export default function BIDashboardClient({ dados }: { dados: BIDadosCompletos }
 
       {/* Seção 5: Ranking */}
       {temRanking && (
-        <div className="rounded-xl bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+        <div className="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-100 dark:border-gray-700">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Ranking de Corretores</h2>
           <RankingBIChart items={dados.ranking} />
         </div>
@@ -84,7 +84,7 @@ export default function BIDashboardClient({ dados }: { dados: BIDadosCompletos }
 
       {/* Seção 6: Empreendimentos */}
       {temEmpreendimentos && (
-        <div className="rounded-xl bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+        <div className="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-100 dark:border-gray-700">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Empreendimentos</h2>
           <EmpreendimentosBICard empreendimentos={dados.empreendimentos} />
         </div>
@@ -92,7 +92,7 @@ export default function BIDashboardClient({ dados }: { dados: BIDadosCompletos }
 
       {/* Seção 7: Timeline */}
       {temTimeline && (
-        <div className="rounded-xl bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+        <div className="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-100 dark:border-gray-700">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Linha do Tempo</h2>
           <TimelineBIPanel eventos={dados.timeline} />
         </div>
@@ -100,7 +100,7 @@ export default function BIDashboardClient({ dados }: { dados: BIDadosCompletos }
 
       {/* Seção 8: Insights */}
       {temInsights && (
-        <div className="rounded-xl bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+        <div className="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-100 dark:border-gray-700">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Insights</h2>
           <InsightsBICard insights={dados.insights} />
         </div>

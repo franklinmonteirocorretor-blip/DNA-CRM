@@ -6,6 +6,7 @@ import { listarClientesPipeline, moverEtapa } from '@/app/dashboard/funil/action
 import { ETAPA_FULL_CONFIG, ETAPA_ORDEM } from '@/src/config/pipeline'
 import PipelineColuna from './PipelineColuna'
 import PainelClientePipeline from './PainelClientePipeline'
+import { LoadingIndicator } from '@/src/components/ui/LoadingIndicator'
 
 export default function PipelineBoard() {
   const [colunas, setColunas] = useState<Record<EtapaFunil, PipelineClienteCard[]>>({} as Record<EtapaFunil, PipelineClienteCard[]>)
@@ -87,9 +88,7 @@ export default function PipelineBoard() {
 
   if (carregando) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-gray-400 dark:text-gray-500 animate-pulse">Carregando pipeline...</p>
-      </div>
+      <LoadingIndicator text="Carregando pipeline..." size="sm" />
     )
   }
 

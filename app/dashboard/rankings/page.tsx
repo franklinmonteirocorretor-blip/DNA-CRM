@@ -84,7 +84,7 @@ export default async function RankingsPage() {
             Métricas de produtividade, VGV e comissões.
           </p>
         </div>
-        <div className="rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-12 text-center">
+        <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 text-center">
           <p className="text-lg font-medium text-gray-500 dark:text-gray-400">
             Nenhum corretor encontrado.
           </p>
@@ -432,7 +432,7 @@ function CardDestaque({
 }) {
   return (
     <div
-      className="rounded-xl bg-white dark:bg-gray-800 p-5 shadow-sm border-2"
+      className="rounded-lg bg-white dark:bg-gray-800 p-5 shadow-sm border-2"
       style={{ borderColor: cor }}
     >
       <div className="flex items-center gap-2">

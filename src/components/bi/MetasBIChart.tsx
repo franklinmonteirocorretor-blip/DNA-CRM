@@ -52,7 +52,7 @@ function MetaBar({
 
   return (
     <div
-      className={`rounded-xl border-2 ${COR_DA_BORDA(pct)} bg-white dark:bg-gray-800 p-4 shadow-sm`}
+      className={`rounded-lg border-2 ${COR_DA_BORDA(pct)} bg-white dark:bg-gray-800 p-4 shadow-sm`}
     >
       <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">{label}</p>
 

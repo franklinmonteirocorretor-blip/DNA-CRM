@@ -63,36 +63,36 @@ export default function FormAutomacao({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-xl max-h-[90vh] overflow-y-auto p-6">
-        <h2 className="text-lg font-semibold mb-4">Nova Automacao</h2>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-xl max-h-[90vh] overflow-y-auto p-6">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Nova Automacao</h2>
         {erro && <p className="text-sm text-red-600 mb-3 bg-red-50 p-2 rounded">{erro}</p>}
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nome</label>
-        <input className="w-full border rounded-md px-3 py-2 text-sm mb-3" value={nome} onChange={e => setNome(e.target.value)} placeholder="Ex: Alerta de inatividade 7 dias" />
+        <input className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md px-3 py-2 text-sm mb-3" value={nome} onChange={e => setNome(e.target.value)} placeholder="Ex: Alerta de inatividade 7 dias" />
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descricao</label>
-        <input className="w-full border rounded-md px-3 py-2 text-sm mb-3" value={desc} onChange={e => setDesc(e.target.value)} placeholder="O que esta automacao faz?" />
+        <input className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md px-3 py-2 text-sm mb-3" value={desc} onChange={e => setDesc(e.target.value)} placeholder="O que esta automacao faz?" />
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Evento disparador</label>
-        <select className="w-full border rounded-md px-3 py-2 text-sm mb-3" value={evento} onChange={e => setEvento(e.target.value as AutomationEvent)}>
+        <select className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md px-3 py-2 text-sm mb-3" value={evento} onChange={e => setEvento(e.target.value as AutomationEvent)}>
           {EVENTOS.map(ev => <option key={ev.value} value={ev.value}>{ev.label}</option>)}
         </select>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status inicial</label>
-        <select className="w-full border rounded-md px-3 py-2 text-sm mb-3" value={status} onChange={e => setStatus(e.target.value as 'ATIVA' | 'INATIVA')}>
+        <select className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md px-3 py-2 text-sm mb-3" value={status} onChange={e => setStatus(e.target.value as 'ATIVA' | 'INATIVA')}>
           <option value="ATIVA">ATIVA</option>
           <option value="INATIVA">INATIVA</option>
         </select>
         <div className="mb-4">
           <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Condicoes</h3>
           <div className="flex gap-2 mb-2">
-            <select className="border rounded-md px-2 py-1.5 text-sm" value={cTipo} onChange={e => setCTipo(e.target.value)}>
+            <select className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md px-2 py-1.5 text-sm" value={cTipo} onChange={e => setCTipo(e.target.value)}>
               <option value="etapa">Etapa</option>
               <option value="status">Status</option>
               <option value="tempo_parado">Tempo parado</option>
             </select>
-            <select className="border rounded-md px-2 py-1.5 text-sm" value={cOp} onChange={e => setCOp(e.target.value)}>
+            <select className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md px-2 py-1.5 text-sm" value={cOp} onChange={e => setCOp(e.target.value)}>
               <option value="igual">Igual</option>
               <option value="maior">Maior que</option>
               <option value="menor">Menor que</option>
             </select>
-            <input className="border rounded-md px-2 py-1.5 text-sm w-40" placeholder="Valor" value={cVal} onChange={e => setCVal(e.target.value)} />
+            <input className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md px-2 py-1.5 text-sm w-40" placeholder="Valor" value={cVal} onChange={e => setCVal(e.target.value)} />
             <button type="button" className="px-3 py-1 bg-blue-600 text-white rounded-md text-sm" onClick={addCond}>+</button>
           </div>
           {conds.map((c, i) => (
@@ -105,7 +105,7 @@ export default function FormAutomacao({ onClose }: { onClose: () => void }) {
         <div className="mb-4">
           <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Acoes</h3>
           <div className="flex gap-2">
-            <select className="w-full border rounded-md px-3 py-2 text-sm" value={aAct} onChange={e => setAAct(e.target.value as AutomationActionSpec['acao'])}>
+            <select className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md px-3 py-2 text-sm" value={aAct} onChange={e => setAAct(e.target.value as AutomationActionSpec['acao'])}>
               {ACOES.map(a => <option key={a.val} value={a.val}>{a.text}</option>)}
             </select>
             <button type="button" className="px-3 py-2 bg-blue-600 text-white rounded-md text-sm" onClick={addAct}>+</button>

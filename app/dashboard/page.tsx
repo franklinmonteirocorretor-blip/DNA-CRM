@@ -5,6 +5,7 @@ import KpiCard from '@/src/components/ui/KpiCard'
 import SecaoAlertas from '@/src/components/dashboard/SecaoAlertas'
 import CardAgendaHoje from '@/src/components/dashboard/CardAgendaHoje'
 import CardEquipeDashboard from '@/src/components/dashboard/CardEquipeDashboard'
+import { Users2, Plus, Funnel } from 'lucide-react'
 
 export default async function DashboardPage() {
   const supabase = await createSupabaseServerClient()
@@ -103,53 +104,43 @@ export default async function DashboardPage() {
     .returns<Pick<Cliente, 'id' | 'nome' | 'proxima_acao' | 'proxima_acao_em'>[]>()
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h1>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Dashboard</h1>
+        <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
           Bem-vindo ao DNA CRM. Aqui está seu resumo de hoje.
         </p>
       </div>
 
-      {/* Cards de métricas */}
-      <div className="grid grid-cols-1 gap-4 xs:grid-cols-2 md:grid-cols-4">
-        <KpiCard label="Ligações" value={hojeStats?.ligacoes ?? 0} color="blue" size="lg" padding="normal" />
-        <KpiCard label="WhatsApp" value={hojeStats?.whatsapp ?? 0} color="green" size="lg" padding="normal" />
-        <KpiCard label="Agendamentos" value={hojeStats?.agendamentos ?? 0} color="purple" size="lg" padding="normal" />
-        <KpiCard label="Comparecimentos" value={hojeStats?.comparecimentos ?? 0} color="orange" size="lg" padding="normal" />
+      {/* KPIs */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <KpiCard label="Ligações" value={hojeStats?.ligacoes ?? 0} color="blue" size="md" padding="compact" />
+        <KpiCard label="WhatsApp" value={hojeStats?.whatsapp ?? 0} color="green" size="md" padding="compact" />
+        <KpiCard label="Agendamentos" value={hojeStats?.agendamentos ?? 0} color="purple" size="md" padding="compact" />
+        <KpiCard label="Comparecimentos" value={hojeStats?.comparecimentos ?? 0} color="orange" size="md" padding="compact" />
       </div>
 
-      {/* Acesso rápido */}
-      <div className="grid grid-cols-1 gap-4 xs:grid-cols-2 md:grid-cols-5">
+      {/* Quick Actions */}
+      <div className="flex flex-wrap items-center gap-2">
+        <Link
+          href="/dashboard/clientes/novo"
+          className="inline-flex items-center gap-1.5 rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 transition-all duration-150"
+        >
+          <Plus className="h-3.5 w-3.5" /> Novo Lead
+        </Link>
         <Link
           href="/dashboard/clientes"
-          className="rounded-lg border border-blue-100 bg-blue-50 p-4 shadow-sm hover:bg-blue-100 transition"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-150"
         >
-          <p className="text-xs font-medium uppercase tracking-wide text-blue-500">Clientes</p>
-          <p className="mt-1 text-2xl font-bold text-blue-700">{count ?? 0}</p>
-          <p className="mt-1 text-[11px] text-blue-400">Gerenciar leads →</p>
+          <Users2 className="h-3.5 w-3.5" /> Clientes
         </Link>
         <Link
           href="/dashboard/funil"
-          className="rounded-lg border border-purple-100 bg-purple-50 p-4 shadow-sm hover:bg-purple-100 transition"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-150"
         >
-          <p className="text-xs font-medium uppercase tracking-wide text-purple-500">Funil de Vendas</p>
-          <p className="mt-1 text-2xl font-bold text-purple-700">{count ?? 0}</p>
-          <p className="mt-1 text-[11px] text-purple-400">Visualizar funil →</p>
+          <Funnel className="h-3.5 w-3.5" /> Pipeline
         </Link>
-        <Link
-          href="/dashboard/clientes/novo"
-          className="rounded-lg border border-green-100 bg-green-50 p-4 shadow-sm hover:bg-green-100 transition"
-        >
-          <p className="text-xs font-medium uppercase tracking-wide text-green-500">Novo Lead</p>
-          <p className="mt-3 text-sm font-semibold text-green-700">+ Cadastrar</p>
-          <p className="mt-1 text-[11px] text-green-400">Adicionar cliente →</p>
-        </Link>
-
-        {/* Sprint 2: Card Agenda de Hoje */}
         <CardAgendaHoje />
-
-        {/* Sprint 4: Card Equipe */}
         <CardEquipeDashboard />
       </div>
 
@@ -162,33 +153,35 @@ export default async function DashboardPage() {
       />
 
       {/* Produção da semana */}
-      <div className="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Últimos 7 dias</h2>
+      <div className="rounded-lg bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-4">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-3">Últimos 7 dias</h2>
         {producao && producao.length > 0 ? (
-          <div className="mt-4 space-y-2">
+          <div className="grid grid-cols-7 gap-2">
             {producao.map((dia) => (
               <div
                 key={dia.data}
-                className="flex items-center justify-between rounded-md bg-gray-50 dark:bg-gray-700 px-4 py-2 text-sm"
+                className="rounded-md bg-gray-50 dark:bg-gray-800 p-2 text-center transition-all duration-150 hover:bg-gray-100 dark:hover:bg-gray-700"
               >
-                <span className="font-medium text-gray-700 dark:text-gray-300">
-                  {new Date(dia.data + 'T00:00:00').toLocaleDateString('pt-BR', {
-                    weekday: 'short',
-                    day: '2-digit',
-                    month: '2-digit',
-                  })}
-                </span>
-                <span className="text-gray-500 dark:text-gray-400 truncate hidden xs:inline">
-                  {dia.ligacoes} ligações · {dia.whatsapp} WhatsApp · {dia.agendamentos} agend.
-                </span>
-                <span className="font-bold text-blue-600">
-                  {dia.pontuacao_gamificacao} pts
-                </span>
+                <p className="text-[10px] font-medium text-gray-400 dark:text-gray-500 mb-1">
+                  {new Date(dia.data + 'T00:00:00').toLocaleDateString('pt-BR', { weekday: 'short' }).slice(0, 3)}
+                </p>
+                <div className="space-y-0.5">
+                  {[
+                    { v: dia.ligacoes, l: 'L' },
+                    { v: dia.whatsapp, l: 'W' },
+                    { v: dia.agendamentos, l: 'A' },
+                  ].map(({ v, l }) => (
+                    <div key={l} className="flex justify-center gap-1 text-[10px] text-gray-500 dark:text-gray-400">
+                      <span className="font-medium">{l}</span><span>{v}</span>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mt-1.5">{dia.pontuacao_gamificacao}pts</p>
               </div>
             ))}
           </div>
         ) : (
-          <p className="mt-4 text-sm text-gray-400 dark:text-gray-500">
+          <p className="text-xs text-gray-400 dark:text-gray-500">
             Nenhuma atividade registrada nos últimos 7 dias.
           </p>
         )}

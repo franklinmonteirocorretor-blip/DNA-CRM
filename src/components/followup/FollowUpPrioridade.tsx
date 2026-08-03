@@ -13,7 +13,7 @@ export default function FollowUpPrioridade() {
   ]
 
   return (
-    <div className="rounded-lg bg-white dark:bg-gray-800 p-5 shadow-sm">
+    <div className="rounded-lg bg-white dark:bg-gray-900 p-5 shadow-sm">
       <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Score de Prioridade</h2>
       <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
         Cada cliente recebe uma pontuação de 0–1000. Quanto maior, mais urgente.

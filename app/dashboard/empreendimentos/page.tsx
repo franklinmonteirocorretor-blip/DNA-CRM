@@ -46,7 +46,7 @@ export default async function EmpreendimentosPage() {
 
       {/* Estado vazio */}
       {lista.length === 0 && (
-        <div className="rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-12 text-center">
+        <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 text-center">
           <p className="text-lg font-medium text-gray-500 dark:text-gray-400">
             Nenhum empreendimento cadastrado ainda.
           </p>

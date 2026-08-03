@@ -33,7 +33,7 @@ function KpiCard({
     tendencia === 'up' ? '↑' : tendencia === 'down' ? '↓' : '→'
 
   return (
-    <div className="rounded-xl bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 p-5">
+    <div className="rounded-lg bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 p-5">
       <p className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">{label}</p>
       <div className="mt-1 flex items-baseline gap-2">
         <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">{value}</span>

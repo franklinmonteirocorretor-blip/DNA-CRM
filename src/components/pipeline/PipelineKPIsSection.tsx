@@ -1,11 +1,12 @@
 import { PipelineKPIs as PipelineKPIsType } from '@/src/types'
 import KpiCard from '@/src/components/ui/KpiCard'
+import { SectionHeader } from '@/src/components/ui/SectionHeader'
 import { formatarMoedaCompacta, formatarHoras } from '@/src/lib/formatters'
 
 export default function PipelineKPIs({ kpis }: { kpis: PipelineKPIsType }) {
   return (
     <section>
-      <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">KPIs do Pipeline</h2>
+      <SectionHeader title="KPIs do Pipeline" />
       <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
         <KpiCard label="Clientes ativos" value={kpis.clientesAtivos.toLocaleString('pt-BR')} color="sky" />
         <KpiCard label="Tempo médio" value={formatarHoras(kpis.tempoMedioGeralHoras)} color="amber" />

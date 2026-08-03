@@ -9,6 +9,7 @@ import {
   reagendarVisita,
   confirmarComparecimentoAgenda,
 } from '@/app/dashboard/agenda/actions'
+import { LoadingIndicator } from '@/src/components/ui/LoadingIndicator'
 
 interface PainelLateralProps {
   evento: AgendaEvent
@@ -174,7 +175,7 @@ export default function PainelLateralAgenda({ evento, onFechar, onAtualizado }: 
         )}
 
         {carregando ? (
-          <div className="p-8 text-center text-sm text-gray-400 dark:text-gray-500 animate-pulse">Carregando dados...</div>
+          <LoadingIndicator text="Carregando dados..." size="sm" />
         ) : (
           <div className="p-4 space-y-4">
             {/* Dados do cliente */}

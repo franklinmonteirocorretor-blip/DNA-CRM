@@ -1,4 +1,5 @@
 import { GestaoProducaoSerie } from '@/src/types'
+import { SectionHeader } from '@/src/components/ui/SectionHeader'
 import { formatarData } from '@/src/lib/formatters'
 
 function BarraHorizontal({
@@ -30,7 +31,7 @@ export default function Produtividade({
   if (series.length === 0) {
     return (
       <section>
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Produtividade</h2>
+        <SectionHeader title="Produtividade" />
         <p className="mt-3 text-sm text-gray-400 dark:text-gray-500">Nenhum dado no período.</p>
       </section>
     )
@@ -42,7 +43,7 @@ export default function Produtividade({
 
   return (
     <section>
-      <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Produtividade</h2>
+      <SectionHeader title="Produtividade" />
 
       <div className="mt-3 overflow-x-auto">
         <table className="w-full text-xs">

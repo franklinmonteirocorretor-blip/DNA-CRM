@@ -21,7 +21,7 @@ export default function Cliente360Cabecalho({
   rendaFormatada, fgtsFormatado, diasSemContato, diasNaEtapa, etapaAtualLabel,
 }: Props) {
   return (
-    <div className="rounded-lg bg-white dark:bg-gray-800 p-5 shadow-sm">
+    <div className="rounded-lg bg-white dark:bg-gray-900 p-5 shadow-sm">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         {/* Foto placeholder */}
         <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-blue-100 text-2xl font-bold text-blue-600">

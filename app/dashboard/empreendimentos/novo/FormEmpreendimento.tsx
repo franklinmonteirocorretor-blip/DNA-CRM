@@ -46,7 +46,7 @@ export default function FormEmpreendimento({
       )}
 
       <form action={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {/* Nome */}
           <div>
             <label htmlFor="nome" className="block text-sm font-medium text-gray-700 dark:text-gray-300">

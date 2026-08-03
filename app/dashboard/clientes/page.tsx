@@ -118,11 +118,11 @@ export default async function ClientesPage({ searchParams }: Props) {
 
       {/* Se não tem nenhum cliente cadastrado (sem filtro) */}
       {!temFiltro && totalClientes === 0 && (
-        <div className="rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-12 text-center">
-          <p className="text-lg font-medium text-gray-500 dark:text-gray-400">
+        <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 text-center">
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
             Você ainda não tem clientes cadastrados.
           </p>
-          <p className="mt-1 text-sm text-gray-400 dark:text-gray-500">
+          <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
             Clique em &quot;+ Novo Cliente&quot; para adicionar seu primeiro lead.
           </p>
         </div>
@@ -130,11 +130,11 @@ export default async function ClientesPage({ searchParams }: Props) {
 
       {/* Se tem filtro mas nenhum resultado */}
       {temFiltro && totalClientes === 0 && (
-        <div className="rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-12 text-center">
-          <p className="text-lg font-medium text-gray-500 dark:text-gray-400">
+        <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 text-center">
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
             Nenhum cliente encontrado.
           </p>
-          <p className="mt-1 text-sm text-gray-400 dark:text-gray-500">
+          <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
             Tente ajustar os filtros ou limpar a busca.
           </p>
         </div>
@@ -206,7 +206,7 @@ function ClienteCard({ cliente }: { cliente: Cliente }) {
   return (
     <Link
       href={`/dashboard/clientes/${cliente.id}`}
-      className={`block rounded-lg border p-3 transition hover:shadow-md ${ precisaAcao ? 'border-orange-300 bg-orange-50 hover:border-orange-400' : 'border-gray-100 bg-gray-50 dark:bg-gray-700 hover:border-gray-300' }`}
+      className={`block rounded-lg border p-3 transition hover:shadow-sm ${ precisaAcao ? 'border-orange-300 bg-orange-50 hover:border-orange-400' : 'border-gray-100 bg-gray-50 dark:bg-gray-700 hover:border-gray-300' }`}
     >
       {/* Nome */}
       <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{cliente.nome}</p>

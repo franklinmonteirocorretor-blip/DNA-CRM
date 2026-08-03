@@ -13,7 +13,7 @@ export default function EmpreendimentosBICard({
   empreendimentos: BIEmpreendimento[]
 }) {
   return (
-    <div className="rounded-xl bg-white dark:bg-gray-800 shadow-sm border p-5">
+    <div className="rounded-lg bg-white dark:bg-gray-800 shadow-sm border p-5">
       <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">Empreendimentos</h3>
 
       {empreendimentos.length === 0 ? (

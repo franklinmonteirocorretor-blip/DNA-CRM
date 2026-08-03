@@ -7,6 +7,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/src/lib/supabase'
 import Link from 'next/link'
+import { SectionHeader } from '@/src/components/ui/SectionHeader'
 
 interface TimelineEvent {
   id: string
@@ -71,11 +72,9 @@ export default function TimelineGlobal({ eventosIniciais }: TimelineGlobalProps)
 
   return (
     <section>
-      <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Timeline Global</h2>
-      <p className="text-xs text-gray-400 dark:text-gray-500 mb-2">
-        <span className="inline-block w-2 h-2 bg-emerald-500 rounded-full animate-pulse mr-1" />
-        Feed em tempo real — novas atividades aparecem automaticamente
-      </p>
+      <SectionHeader title="Timeline Global" subtitle={
+        <><span className="inline-block w-2 h-2 bg-emerald-500 rounded-full animate-pulse mr-1" />Feed em tempo real — novas atividades aparecem automaticamente</>
+      } />
       <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-hidden">
         <div ref={containerRef} className="max-h-96 overflow-y-auto scroll-smooth">
           {eventos.length === 0 ? (

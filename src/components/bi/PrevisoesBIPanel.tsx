@@ -84,7 +84,7 @@ export default function PrevisoesBIPanel({
   previsoes: BIPrevisao
 }) {
   return (
-    <div className="rounded-xl bg-white dark:bg-gray-800 shadow-sm border p-5 space-y-5">
+    <div className="rounded-lg bg-white dark:bg-gray-800 shadow-sm border p-5 space-y-5">
       <div>
         <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">Previsões</h3>
         <div className="flex gap-2 text-xs text-gray-500 dark:text-gray-400">

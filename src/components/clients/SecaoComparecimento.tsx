@@ -15,7 +15,7 @@ export default function SecaoComparecimento({
   if (agendamentos.length === 0) return null
 
   return (
-    <div className="rounded-lg bg-white dark:bg-gray-800 p-5 shadow-sm space-y-4">
+    <div className="rounded-lg bg-white dark:bg-gray-900 p-5 shadow-sm space-y-4">
       <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
         Agendamentos
       </h2>

@@ -102,7 +102,7 @@ export default function FunilBIChart({ etapas }: { etapas: BIFunilEtapa[] }) {
   }))
 
   return (
-    <div className="rounded-xl bg-white dark:bg-gray-800 shadow-sm border p-5">
+    <div className="rounded-lg bg-white dark:bg-gray-800 shadow-sm border p-5">
       <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">Funil Executivo</h3>
       <div className="h-[340px]">
         <ResponsiveContainer width="100%" height="100%">
