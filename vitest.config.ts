@@ -1,6 +1,9 @@
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import path from 'path'
+import { config } from 'dotenv'
+
+config({ path: '.env.local' })
 
 export default defineConfig({
   plugins: [react()],
@@ -8,11 +11,8 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./tests/setup.ts'],
-    env: {
-      NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '',
-      SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY ?? '',
-    },
+    testTimeout: 30000,
+    hookTimeout: 30000,
     include: ['tests/**/*.test.{ts,tsx}'],
     exclude: ['tests/e2e/**'],
     coverage: {
