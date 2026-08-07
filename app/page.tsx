@@ -18,12 +18,6 @@ export default function Home() {
           >
             Entrar no sistema
           </Link>
-          <Link
-            href="/test-supabase"
-            className="rounded-lg bg-gray-100 dark:bg-gray-800 px-6 py-3 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600"
-          >
-            Testar conexão
-          </Link>
         </div>
       </div>
     </div>

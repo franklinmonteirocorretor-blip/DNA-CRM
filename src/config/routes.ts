@@ -17,7 +17,6 @@ export const PUBLIC_ROUTES = [
   '/',
   '/login',
   '/auth/callback',
-  '/test-supabase',
   '/api/health',
   // Cron de automações — autenticado por CRON_SECRET dentro da rota
   '/api/cron/automacao',
