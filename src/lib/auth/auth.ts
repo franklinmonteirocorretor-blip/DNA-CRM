@@ -21,7 +21,6 @@ export {
 import { getUsuarioLogado } from '@/src/lib/server/auth'
 import { isAdmin as checkAdmin, isGerente as checkGerente } from '@/src/lib/auth/roles'
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
-import type { Usuario } from '@/src/types'
 
 /**
  * Verifica se o corretor logado é dono do cliente.

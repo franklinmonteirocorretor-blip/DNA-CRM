@@ -1,6 +1,6 @@
 'use server'
 
-import { requireAuth } from '@/src/lib/auth/guards'
+import { requireRole } from '@/src/lib/auth/guards'
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
 
 // ── Tipos ────────────────────────────────────────────────────────────────────
@@ -23,7 +23,9 @@ export async function gerarDadosRelatorio(
 ): Promise<DadosRelatorio> {
   const supabase = await createSupabaseServerClient()
 
-  const usuario = await requireAuth()
+  // Acesso restrito à gerência (GERENTE/ADMINISTRADOR). SUPERVISOR e
+  // CORRETOR não geram relatórios gerenciais.
+  const usuario = await requireRole('GERENTE')
 
   const ehCorretor = usuario.perfil === 'CORRETOR'
   const ehGerente = usuario.perfil === 'GERENTE'

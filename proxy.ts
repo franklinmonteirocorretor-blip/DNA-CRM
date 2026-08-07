@@ -1,6 +1,8 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
-import { PROTECTED_ROUTES, PUBLIC_ROUTES, ADMIN_ROUTES, DASHBOARD_ROUTES } from '@/src/config/routes'
+import { PROTECTED_ROUTES, PUBLIC_ROUTES, ROLE_ROUTES, DASHBOARD_ROUTES } from '@/src/config/routes'
+import { temNivelMinimo } from '@/src/lib/auth/roles'
+import type { PerfilUsuario } from '@/src/types'
 
 // Middleware de autenticação do Supabase.
 //
@@ -57,10 +59,11 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
-  // Admin routes — only ADMINISTRADOR
-  const isAdminRoute = ADMIN_ROUTES.some((route) => pathname.startsWith(route))
+  // RBAC por rota — perfil mínimo exigido (defesa em profundidade)
+  const rotaComPerfil = Object.entries(ROLE_ROUTES) as [string, PerfilUsuario][]
+  const rotaProtegida = rotaComPerfil.find(([route]) => pathname.startsWith(route))
 
-  if (isAdminRoute && user) {
+  if (rotaProtegida && user) {
     try {
       const { data: profile } = await supabase
         .from('usuarios')
@@ -68,7 +71,8 @@ export async function proxy(request: NextRequest) {
         .eq('id', user.id)
         .single()
 
-      if (!profile || profile.perfil !== 'ADMINISTRADOR') {
+      const perfil = (profile?.perfil ?? 'CORRETOR') as PerfilUsuario
+      if (!temNivelMinimo(perfil, rotaProtegida[1])) {
         return NextResponse.redirect(new URL('/dashboard', request.url))
       }
     } catch {

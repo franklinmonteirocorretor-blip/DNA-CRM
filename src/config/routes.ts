@@ -1,6 +1,8 @@
 // DNA CRM — RC2: Config centralizada de rotas da aplicação
 // Single source of truth para proxy.ts, layouts, e verificações de permissão
 
+import type { PerfilUsuario } from '@/src/types'
+
 /** Todas as rotas que exigem autenticação */
 export const PROTECTED_ROUTES = [
   '/dashboard',
@@ -16,13 +18,26 @@ export const PUBLIC_ROUTES = [
   '/login',
   '/auth/callback',
   '/test-supabase',
+  '/api/health',
+  // Cron de automações — autenticado por CRON_SECRET dentro da rota
+  '/api/cron/automacao',
 ] as const
 
-/** Rotas restritas ao perfil ADMINISTRADOR */
-export const ADMIN_ROUTES = [
-  '/dashboard/corretores',
-  '/dashboard/gestao',
-] as const
+/** Perfil mínimo exigido por rota (RBAC no middleware — defesa em profundidade) */
+export const ROLE_ROUTES: Record<string, PerfilUsuario> = {
+  // Gestão e supervisão (alinhado a PERFIS_POR_MODULO)
+  '/dashboard/bi': 'SUPERVISOR',
+  '/dashboard/operacao': 'SUPERVISOR',
+  '/dashboard/rankings': 'SUPERVISOR',
+  '/dashboard/financeiro': 'SUPERVISOR',
+  '/dashboard/equipe': 'SUPERVISOR',
+  '/dashboard/gestao': 'SUPERVISOR',
+  // Gerência
+  '/dashboard/corretores': 'GERENTE',
+  '/dashboard/relatorios': 'GERENTE',
+  '/dashboard/empreendimentos': 'GERENTE',
+  '/dashboard/automacoes': 'GERENTE',
+}
 
 /** Todas as sub-rotas do dashboard (usado pelo middleware e pelo layout) */
 export const DASHBOARD_ROUTES = [

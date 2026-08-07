@@ -19,10 +19,10 @@ describe('Integração — Financeiro e RBAC', () => {
     if (usuarios && usuarios.length > 0) {
       testUserId = usuarios[0].id
     } else {
-      // Criar usuário de fallback
+      // Criar usuário de fallback (efêmero — senha gerada dinamicamente, sem credencial no repo)
       const { data: user } = await supabaseAdmin.auth.admin.createUser({
         email: `fin-fallback-${Date.now()}@dnaimoveis.com`,
-        password: 'teste123',
+        password: `Tst!${Math.random().toString(36).slice(2)}${Date.now()}`,
         email_confirm: true,
       })
       if (user?.user) {

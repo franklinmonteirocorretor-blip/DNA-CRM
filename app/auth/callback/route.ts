@@ -10,10 +10,24 @@ import { createSupabaseServerClient } from '@/src/lib/server/supabase'
 // Esta rota troca o `code` da URL por uma sessão (cookies)
 // e redireciona para o dashboard.
 
+/** Apenas caminhos locais — bloqueia open redirect via `next` */
+function isCaminhoSeguro(caminho: string): boolean {
+  return (
+    caminho.startsWith('/') &&
+    !caminho.startsWith('//') &&
+    !caminho.startsWith('/\\') &&
+    !caminho.includes('\\') &&
+    !caminho.includes('\n') &&
+    !caminho.includes('\r') &&
+    !/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(caminho)
+  )
+}
+
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
-  const next = searchParams.get('next') ?? '/dashboard'
+  const nextRaw = searchParams.get('next') ?? '/dashboard'
+  const next = isCaminhoSeguro(nextRaw) ? nextRaw : '/dashboard'
 
   if (code) {
     const supabase = await createSupabaseServerClient()

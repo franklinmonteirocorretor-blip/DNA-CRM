@@ -3,12 +3,21 @@
 // Chamar via cron job (ex: Vercel Cron ou pg_cron)
 
 import { NextResponse } from 'next/server'
-import { requireAuth } from '@/src/lib/auth/guards'
+import { requireRole } from '@/src/lib/auth/guards'
 import { dispatchProcessarFila } from '@/src/lib/automation/engine'
 import { logger } from '@/src/utils/logger'
 
 export async function POST() {
-  await requireAuth()
+  try {
+    // Apenas GERENTE/ADMINISTRADOR podem disparar o processamento manualmente
+    await requireRole('GERENTE')
+  } catch {
+    return NextResponse.json(
+      { sucesso: false, erro: 'Não autorizado' },
+      { status: 403 },
+    )
+  }
+
   try {
     const resultado = await dispatchProcessarFila()
     return NextResponse.json({

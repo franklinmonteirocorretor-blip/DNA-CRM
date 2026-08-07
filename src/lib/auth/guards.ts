@@ -1,7 +1,7 @@
 // ─── RBAC - Server Guards (Sprint 12) ─────────────────────────────────────────
 
 import { getUsuarioLogado } from '@/src/lib/server/auth'
-import { temNivelMinimo, isAdmin, isGerente } from '@/src/lib/auth/roles'
+import { temNivelMinimo, isAdmin, isGerente, isSupervisor } from '@/src/lib/auth/roles'
 import { temPermissao, type Recurso, type Acao } from '@/src/lib/auth/permissions'
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
 import type { PerfilUsuario, Usuario } from '@/src/types'
@@ -68,6 +68,27 @@ export async function requireClienteOwner(clienteId: string): Promise<Usuario> {
   if (!cliente || cliente.corretor_responsavel_id !== usuario.id) {
     throw new AuthError(
       'Acesso negado. Você só pode acessar seus próprios clientes.',
+      'SEM_PERMISSAO', 403,
+    )
+  }
+  return usuario
+}
+
+/** Garante que o agendamento pertence ao usuário (supervisão/gerência pode agir em qualquer um) */
+export async function requireAgendamentoOwner(agendamentoId: string): Promise<Usuario> {
+  const usuario = await requireAuth()
+  if (isSupervisor(usuario.perfil)) return usuario
+
+  const supabase = await createSupabaseServerClient()
+  const { data: agendamento } = await supabase
+    .from('agendamentos')
+    .select('corretor_id')
+    .eq('id', agendamentoId)
+    .single()
+
+  if (!agendamento || agendamento.corretor_id !== usuario.id) {
+    throw new AuthError(
+      'Acesso negado. Você só pode gerenciar seus próprios agendamentos.',
       'SEM_PERMISSAO', 403,
     )
   }

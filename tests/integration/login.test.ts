@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest'
+import { describe, it, expect, afterAll } from 'vitest'
 import { createClient } from '@supabase/supabase-js'
 
 /**
@@ -12,7 +12,9 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
 
 const TEST_EMAIL = `teste-integracao-${Date.now()}@dnaimoveis.com`
-const TEST_PASSWORD = 'teste123456'
+// Senha gerada dinamicamente — usuário efêmero criado e excluído no afterAll.
+// Nenhuma credencial fica hardcoded no repositório.
+const TEST_PASSWORD = `Tst!${Math.random().toString(36).slice(2)}${Date.now()}`
 
 describe('Integração — Login e Cadastro', () => {
   afterAll(async () => {
@@ -54,7 +56,7 @@ describe('Integração — Login e Cadastro', () => {
 
     const { data, error } = await supabaseAnon.auth.signInWithPassword({
       email: TEST_EMAIL,
-      password: 'senhaerradissima',
+      password: `errada-${Math.random().toString(36).slice(2)}`,
     })
 
     expect(error).toBeDefined()

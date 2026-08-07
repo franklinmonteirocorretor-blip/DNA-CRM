@@ -1,12 +1,12 @@
 'use server'
 
-import { requireAuth } from '@/src/lib/auth/guards'
+import { requirePermission } from '@/src/lib/auth/guards'
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
 export async function criarEmpreendimento(formData: FormData) {
-  await requireAuth()
+  await requirePermission('empreendimentos', 'criar')
 
   const supabase = await createSupabaseServerClient()
 
@@ -45,7 +45,7 @@ export async function criarEmpreendimento(formData: FormData) {
 }
 
 export async function editarEmpreendimento(id: string, formData: FormData) {
-  await requireAuth()
+  await requirePermission('empreendimentos', 'editar')
 
   const supabase = await createSupabaseServerClient()
 
@@ -83,7 +83,7 @@ export async function editarEmpreendimento(id: string, formData: FormData) {
 }
 
 export async function alternarAtivoEmpreendimento(id: string, ativo: boolean) {
-  await requireAuth()
+  await requirePermission('empreendimentos', 'editar')
 
   const supabase = await createSupabaseServerClient()
 

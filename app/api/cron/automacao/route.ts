@@ -1,12 +1,20 @@
 // ─── Cron-secure endpoint (Sprint 18 — Deploy) ───────────────────────────────
 // Chamado pelo Vercel Cron Job (vercel.json). Usa SUPABASE_SERVICE_ROLE_KEY
 // pois cron jobs não possuem sessão de usuário.
+// Autenticado via header `x-cron-secret` (CRON_SECRET no ambiente).
 
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    // Verificação do segredo do cron — impede que qualquer um dispare o processamento
+    const secretoEsperado = process.env.CRON_SECRET ?? process.env.VERCEL_CRON_SECRET
+    const secretoRecebido = request.headers.get('x-cron-secret')
+    if (!secretoEsperado || !secretoRecebido || secretoRecebido !== secretoEsperado) {
+      return NextResponse.json({ ok: false, erro: 'Não autorizado' }, { status: 401 })
+    }
+
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
