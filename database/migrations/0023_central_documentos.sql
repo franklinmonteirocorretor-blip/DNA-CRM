@@ -111,6 +111,7 @@ create index if not exists idx_documentos_vencimento
   where deleted_at is null and vencimento is not null;
 
 -- 8. Índice para consultas por observacao (trigram)
+-- [FIX] Coluna real é observacoes (plural)
 create index if not exists idx_documentos_observacao_trgm
-  on documentos using gin (observacao gin_trgm_ops)
-  where observacao is not null;
+  on documentos using gin (observacoes gin_trgm_ops)
+  where observacoes is not null;

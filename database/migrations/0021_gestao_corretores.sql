@@ -52,9 +52,11 @@ create table if not exists equipes (
   gerente_id  uuid references usuarios (id),
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now(),
-  deleted_at  timestamptz,
-  constraint equipes_nome_unico unique (nome) where deleted_at is null
+  deleted_at  timestamptz
 );
+
+-- [FIX] Unicidade parcial exige índice único (constraint não suporta WHERE)
+create unique index if not exists equipes_nome_unico on equipes (nome) where deleted_at is null;
 
 create index if not exists idx_equipes_gerente on equipes (gerente_id);
 

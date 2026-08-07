@@ -105,7 +105,7 @@ begin
         (registro->>'data_entrada')::timestamptz
       ) / 3600
     )::numeric, 1) as tempo_medio_horas,
-    count(*) as quantidade
+    count(*)::int as quantidade
   from historico
   group by registro->>'etapa'
   order by etapa;

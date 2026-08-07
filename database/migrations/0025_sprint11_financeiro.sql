@@ -93,7 +93,7 @@ begin
 
     -- Define data prevista como data_fechamento + 45 dias se não definida
     if new.comissao_data_prevista is null then
-      new.comissao_data_prevista := (new.data_fechamento::date + 45 days)::date;
+      new.comissao_data_prevista := (new.data_fechamento::date + interval '45 days')::date;
     end if;
 
     -- Registra no histórico de ações
