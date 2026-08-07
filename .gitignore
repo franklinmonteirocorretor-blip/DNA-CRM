@@ -26,3 +26,12 @@ Thumbs.db
 # Supabase
 supabase/.temp/
 .vercel
+
+# Test artifacts
+coverage/
+test-results/
+playwright-report/
+*.tsbuildinfo
+
+# Área de trabalho temporária do agente (diagnóstico — pode conter credenciais)
+.tmp/
