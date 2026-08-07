@@ -22,7 +22,7 @@ describe('Ranking — Ordenação e Pontuação', () => {
       const expected =
         2 * 1000 + 3 * 300 + 5 * 120 + 10 * 70 +
         4 * 40 + 20 * 10 + 100 * 3 + 500 * 1
-      expect(result).toBe(5360)
+      expect(result).toBe(expected)
     })
 
     it('PONTUACAO_RANKING tem os valores da config', () => {

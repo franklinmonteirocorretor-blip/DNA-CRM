@@ -15,7 +15,12 @@ import { test, expect } from '@playwright/test'
 
 const BASE_URL = 'http://localhost:3000'
 const TEST_EMAIL = 'admin@dnaimoveis.com'
-const TEST_PASSWORD = 'admin123'
+// Credencial via ambiente (nunca hardcoded). Defina TEST_E2E_PASSWORD no .env.local
+// (ver .env.example). Sem ela, o teste falha com erro explícito.
+const TEST_PASSWORD = process.env.TEST_E2E_PASSWORD
+if (!TEST_PASSWORD) {
+  throw new Error('TEST_E2E_PASSWORD não definida — configure no .env.local para rodar o e2e de fluxo completo')
+}
 
 test.describe('Fluxo Completo — Lead → Pós-venda', () => {
   test.beforeEach(async ({ page }) => {
