@@ -1,6 +1,7 @@
 'use server'
 
-import { requireAuth } from '@/src/lib/auth/guards'
+import { requireAuth, requirePermission } from '@/src/lib/auth/guards'
+import { escaparLike } from '@/src/lib/sql-utils'
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
 import {
   PipelineClienteCard,
@@ -27,26 +28,29 @@ export async function listarClientesPipeline(filtros?: PipelineFiltros): Promise
   if (filtros?.corretorId) query = query.eq('corretor_responsavel_id', filtros.corretorId)
   if (filtros?.empreendimentoId) query = query.eq('empreendimento_id', filtros.empreendimentoId)
   if (filtros?.etapa) query = query.eq('etapa_atual', filtros.etapa)
-  if (filtros?.busca) query = query.or(`nome.ilike.%${filtros.busca}%,telefone.ilike.%${filtros.busca}%`)
+  if (filtros?.busca) query = query.or(`nome.ilike.%${escaparLike(filtros.busca)}%,telefone.ilike.%${escaparLike(filtros.busca)}%`)
 
-  const { data: clientes } = await query
+  const { data: clientes, error: clientesError } = await query
+  if (clientesError) throw new Error(clientesError.message)
 
   // Busca pendências documentais em batch
   const ids = (clientes ?? []).map((c) => c.id)
-  const { data: docsPendentes } = ids.length > 0
+  const { data: docsPendentes, error: docsError } = ids.length > 0
     ? await supabase.from('documentos').select('cliente_id').eq('status_validacao', 'PENDENTE').is('deleted_at', null).in('cliente_id', ids)
-    : { data: [] }
+    : { data: [], error: null }
+  if (docsError) throw new Error(docsError.message)
   const clientesComDocPendente = new Set((docsPendentes ?? []).map((d) => d.cliente_id))
 
   // Busca próximos agendamentos
-  const { data: agendamentos } = ids.length > 0
+  const { data: agendamentos, error: agendError } = ids.length > 0
     ? await supabase.from('agendamentos')
         .select('cliente_id, data_hora, status')
         .in('cliente_id', ids)
         .gte('data_hora', new Date().toISOString())
         .in('status', ['AGENDADO', 'CONFIRMADO', 'REMARCADO'])
         .order('data_hora', { ascending: true })
-    : { data: [] }
+    : { data: [], error: null }
+  if (agendError) throw new Error(agendError.message)
   const agendPorCliente: Record<string, { dataHora: string; status: string }> = {}
   for (const a of agendamentos ?? []) {
     if (!agendPorCliente[a.cliente_id]) {
@@ -114,12 +118,13 @@ export async function buscarClienteDetalhe(id: string): Promise<PipelineClienteD
   await requireAuth()
   const supabase = await createSupabaseServerClient()
 
-  const { data: c } = await supabase
+  const { data: c, error: cError } = await supabase
     .from('clientes')
     .select('*, usuarios!inner(nome), empreendimentos(nome)')
     .eq('id', id)
     .single()
 
+  if (cError) throw new Error(cError.message)
   if (!c) return null
 
   const hoje = Date.now()
@@ -170,14 +175,17 @@ export async function pipelineKPIs(): Promise<PipelineKPIs> {
   const supabase = await createSupabaseServerClient()
 
   const [
-    { data: clientes },
-    { data: tempoEtapas },
-    { data: vgvEtapas },
+    { data: clientes, error: clientesError },
+    { data: tempoEtapas, error: tempoError },
+    { data: vgvEtapas, error: vgvError },
   ] = await Promise.all([
     supabase.from('clientes').select('etapa_atual, vgv').is('deleted_at', null),
     supabase.rpc('fn_tempo_medio_etapas'),
     supabase.rpc('fn_vgv_por_etapa'),
   ])
+  if (clientesError) throw new Error(clientesError.message)
+  if (tempoError) throw new Error(tempoError.message)
+  if (vgvError) throw new Error(vgvError.message)
 
   const totalClientes = (clientes ?? []).length
   const fechamentos = (clientes ?? []).filter((c) => c.etapa_atual === 'FECHAMENTOS').length
@@ -221,18 +229,18 @@ export async function pipelineKPIs(): Promise<PipelineKPIs> {
 // ─── Alertas do Pipeline ─────────────────────────────────────────────────────
 
 export async function pipelineAlertas(): Promise<PipelineAlertas> {
-  await requireAuth()
+  await requirePermission('pipeline', 'visualizar')
   const supabase = await createSupabaseServerClient()
   const tresDias = new Date(Date.now() - 3 * 86400000).toISOString()
   const seteDias = new Date(Date.now() - 7 * 86400000).toISOString()
 
   const [
-    { data: semContato },
-    { data: parados },
-    { data: docsPend },
-    { data: aprovadosSemVisita },
-    { data: semAcao },
-    { data: comVisita },
+    { data: semContato, error: errSemContato },
+    { data: parados, error: errParados },
+    { data: docsPend, error: errDocsPend },
+    { data: aprovadosSemVisita, error: errAprovadosSemVisita },
+    { data: semAcao, error: errSemAcao },
+    { data: comVisita, error: errComVisita },
   ] = await Promise.all([
     // Sem contato há +3 dias
     supabase.from('clientes')
@@ -283,6 +291,13 @@ export async function pipelineAlertas(): Promise<PipelineAlertas> {
       .order('entrou_etapa_em', { ascending: true })
       .limit(20),
   ])
+
+  if (errSemContato) throw new Error(errSemContato.message)
+  if (errParados) throw new Error(errParados.message)
+  if (errDocsPend) throw new Error(errDocsPend.message)
+  if (errAprovadosSemVisita) throw new Error(errAprovadosSemVisita.message)
+  if (errSemAcao) throw new Error(errSemAcao.message)
+  if (errComVisita) throw new Error(errComVisita.message)
 
   function toCard(c: Record<string, unknown>): PipelineClienteCard {
     return {

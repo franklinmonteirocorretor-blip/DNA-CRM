@@ -32,6 +32,8 @@ export function EmptyState({
             {action && (
               <a
                 href={action.href}
+                role="button"
+                aria-label={action.label}
                 className="inline-flex h-8 items-center rounded-md bg-blue-600 px-4 text-xs font-medium text-white hover:bg-blue-700 transition-colors duration-150"
               >
                 {action.label}
@@ -40,6 +42,8 @@ export function EmptyState({
             {secondaryAction && (
               <a
                 href={secondaryAction.href}
+                role="button"
+                aria-label={secondaryAction.label}
                 className="inline-flex h-8 items-center rounded-md bg-gray-100 dark:bg-gray-800 px-4 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-150"
               >
                 {secondaryAction.label}
@@ -52,7 +56,10 @@ export function EmptyState({
   }
 
   return (
-    <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+    <div
+      role="status"
+      className="flex flex-col items-center justify-center py-16 px-4 text-center"
+    >
       <div className="max-w-sm space-y-4">
         {/* Ícone: usa o emoji existente ou um default clean */}
         <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 mx-auto">

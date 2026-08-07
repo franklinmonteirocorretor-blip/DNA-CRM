@@ -2,7 +2,7 @@
 // Cada aÃ§Ã£o Ã© executada via Supabase no lado servidor.
 
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
-import type { AutomationAction, AutomationEventPayload } from './types'
+import type { AutomationEventPayload } from './types'
 
 /**
  * FunÃ§Ã£o principal chamada pelo engine.ts via lazy import.

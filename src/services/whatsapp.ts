@@ -40,11 +40,13 @@ function criarMockAdapter(): WhatsAppAdapter {
 
     async enviar(payload: WhatsAppSendPayload): Promise<WhatsAppSendResult> {
       const messageId = `mock-msg-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
-      console.log('[WhatsApp Mock] Enviando:', payload.texto?.slice(0, 80), '→', payload.telefone)
+      // Log apenas em desenvolvimento
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[WhatsApp Mock] Enviando mensagem para', payload.telefone)
+      }
       return { ok: true, messageId }
     },
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async status(_messageId: string): Promise<{ status: string; error?: string }> {
       return { status: 'ENTREGUE' }
     },
@@ -250,7 +252,6 @@ export async function getMetricas(usuarioId: string): Promise<WhatsAppMetricas> 
 
   const conversaIds = convs?.map(c => c.id) ?? []
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, { data: msgsHoje }] = await Promise.all([
     supabase.from('whatsapp_conversas')
       .select('*', { count: 'exact', head: true })

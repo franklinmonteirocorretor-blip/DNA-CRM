@@ -35,29 +35,29 @@ export default function EmpreendimentosBICard({
               <div className="mt-3 space-y-1.5 text-xs">
                 <div className="flex justify-between">
                   <span className="text-gray-500 dark:text-gray-400">Clientes</span>
-                  <span className="font-medium text-gray-800">{emp.clientes}</span>
+                  <span className="font-medium text-gray-800 dark:text-gray-200">{emp.clientes}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500 dark:text-gray-400">VGV</span>
-                  <span className="font-medium text-gray-800">{formatarMoeda(emp.vgv)}</span>
+                  <span className="font-medium text-gray-800 dark:text-gray-200">{formatarMoeda(emp.vgv)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500 dark:text-gray-400">Conversão</span>
-                  <span className="font-medium text-gray-800">
+                  <span className="font-medium text-gray-800 dark:text-gray-200">
                     {formatoPercentual(emp.conversao)}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500 dark:text-gray-400">Comissão</span>
-                  <span className="font-medium text-gray-800">{formatarMoeda(emp.comissao)}</span>
+                  <span className="font-medium text-gray-800 dark:text-gray-200">{formatarMoeda(emp.comissao)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500 dark:text-gray-400">Ticket Médio</span>
-                  <span className="font-medium text-gray-800">{formatarMoeda(emp.ticketMedio)}</span>
+                  <span className="font-medium text-gray-800 dark:text-gray-200">{formatarMoeda(emp.ticketMedio)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500 dark:text-gray-400">Tempo Médio</span>
-                  <span className="font-medium text-gray-800">{emp.tempoMedioDias} dias</span>
+                  <span className="font-medium text-gray-800 dark:text-gray-200">{emp.tempoMedioDias} dias</span>
                 </div>
               </div>
             </div>

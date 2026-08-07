@@ -35,6 +35,16 @@ export default function Sidebar({ groups, usuarioNome, usuarioPerfil }: SidebarP
     return () => document.removeEventListener('keydown', handler)
   }, [])
 
+  // Focus trap: ao abrir mobile, foca no botão fechar
+  useEffect(() => {
+    if (mobileOpen) {
+      const closeBtn = document.querySelector('[data-mobile-close]') as HTMLElement | null
+      // Pequeno delay para o DOM montar
+      const id = setTimeout(() => closeBtn?.focus(), 50)
+      return () => clearTimeout(id)
+    }
+  }, [mobileOpen])
+
   const initials = usuarioNome
     .split(' ')
     .slice(0, 2)
@@ -60,7 +70,7 @@ export default function Sidebar({ groups, usuarioNome, usuarioPerfil }: SidebarP
       </div>
 
       {/* Navegação */}
-      <nav className="flex-1 overflow-y-auto py-3 space-y-4">
+      <nav className="flex-1 overflow-y-auto py-3 space-y-4" aria-label="Seções principais">
         {groups.map((g) => (
           <SidebarGroup key={g.label} group={g} collapsed={collapsed} />
         ))}
@@ -128,6 +138,8 @@ export default function Sidebar({ groups, usuarioNome, usuarioPerfil }: SidebarP
 
       {/* ── Desktop: sidebar fixa ── */}
       <aside
+        role="complementary"
+        aria-label="Navegação principal"
         className={`
           fixed top-0 left-0 z-30 h-screen
           border-r border-gray-200/70 dark:border-gray-800/70
@@ -142,6 +154,9 @@ export default function Sidebar({ groups, usuarioNome, usuarioPerfil }: SidebarP
 
       {/* ── Mobile: drawer lateral ── */}
       <aside
+        role="dialog"
+        aria-label="Menu de navegação"
+        aria-modal="true"
         className={`
           fixed top-0 left-0 z-50 h-screen
           bg-gray-50 dark:bg-gray-950 border-r border-gray-200 dark:border-gray-800
@@ -153,6 +168,7 @@ export default function Sidebar({ groups, usuarioNome, usuarioPerfil }: SidebarP
       >
         <button
           onClick={() => setMobileOpen(false)}
+          data-mobile-close
           className="absolute top-3 right-3 z-50 rounded p-1.5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors duration-150"
           aria-label="Fechar menu"
         >

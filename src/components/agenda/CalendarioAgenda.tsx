@@ -194,13 +194,13 @@ export default function CalendarioAgenda() {
       {/* Cabeçalho com navegação e views */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
-          <button onClick={() => navegar(-1)} className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-800">
+          <button onClick={() => navegar(-1)} aria-label="Mês anterior" className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-800">
             ◀
           </button>
           <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 min-w-[180px] text-center">
             {tituloView()}
           </h2>
-          <button onClick={() => navegar(1)} className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-800">
+          <button onClick={() => navegar(1)} aria-label="Próximo mês" className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-800">
             ▶
           </button>
           <button onClick={irParaHoje} className="ml-2 rounded-lg border border-blue-300 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100">
@@ -269,6 +269,7 @@ export default function CalendarioAgenda() {
           value={filtros.clienteBusca ?? ''}
           onChange={(e) => setFiltros({ ...filtros, clienteBusca: e.target.value || null })}
           placeholder="Buscar cliente..."
+          aria-label="Buscar cliente"
           className="rounded-md border border-gray-300 dark:border-gray-600 px-2 py-1.5 text-xs w-32"
         />
 
@@ -470,7 +471,7 @@ function CalendarioSemanal({
                     onClick={() => onEventoClick(ev)}
                     className={`block w-full rounded px-2 py-1.5 text-left text-xs border ${STATUS_COR[ev.agendamento.status]?.replace('bg-', 'border-').replace(' text-', ' ').replace('-100', '-200') ?? 'border-gray-200'} bg-white dark:bg-gray-800 hover:shadow`}
                   >
-                    <p className="font-medium text-gray-800 text-[11px]">
+                    <p className="font-medium text-gray-800 dark:text-gray-100 text-[11px]">
                       {new Date(ev.agendamento.data_hora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                     </p>
                     <p className="text-[11px] text-gray-600 dark:text-gray-400 truncate">{ev.cliente.nome}</p>
@@ -514,7 +515,7 @@ function CalendarioDiario({
   return (
     <div className="rounded-lg bg-white dark:bg-gray-800 shadow-sm">
       <div className="px-4 py-3 border-b">
-        <h3 className="text-sm font-semibold text-gray-800">
+        <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100">
           {dataReferencia.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })}
         </h3>
       </div>
@@ -581,14 +582,14 @@ function VisualizacaoLista({
           onClick={() => onEventoClick(ev)}
           className="grid grid-cols-7 gap-2 px-4 py-3 border-t text-xs items-center hover:bg-gray-50 dark:hover:bg-gray-700 w-full text-left"
         >
-          <span className="font-medium text-gray-800">
+          <span className="font-medium text-gray-800 dark:text-gray-100">
             {new Date(ev.agendamento.data_hora).toLocaleDateString('pt-BR')}
             <br />
             <span className="text-[10px] text-gray-400 dark:text-gray-500">
               {new Date(ev.agendamento.data_hora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
             </span>
           </span>
-          <span className="font-semibold text-gray-800 truncate">{ev.cliente.nome}</span>
+          <span className="font-semibold text-gray-800 dark:text-gray-100 truncate">{ev.cliente.nome}</span>
           <span className="col-span-2 text-gray-500 dark:text-gray-400 truncate">
             {ev.cliente.telefone}
             {ev.empreendimento && <><br /><span className="text-[10px]">{ev.empreendimento.nome}</span></>}

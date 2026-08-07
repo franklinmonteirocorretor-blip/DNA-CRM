@@ -3,7 +3,7 @@
 
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import type { CopilotPergunta } from '@/src/types/copiloto'
 
 interface PerguntasProps {

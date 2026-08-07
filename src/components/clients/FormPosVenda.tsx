@@ -54,7 +54,7 @@ export default function FormPosVenda({
   }
 
   return (
-    <div className={`rounded-lg p-5 shadow-sm space-y-4 ${jaPosVenda ? 'border border-indigo-200 bg-indigo-50/50' : 'border border-indigo-100 bg-white'}`}>
+    <div className={`rounded-lg p-5 shadow-sm space-y-4 ${jaPosVenda ? 'border border-indigo-200 dark:border-indigo-700 bg-indigo-50/50 dark:bg-indigo-900/10' : 'border border-indigo-100 dark:border-indigo-800 bg-white dark:bg-gray-800'}`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">

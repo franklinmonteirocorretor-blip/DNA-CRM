@@ -20,7 +20,7 @@ const CORES_CENARIO_TEXTO: Record<string, string> = {
 }
 
 function HorizonCard({ cenario }: { cenario: BIHorizonteMeta }) {
-  const cardStyle = CORES_CENARIO[cenario.cenario] ?? 'border-gray-200 bg-gray-50'
+  const cardStyle = CORES_CENARIO[cenario.cenario] ?? 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800'
   const textStyle = CORES_CENARIO_TEXTO[cenario.cenario] ?? 'text-gray-500'
 
   return (

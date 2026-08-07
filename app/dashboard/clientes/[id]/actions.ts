@@ -1,7 +1,9 @@
 'use server'
 
-import { requireAuth } from '@/src/lib/auth/guards'
+import { requireClienteOwner } from '@/src/lib/auth/guards'
+import { cpfValido } from '@/src/lib/validators'
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
+import { throwOnError } from '@/src/lib/server/safeQuery'
 import { revalidatePath } from 'next/cache'
 import { Cliente, Conjuge, Documento, TipoDocumento, EtapaFunil, CHECKLIST_OBRIGATORIO, Cliente360Evento } from '@/src/types'
 import { ETAPA_LABEL_SINGULAR, ETAPA_ORDEM } from '@/src/config/pipeline'
@@ -70,7 +72,7 @@ export interface EditarClienteInput {
 }
 
 export async function agendarVisita(input: AgendarVisitaInput) {
-  await requireAuth()
+  await requireClienteOwner(input.cliente_id)
   const supabase = await createSupabaseServerClient()
 
   const {
@@ -133,7 +135,7 @@ export async function agendarVisita(input: AgendarVisitaInput) {
 }
 
 export async function registrarAtividade(input: RegistrarAtividadeInput) {
-  await requireAuth()
+  await requireClienteOwner(input.cliente_id)
   const supabase = await createSupabaseServerClient()
 
   const {
@@ -170,7 +172,7 @@ export async function registrarAtividade(input: RegistrarAtividadeInput) {
 }
 
 export async function uploadDocumento(input: UploadDocumentoInput) {
-  await requireAuth()
+  await requireClienteOwner(input.cliente_id)
   const supabase = await createSupabaseServerClient()
 
   const {
@@ -187,8 +189,22 @@ export async function uploadDocumento(input: UploadDocumentoInput) {
 
   // Converte base64 para buffer binário
   const partes = input.arquivo_base64.split(',')
+  const mimeDeclarado = (partes[0] ?? '').match(/^data:([^;]+);/)?.[1] ?? null
   const base64Data = partes.length === 2 ? partes[1] : partes[0]
   const buffer = Buffer.from(base64Data, 'base64')
+
+  // Defesa: valida tipo MIME e tamanho máximo (10 MB)
+  const MIME_PERMITIDOS = ['application/pdf', 'image/png', 'image/jpeg', 'image/webp']
+  const TAMANHO_MAXIMO = 10 * 1024 * 1024
+  if (mimeDeclarado && !MIME_PERMITIDOS.includes(mimeDeclarado)) {
+    return { erro: 'Tipo de arquivo não permitido. Envie PDF, PNG, JPG ou WEBP.' }
+  }
+  if (buffer.length === 0) {
+    return { erro: 'Arquivo vazio.' }
+  }
+  if (buffer.length > TAMANHO_MAXIMO) {
+    return { erro: 'Arquivo muito grande. O limite é 10 MB.' }
+  }
 
   // Caminho no bucket: [cliente_id]/[timestamp]-[nome_arquivo]
   const timestamp = Date.now()
@@ -256,7 +272,7 @@ export async function uploadDocumento(input: UploadDocumentoInput) {
 }
 
 export async function registrarComparecimento(input: RegistrarComparecimentoInput) {
-  await requireAuth()
+  await requireClienteOwner(input.cliente_id)
   const supabase = await createSupabaseServerClient()
 
   const {
@@ -316,7 +332,7 @@ export async function registrarComparecimento(input: RegistrarComparecimentoInpu
 }
 
 export async function registrarAnalise(input: RegistrarAnaliseInput) {
-  await requireAuth()
+  await requireClienteOwner(input.cliente_id)
   const supabase = await createSupabaseServerClient()
 
   const {
@@ -383,7 +399,7 @@ export async function registrarAnalise(input: RegistrarAnaliseInput) {
 }
 
 export async function registrarFechamento(input: RegistrarFechamentoInput) {
-  await requireAuth()
+  await requireClienteOwner(input.cliente_id)
   const supabase = await createSupabaseServerClient()
 
   const {
@@ -442,7 +458,7 @@ export async function registrarFechamento(input: RegistrarFechamentoInput) {
 }
 
 export async function registrarPosVenda(input: RegistrarPosVendaInput) {
-  await requireAuth()
+  await requireClienteOwner(input.cliente_id)
   const supabase = await createSupabaseServerClient()
 
   const {
@@ -510,7 +526,7 @@ export async function registrarPosVenda(input: RegistrarPosVendaInput) {
 // === SPRINT 1 — Feature 01: Edição de Cliente ===
 
 export async function editarCliente(input: EditarClienteInput) {
-  await requireAuth()
+  await requireClienteOwner(input.cliente_id)
   const supabase = await createSupabaseServerClient()
 
   const {
@@ -530,6 +546,8 @@ export async function editarCliente(input: EditarClienteInput) {
 
   if (!input.cpf || input.cpf.length !== 11) {
     erros.push('O CPF deve ter exatamente 11 dígitos.')
+  } else if (!cpfValido(input.cpf)) {
+    erros.push('CPF inválido (dígitos verificadores não conferem).')
   }
 
   if (!input.telefone || (input.telefone.length !== 11 && input.telefone.length !== 10)) {
@@ -609,7 +627,7 @@ export async function editarCliente(input: EditarClienteInput) {
 // ═══ Sprint 8: Central do Cliente 360º ═══
 
 export async function cliente360(id: string) {
-  await requireAuth()
+  await requireClienteOwner(id)
   const supabase = await createSupabaseServerClient()
 
   const { data: cliente } = await supabase
@@ -622,18 +640,16 @@ export async function cliente360(id: string) {
 
   const { data: conjuge } = await supabase.from('conjuges').select('*').eq('cliente_id', id).maybeSingle()
 
-  const [agendamentosIds] = await Promise.all([
-    supabase.from('agendamentos').select('id').eq('cliente_id', id),
-  ])
+  const agendamentosIds = await throwOnError(supabase.from('agendamentos').select('id').eq('cliente_id', id))
 
-  const ids = agendamentosIds.data?.map(a => a.id) ?? []
+  const ids = agendamentosIds.map(a => a.id)
 
-  const [{ data: atividades }, { data: historico }, { data: docs }, { data: agendamentos }, { data: comparecimentos }] = await Promise.all([
-    supabase.from('atividades').select('id, tipo, resultado, created_at, usuarios!inner(nome)').eq('cliente_id', id).order('created_at', { ascending: false }).limit(100),
-    supabase.from('historico_acoes').select('*').eq('entidade_id', id).eq('entidade', 'clientes').order('created_at', { ascending: false }).limit(50),
-    supabase.from('documentos').select('*').eq('cliente_id', id).is('deleted_at', null).order('created_at', { ascending: false }),
-    supabase.from('agendamentos').select('id, data_hora, status, created_at, usuarios!inner(nome)').eq('cliente_id', id).order('data_hora', { ascending: false }),
-    supabase.from('comparecimentos').select('id, resultado, agendamento_id, created_at').in('agendamento_id', ids.length > 0 ? ids : ['00000000-0000-0000-0000-000000000000']),
+  const [atividades, historico, docs, agendamentos, comparecimentos] = await Promise.all([
+    throwOnError(supabase.from('atividades').select('id, tipo, resultado, created_at, usuarios!inner(nome)').eq('cliente_id', id).order('created_at', { ascending: false }).limit(100)),
+    throwOnError(supabase.from('historico_acoes').select('*').eq('entidade_id', id).eq('entidade', 'clientes').order('created_at', { ascending: false }).limit(50)),
+    throwOnError(supabase.from('documentos').select('*').eq('cliente_id', id).is('deleted_at', null).order('created_at', { ascending: false })),
+    throwOnError(supabase.from('agendamentos').select('id, data_hora, status, created_at, usuarios!inner(nome)').eq('cliente_id', id).order('data_hora', { ascending: false })),
+    throwOnError(supabase.from('comparecimentos').select('id, resultado, agendamento_id, created_at').in('agendamento_id', ids.length > 0 ? ids : ['00000000-0000-0000-0000-000000000000'])),
   ])
 
   const timeline: Cliente360Evento[] = []

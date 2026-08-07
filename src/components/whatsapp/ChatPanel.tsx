@@ -19,10 +19,9 @@ interface ChatProps {
 export function ChatPanel({
   conversa,
   mensagens,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   usuarioName: _usuarioName,
   onEnviar,
-  onMarcaLidas,
+  onMarcaLidas: _onMarcaLidas,
 }: ChatProps) {
   const [texto, setTexto] = useState('')
   const ref = useRef<HTMLDivElement>(null)
@@ -88,7 +87,7 @@ export function ChatPanel({
           const isUser = m.remetente === 'usuario' || m.remetente === 'sistema'
           const balaoClasse = isUser
             ? 'bg-blue-600 text-white ml-auto'
-            : 'bg-white text-gray-900 border border-gray-200 mr-auto'
+            : 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 mr-auto'
           const timeClasse = isUser ? 'text-blue-200' : 'text-gray-400'
 
           return (

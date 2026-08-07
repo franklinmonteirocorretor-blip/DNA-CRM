@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, type Dispatch, type SetStateAction } from 'react'
+import { useState, useEffect } from 'react'
 import KpiCard from '@/src/components/ui/KpiCard'
 import FormAutomacao from '@/src/components/automacoes/FormAutomacao'
 import { alterarStatusAutomacao, excluirAutomacao, processarFilaAgora } from '@/app/dashboard/automacoes/actions'

@@ -28,10 +28,10 @@ function PodioItem({
 }) {
   return (
     <div
-      className={`rounded-lg border-2 ${CORES_PODIO[posicao] ?? 'border-gray-200 bg-white'} p-4 shadow-sm`}
+      className={`rounded-lg border-2 ${CORES_PODIO[posicao] ?? 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'} p-4 shadow-sm`}
     >
       <div className="flex items-center gap-3">
-        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white dark:bg-gray-800 text-lg font-bold shadow-sm text-gray-800">
+        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white dark:bg-gray-700 text-lg font-bold shadow-sm text-gray-800 dark:text-gray-100">
           {ICONES_PODIO[posicao]}
         </span>
         <div>
@@ -43,15 +43,15 @@ function PodioItem({
       </div>
       <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
         <span className="text-gray-500 dark:text-gray-400">VGV:</span>
-        <span className="text-right font-medium text-gray-800">
+        <span className="text-right font-medium text-gray-800 dark:text-gray-200">
           {formatarMoeda(item.vgv)}
         </span>
         <span className="text-gray-500 dark:text-gray-400">Comissão:</span>
-        <span className="text-right font-medium text-gray-800">
+        <span className="text-right font-medium text-gray-800 dark:text-gray-200">
           {formatarMoeda(item.comissao)}
         </span>
         <span className="text-gray-500 dark:text-gray-400">Conversão:</span>
-        <span className="text-right font-medium text-gray-800">
+        <span className="text-right font-medium text-gray-800 dark:text-gray-200">
           {formatoPercentual(item.conversao)}
         </span>
       </div>

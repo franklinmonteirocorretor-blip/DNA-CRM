@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/src/lib/supabase'
+import { escaparLike } from '@/src/lib/sql-utils'
 
 type ResultadoItem = {
   id: string
@@ -33,7 +34,7 @@ export default function BuscaGlobal() {
     setCarregando(true)
     setAberto(true)
 
-    const padrao = `%${q}%`
+    const padrao = `%${escaparLike(q)}%`
     const [resClientes, resUsuarios] = await Promise.all([
       supabase
         .from('clientes')
@@ -120,7 +121,7 @@ export default function BuscaGlobal() {
           if (resultado.length > 0) setAberto(true)
         }}
         placeholder="Buscar clientes, corretores..."
-        className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 px-3 py-1.5 text-xs text-gray-700 dark:text-gray-300 placeholder-gray-400 focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-400 transition"
+        className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 px-3 py-1.5 text-xs text-gray-700 dark:text-gray-300 placeholder-gray-400 focus:border-blue-400 focus:bg-white dark:focus:bg-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-400 transition"
       />
 
       {aberto && (carregando || resultado.length > 0) && (

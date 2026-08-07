@@ -67,7 +67,7 @@ function MiniCard({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded bg-gray-50 dark:bg-gray-700 px-3 py-2">
       <span className="text-[10px] uppercase text-gray-400 dark:text-gray-500">{label}</span>
-      <p className="text-sm font-medium text-gray-800">{value}</p>
+      <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{value}</p>
     </div>
   )
 }

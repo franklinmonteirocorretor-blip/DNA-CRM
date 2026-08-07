@@ -65,14 +65,14 @@ export default function PainelClientePipeline({
   return (
     <>
       {/* Overlay */}
-      <div className="fixed inset-0 bg-black/20 z-40" onClick={onFechar} />
+      <div className="fixed inset-0 bg-black/20 z-40" onClick={onFechar} role="presentation" tabIndex={-1} />
 
       {/* Painel */}
       <div className="fixed inset-y-0 right-0 w-96 bg-white dark:bg-gray-800 shadow-2xl border-l border-gray-200 dark:border-gray-600 z-50 overflow-y-auto">
         {/* Cabeçalho */}
         <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-600 px-4 py-3 flex items-center justify-between z-10">
           <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{dados.nome}</h2>
-          <button onClick={onFechar} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 text-lg leading-none">&times;</button>
+          <button onClick={onFechar} aria-label="Fechar painel" className="text-gray-400 dark:text-gray-500 hover:text-gray-600 text-lg leading-none">&times;</button>
         </div>
 
         <div className="p-4 space-y-4 text-sm">

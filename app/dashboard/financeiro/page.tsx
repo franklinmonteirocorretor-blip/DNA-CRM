@@ -2,7 +2,6 @@
 // Dashboard completo com 7 seções: Resumo, Comissões, Produção,
 // Ranking, Empreendimentos, Previsão, Filtros.
 
-import { createSupabaseServerClient } from '@/src/lib/server/supabase'
 import { financeiroDadosIniciais } from './actions'
 import { FinanceiroFiltros } from '@/src/types/financeiro'
 import { formatarMoeda } from '@/src/lib/formatters'
@@ -65,18 +64,18 @@ export default async function FinanceiroPage({ searchParams }: Props) {
         <p className="text-[11px] text-gray-400 dark:text-gray-500 mb-2">{dados.comissoes.length} vendas com comissão</p>
         <div className="overflow-x-auto rounded-lg bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800">
           <table className="w-full text-sm">
-            <thead>
+            <thead className="sticky top-0 z-10">
               <tr className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 text-left text-[10px] font-medium uppercase text-gray-400 dark:text-gray-500">
-                <th className="px-3 py-2.5 font-medium">Cliente</th>
-                <th className="px-3 py-2.5 font-medium">Empreendimento</th>
-                <th className="px-3 py-2.5 font-medium">Corretor</th>
-                <th className="px-3 py-2.5 text-right font-medium">VGV</th>
-                <th className="px-3 py-2.5 text-right font-medium">%</th>
-                <th className="px-3 py-2.5 text-right font-medium">Valor</th>
-                <th className="px-3 py-2.5 font-medium">Status</th>
-                <th className="px-3 py-2.5 font-medium">Prevista</th>
-                <th className="px-3 py-2.5 font-medium">Recebimento</th>
-                <th className="px-3 py-2.5 font-medium">Ações</th>
+                <th scope="col" className="px-3 py-2.5 font-medium">Cliente</th>
+                <th scope="col" className="px-3 py-2.5 font-medium">Empreendimento</th>
+                <th scope="col" className="px-3 py-2.5 font-medium">Corretor</th>
+                <th scope="col" className="px-3 py-2.5 text-right font-medium">VGV</th>
+                <th scope="col" className="px-3 py-2.5 text-right font-medium">%</th>
+                <th scope="col" className="px-3 py-2.5 text-right font-medium">Valor</th>
+                <th scope="col" className="px-3 py-2.5 font-medium">Status</th>
+                <th scope="col" className="px-3 py-2.5 font-medium">Prevista</th>
+                <th scope="col" className="px-3 py-2.5 font-medium">Recebimento</th>
+                <th scope="col" className="px-3 py-2.5 font-medium">Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -122,7 +121,7 @@ export default async function FinanceiroPage({ searchParams }: Props) {
               {dados.producao.slice(-12).map((p) => {
                 const maxVgv = Math.max(...dados.producao.map((x) => x.vgv), 1)
                 const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
-                const [ano, mes] = p.periodo.split('-')
+                const [, mes] = p.periodo.split('-')
                 const label = meses[Number(mes) - 1] ?? p.periodo
                 return (
                   <div key={p.periodo} className="flex items-center gap-2 text-[11px]">
@@ -145,7 +144,7 @@ export default async function FinanceiroPage({ searchParams }: Props) {
               {dados.producao.slice(-12).map((p) => {
                 const maxCom = Math.max(...dados.producao.map((x) => x.comissoes), 1)
                 const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
-                const [ano, mes] = p.periodo.split('-')
+                const [, mes] = p.periodo.split('-')
                 const label = meses[Number(mes) - 1] ?? p.periodo
                 return (
                   <div key={p.periodo} className="flex items-center gap-2 text-[11px]">

@@ -19,7 +19,7 @@ export default function TabelaKPIs({ kpis }: { kpis: GestaoKPI[] }) {
         {kpis.map((kpi) => (
           <div
             key={kpi.usuarioId}
-            className={`rounded-lg border p-4 ${ kpi.status === 'META_BATIDA' ? 'border-emerald-200 bg-emerald-50' : 'border-gray-200 bg-white' }`}
+            className={`rounded-lg border p-4 ${ kpi.status === 'META_BATIDA' ? 'border-emerald-200 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-900/20' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800' }`}
           >
             {/* Cabeçalho do corretor */}
             <div className="flex items-center justify-between mb-3">

@@ -2,8 +2,9 @@
 
 'use server'
 
-import { requireAuth } from '@/src/lib/auth/guards'
+import { requirePermission } from '@/src/lib/auth/guards'
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
+import { throwOnError } from '@/src/lib/server/safeQuery'
 import { hoje, inicioDoMes, ultimoDiaDoMes } from '@/src/lib/analytics'
 import { dispatchAutomation } from '@/src/lib/automation/engine'
 import type {
@@ -49,7 +50,7 @@ function aplicarFiltrosBase(query: any, filtros?: FinanceiroFiltros) {
 // ─── SEÇÃO 1: Resumo ─────────────────────────────────────────────────────────
 
 export async function financeiroResumo(filtros?: FinanceiroFiltros): Promise<FinanceiroResumo> {
-  await requireAuth()
+  await requirePermission('financeiro', 'visualizar')
   const supabase = await createSupabaseServerClient()
   const { inicio, fim } = resolverPeriodo(filtros)
 
@@ -60,7 +61,7 @@ export async function financeiroResumo(filtros?: FinanceiroFiltros): Promise<Fin
     .lte('data_fechamento', `${fim}T23:59:59`)
     .is('deleted_at', null)
   query = aplicarFiltrosBase(query, filtros)
-  const { data } = await query
+  const data = await throwOnError(query)
 
   const vendas = data ?? []
   const vgvTotal = vendas.reduce((s, v) => s + (v.vgv ?? 0), 0)
@@ -85,7 +86,7 @@ export async function financeiroResumo(filtros?: FinanceiroFiltros): Promise<Fin
 // ─── SEÇÃO 2: Tabela de Comissões ────────────────────────────────────────────
 
 export async function listarComissoes(filtros?: FinanceiroFiltros): Promise<ComissaoItem[]> {
-  await requireAuth()
+  await requirePermission('financeiro', 'visualizar')
   const supabase = await createSupabaseServerClient()
   const { inicio, fim } = resolverPeriodo(filtros)
 
@@ -102,7 +103,7 @@ export async function listarComissoes(filtros?: FinanceiroFiltros): Promise<Comi
     .order('data_fechamento', { ascending: false })
 
   query = aplicarFiltrosBase(query, filtros)
-  const { data } = await query
+  const data = await throwOnError(query)
 
   return (data ?? []).map((c) => {
     const item = c as unknown as {
@@ -132,7 +133,7 @@ export async function producaoFinanceira(
   agrupamento: 'monthly' | 'weekly' | 'annual',
   filtros?: FinanceiroFiltros,
 ): Promise<FinanceiroProducao[]> {
-  await requireAuth()
+  await requirePermission('financeiro', 'visualizar')
   const supabase = await createSupabaseServerClient()
   const { inicio, fim } = resolverPeriodo(filtros)
 
@@ -144,7 +145,7 @@ export async function producaoFinanceira(
     .is('deleted_at', null)
     .order('data_fechamento', { ascending: true })
   query = aplicarFiltrosBase(query, filtros)
-  const { data } = await query
+  const data = await throwOnError(query)
 
   const rows = data ?? []
   const grupos: Record<string, FinanceiroProducao> = {}
@@ -176,7 +177,7 @@ export async function producaoFinanceira(
 // ─── SEÇÃO 4: Ranking Financeiro ─────────────────────────────────────────────
 
 export async function rankingFinanceiro(filtros?: FinanceiroFiltros): Promise<FinanceiroRankingItem[]> {
-  await requireAuth()
+  await requirePermission('financeiro', 'visualizar')
   const supabase = await createSupabaseServerClient()
   const { inicio, fim } = resolverPeriodo(filtros)
 
@@ -187,7 +188,7 @@ export async function rankingFinanceiro(filtros?: FinanceiroFiltros): Promise<Fi
     .lte('data_fechamento', `${fim}T23:59:59`)
     .is('deleted_at', null)
   query = aplicarFiltrosBase(query, filtros)
-  const { data } = await query
+  const data = await throwOnError(query)
 
   type AccItem = { nome: string; vgv: number; comissoes: number; vendas: Set<string> }
   const porCorretor: Record<string, AccItem> = {}
@@ -205,12 +206,12 @@ export async function rankingFinanceiro(filtros?: FinanceiroFiltros): Promise<Fi
   }
 
   const corretorIds = Object.keys(porCorretor)
-  const { data: totalClientes } = corretorIds.length > 0
-    ? await supabase.from('clientes')
+  const totalClientes = corretorIds.length > 0
+    ? await throwOnError(supabase.from('clientes')
         .select('corretor_responsavel_id')
         .in('corretor_responsavel_id', corretorIds)
-        .is('deleted_at', null)
-    : { data: [] }
+        .is('deleted_at', null))
+    : []
 
   const totalPorCorretor: Record<string, number> = {}
   for (const c of totalClientes ?? []) {
@@ -237,7 +238,7 @@ export async function rankingFinanceiro(filtros?: FinanceiroFiltros): Promise<Fi
 export async function empreendimentosFinanceiro(
   filtros?: FinanceiroFiltros,
 ): Promise<FinanceiroEmpreendimento[]> {
-  await requireAuth()
+  await requirePermission('financeiro', 'visualizar')
   const supabase = await createSupabaseServerClient()
   const { inicio, fim } = resolverPeriodo(filtros)
 
@@ -248,7 +249,7 @@ export async function empreendimentosFinanceiro(
     .lte('data_fechamento', `${fim}T23:59:59`)
     .is('deleted_at', null)
   query = aplicarFiltrosBase(query, filtros)
-  const { data } = await query
+  const data = await throwOnError(query)
 
   type EmpAcc = { nome: string; vgv: number; comissoes: number; clientes: Set<string> }
   const porEmpreendimento: Record<string, EmpAcc> = {}
@@ -284,7 +285,7 @@ export async function empreendimentosFinanceiro(
 export async function previsaoComissoes(
   filtros?: FinanceiroFiltros,
 ): Promise<FinanceiroPrevisao> {
-  await requireAuth()
+  await requirePermission('financeiro', 'visualizar')
   const supabase = await createSupabaseServerClient()
   const now = new Date()
   const mais7 = new Date(now.getTime() + 7 * 86400000).toISOString().slice(0, 10)
@@ -299,7 +300,7 @@ export async function previsaoComissoes(
     .not('comissao_data_prevista', 'is', null)
     .order('comissao_data_prevista', { ascending: true })
   query = aplicarFiltrosBase(query, filtros)
-  const { data } = await query
+  const data = await throwOnError(query)
 
   let p7 = 0; let p30 = 0; let p90 = 0
   const detalhes: { clienteId: string; clienteNome: string; valor: number; dataPrevista: string }[] = []
@@ -329,7 +330,7 @@ export async function atualizarComissao(
   novoStatus: ComissaoStatus,
   dataRecebimento?: string,
 ): Promise<{ success: boolean; error?: string }> {
-  await requireAuth()
+  await requirePermission('financeiro', 'editar')
   const supabase = await createSupabaseServerClient()
 
   const update: Record<string, string | null> = { comissao_status: novoStatus }
@@ -364,7 +365,7 @@ export async function registrarRecebimento(
   clienteId: string,
   _observacao?: string,
 ): Promise<GestaoResultado> {
-  await requireAuth()
+  await requirePermission('financeiro', 'confirmar_recebimento')
 
   const resultado = await gestaoComissaoDB(clienteId, 'RECEBIDA')
   if (!resultado.sucesso) return resultado
@@ -382,7 +383,7 @@ export async function cancelarComissao(
   clienteId: string,
   _observacao?: string,
 ): Promise<GestaoResultado> {
-  await requireAuth()
+  await requirePermission('financeiro', 'editar')
 
   const resultado = await gestaoComissaoDB(clienteId, 'CANCELADA')
   if (!resultado.sucesso) return resultado
@@ -394,7 +395,7 @@ export async function reativarComissao(
   clienteId: string,
   _observacao?: string,
 ): Promise<GestaoResultado> {
-  await requireAuth()
+  await requirePermission('financeiro', 'editar')
 
   const resultado = await gestaoComissaoDB(clienteId, 'REATIVADA')
   if (!resultado.sucesso) return resultado
@@ -418,7 +419,7 @@ export interface FinanceiroDadosCompletos {
 export async function financeiroDadosIniciais(
   filtros?: FinanceiroFiltros,
 ): Promise<FinanceiroDadosCompletos> {
-  await requireAuth()
+  await requirePermission('financeiro', 'visualizar')
   const supabase = await createSupabaseServerClient()
 
   const [

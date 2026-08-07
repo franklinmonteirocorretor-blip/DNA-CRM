@@ -44,7 +44,7 @@ export default function AlertasAgenda({ eventos }: AlertasAgendaProps) {
       {/* Compromissos de hoje */}
       <AlertaCard
         titulo="Hoje"
-        cor="bg-blue-50 border-blue-200 text-blue-800"
+        cor="bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-950/60 dark:text-blue-200 dark:border-blue-800"
         eventos={compromissosHoje}
         badgeCor="bg-blue-100 text-blue-600"
       />
@@ -52,7 +52,7 @@ export default function AlertasAgenda({ eventos }: AlertasAgendaProps) {
       {/* Atrasados */}
       <AlertaCard
         titulo="Atrasados"
-        cor="bg-red-50 border-red-200 text-red-800"
+        cor="bg-red-50 border-red-200 text-red-800 dark:bg-red-950/60 dark:text-red-200 dark:border-red-800"
         eventos={atrasados}
         badgeCor="bg-red-100 text-red-600"
       />
@@ -60,7 +60,7 @@ export default function AlertasAgenda({ eventos }: AlertasAgendaProps) {
       {/* Próximos */}
       <AlertaCard
         titulo="Próximos 3 dias"
-        cor="bg-amber-50 border-amber-200 text-amber-800"
+        cor="bg-amber-50 border-amber-200 text-amber-800 dark:bg-amber-950/60 dark:text-amber-200 dark:border-amber-800"
         eventos={proximosFiltrados}
         badgeCor="bg-amber-100 text-amber-600"
       />

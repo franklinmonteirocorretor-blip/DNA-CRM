@@ -1,17 +1,18 @@
 'use server'
 
-import { requireAuth } from '@/src/lib/auth/guards'
+import { requireAuth, requirePermission, requireAgendamentoOwner, requireClienteOwner } from '@/src/lib/auth/guards'
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
 import { revalidatePath } from 'next/cache'
 import { AgendaEvent, AgendaFiltros, AgendaResumo, StatusAgendamento, ResultadoComparecimento, EtapaFunil } from '@/src/types'
 import { dispatchAutomation } from '@/src/lib/automation/engine'
+import { escaparLike } from '@/src/lib/sql-utils'
 
 /**
  * Busca todos os agendamentos enriquecidos para o calendário.
  * Aplica os filtros recebidos (corretor, empreendimento, status, período, cliente).
  */
 export async function listarAgendamentos(filtros: AgendaFiltros) {
-  await requireAuth()
+  await requirePermission('agenda', 'visualizar')
   const supabase = await createSupabaseServerClient()
 
   const {
@@ -78,8 +79,8 @@ export async function listarAgendamentos(filtros: AgendaFiltros) {
   if (filtros.clienteBusca) {
     const busca = filtros.clienteBusca.trim()
     if (busca.length >= 2) {
-      // Usa ilike para busca parcial no nome do cliente
-      query = query.ilike('clientes.nome', `%${busca}%`)
+      // Usa ilike para busca parcial no nome do cliente — valor escapado contra LIKE injection
+      query = query.ilike('clientes.nome', `%${escaparLike(busca)}%`)
     }
   }
 
@@ -189,7 +190,7 @@ type AgendamentoJoinRow = {
  * Resumo para o card Agenda de Hoje no Dashboard.
  */
 export async function resumoAgendaHoje(): Promise<AgendaResumo> {
-  await requireAuth()
+  await requirePermission('agenda', 'visualizar')
   const supabase = await createSupabaseServerClient()
 
   const {
@@ -309,7 +310,7 @@ export async function confirmarAgendamento(agendamentoId: string) {
  * Cancela um agendamento.
  */
 export async function cancelarAgendamento(agendamentoId: string) {
-  await requireAuth()
+  await requireAgendamentoOwner(agendamentoId)
   const supabase = await createSupabaseServerClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -351,7 +352,7 @@ export async function reagendarVisita(input: {
   novaDataHora: string
   observacao: string | null
 }) {
-  await requireAuth()
+  await requireAgendamentoOwner(input.agendamentoId)
   const supabase = await createSupabaseServerClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -423,7 +424,7 @@ export async function confirmarComparecimentoAgenda(input: {
   motivoAusencia: string | null
   observacao: string
 }) {
-  await requireAuth()
+  await requireAgendamentoOwner(input.agendamentoId)
   const supabase = await createSupabaseServerClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -479,7 +480,7 @@ export async function confirmarComparecimentoAgenda(input: {
  * Busca dados completos do cliente para o painel lateral.
  */
 export async function buscarDetalhesClientePainel(clienteId: string) {
-  await requireAuth()
+  await requireClienteOwner(clienteId)
   const supabase = await createSupabaseServerClient()
 
   const { data: { user } } = await supabase.auth.getUser()

@@ -1,6 +1,6 @@
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
 import { operacaoDadosIniciais } from './actions'
-import CentralOperacao from '@/src/components/operacao/CentralOperacao'
+import { LazyCentralOperacao } from '@/src/components/lazy'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,5 +18,5 @@ export default async function OperacaoPage() {
 
   const dados = await operacaoDadosIniciais()
 
-  return <CentralOperacao dadosIniciais={dados} />
+  return <LazyCentralOperacao dadosIniciais={dados} />
 }

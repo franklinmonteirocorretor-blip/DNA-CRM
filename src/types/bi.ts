@@ -1,7 +1,5 @@
 // DNA CRM — Sprint 14: BI Executivo — Types
 
-import type { EtapaFunil } from './index'
-
 // ─── SEÇÃO 1: Resumo Executivo ─────────────────────────────────────────────────
 export interface BIResumoExecutivo {
   vgvMes: number

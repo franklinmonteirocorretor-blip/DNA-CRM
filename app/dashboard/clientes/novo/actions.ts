@@ -1,6 +1,7 @@
 'use server'
 
 import { requireAuth } from '@/src/lib/auth/guards'
+import { cpfValido, emailValido } from '@/src/lib/validators'
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
 import { redirect } from 'next/navigation'
 import { dispatchAutomation } from '@/src/lib/automation/engine'
@@ -35,6 +36,14 @@ export async function cadastrarCliente(formData: FormData) {
 
   if (!telefone || (telefone.length !== 11 && telefone.length !== 10)) {
     erros.push('Telefone deve ter 10 ou 11 dígitos (com DDD).')
+  }
+
+  if (!emailValido(email)) {
+    erros.push('E-mail informado não é válido.')
+  }
+
+  if (!cpfValido(cpf)) {
+    erros.push('CPF inválido (dígitos verificadores não conferem).')
   }
 
   if (erros.length > 0) {

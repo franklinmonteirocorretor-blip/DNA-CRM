@@ -57,15 +57,15 @@ export default function ProdutividadeChart({ series }: ProdutividadeChartProps) 
       <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Produtividade por Equipe</h3>
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={dadosUnificados}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#d1d5db" />
           <XAxis
             dataKey="dia"
-            tick={{ fontSize: 11, fill: '#9ca3af' }}
+            tick={{ fontSize: 11, fill: '#6b7280' }}
             tickLine={false}
-            axisLine={{ stroke: '#e5e7eb' }}
+            axisLine={{ stroke: '#d1d5db' }}
           />
           <YAxis
-            tick={{ fontSize: 11, fill: '#9ca3af' }}
+            tick={{ fontSize: 11, fill: '#6b7280' }}
             tickLine={false}
             axisLine={false}
             width={35}
@@ -73,9 +73,11 @@ export default function ProdutividadeChart({ series }: ProdutividadeChartProps) 
           <Tooltip
             contentStyle={{
               borderRadius: '8px',
-              border: '1px solid #e5e7eb',
+              border: '1px solid #d1d5db',
               fontSize: '12px',
               boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+              backgroundColor: 'var(--color-bg)',
+              color: 'var(--color-text)',
             }}
           />
           <Legend

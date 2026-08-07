@@ -1,7 +1,7 @@
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
-import { Usuario } from '@/src/types'
+import { throwOnError } from '@/src/lib/server/safeQuery'
+import { Usuario, ProducaoDiaria } from '@/src/types'
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
 
 // ── Tipos internos ───────────────────────────────────────────────────────────
 
@@ -69,11 +69,11 @@ export default async function RankingsPage() {
     queryCorretores = queryCorretores.eq('id', usuario.id)
   }
 
-  const { data: corretores } = await queryCorretores.returns<
+  const corretores = await throwOnError(queryCorretores.returns<
     Pick<Usuario, 'id' | 'nome'>[]
-  >()
+  >())
 
-  const listaCorretores = corretores ?? []
+  const listaCorretores = corretores
 
   if (listaCorretores.length === 0) {
     return (
@@ -106,19 +106,24 @@ export default async function RankingsPage() {
   const fimMes = new Date(agora.getFullYear(), agora.getMonth() + 1, 0, 23, 59, 59, 999).toISOString()
 
   // ── 1. Produção do mês (producao_diaria) ────────────────────────────────
-  const { data: producao } = await supabase
-    .from('producao_diaria')
-    .select('*')
-    .in('usuario_id', ids)
-    .gte('data', inicioMes.slice(0, 10))
-    .lte('data', fimMes.slice(0, 10))
+  const producao = await throwOnError(
+    supabase
+      .from('producao_diaria')
+      .select('*')
+      .in('usuario_id', ids)
+      .gte('data', inicioMes.slice(0, 10))
+      .lte('data', fimMes.slice(0, 10))
+      .returns<ProducaoDiaria[]>()
+  )
 
   // ── 2. Clientes com dados de VGV e comissão ─────────────────────────────
-  const { data: clientes } = await supabase
-    .from('clientes')
-    .select('id, corretor_responsavel_id, etapa_atual, resultado_analise, ficha_proposta_assinada, pasta_completa_em, vgv, comissao_valor, data_fechamento')
-    .in('corretor_responsavel_id', ids)
-    .is('deleted_at', null)
+  const clientes = await throwOnError(
+    supabase
+      .from('clientes')
+      .select('id, corretor_responsavel_id, etapa_atual, resultado_analise, ficha_proposta_assinada, pasta_completa_em, vgv, comissao_valor, data_fechamento')
+      .in('corretor_responsavel_id', ids)
+      .is('deleted_at', null)
+  )
 
   // ── Consolida por corretor ──────────────────────────────────────────────
   const mapa = new Map<string, StatsCorretor>()
@@ -143,7 +148,7 @@ export default async function RankingsPage() {
   }
 
   // Produção
-  for (const p of producao ?? []) {
+  for (const p of producao) {
     const s = mapa.get(p.usuario_id)
     if (!s) continue
     s.ligacoes += p.ligacoes
@@ -153,7 +158,7 @@ export default async function RankingsPage() {
   }
 
   // Clientes
-  for (const cli of clientes ?? []) {
+  for (const cli of clientes) {
     const s = mapa.get(cli.corretor_responsavel_id)
     if (!s) continue
     s.totalClientes++

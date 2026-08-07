@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
+import { throwOnError } from '@/src/lib/server/safeQuery'
 import { ProducaoDiaria, Cliente, Agendamento, Documento } from '@/src/types'
 import Link from 'next/link'
 import KpiCard from '@/src/components/ui/KpiCard'
@@ -14,94 +15,137 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Busca a produção diária do corretor logado (últimos 7 dias)
+// Busca a produção diária do corretor logado (últimos 7 dias)
   const hoje = new Date().toISOString().slice(0, 10)
   const seteDiasAtras = new Date(new Date().getTime() - 7 * 86400000).toISOString().slice(0, 10)
-
-  const { data: producao } = await supabase
-    .from('producao_diaria')
-    .select('*')
-    .eq('usuario_id', user!.id)
-    .gte('data', seteDiasAtras)
-    .lte('data', hoje)
-    .order('data', { ascending: false })
-    .returns<ProducaoDiaria[]>()
-
-  const hojeStats = producao?.find((p) => p.data === hoje)
-
-  // Total de clientes ativos
-  const { count } = await supabase
-    .from('clientes')
-    .select('*', { count: 'exact', head: true })
-
-  // ---- Alertas ----
-
-  // 1. Clientes sem contato há ≥ 5 dias (etapas ativas)
   const cincoDiasAtras = new Date(new Date().getTime() - 5 * 86400000).toISOString()
-  const etapasParado = ['NOVO_LEAD', 'CONTATOS', 'AGENDAMENTO', 'COMPARECIMENTO']
-  const { data: clientesParados } = await supabase
-    .from('clientes')
-    .select('id, nome, etapa_atual, ultima_atividade_em')
-    .in('etapa_atual', etapasParado)
-    .lt('ultima_atividade_em', cincoDiasAtras)
-    .order('ultima_atividade_em', { ascending: true })
-    .limit(5)
-    .returns<Pick<Cliente, 'id' | 'nome' | 'etapa_atual' | 'ultima_atividade_em'>[]>()
+  const tresDiasFuturo = new Date(new Date().getTime() + 3 * 86400000).toISOString()
 
-  // 2. Agendamentos para hoje e amanhã
+  // Datas para agendamentos
   const amanhaInicio = new Date()
   amanhaInicio.setDate(amanhaInicio.getDate() + 1)
   amanhaInicio.setHours(0, 0, 0, 0)
   const amanhaFim = new Date(amanhaInicio)
   amanhaFim.setHours(23, 59, 59, 999)
-
   const hojeInicio = new Date()
   hojeInicio.setHours(0, 0, 0, 0)
   const hojeFim = new Date()
   hojeFim.setHours(23, 59, 59, 999)
 
-  const { data: agendamentosProximos } = await supabase
-    .from('agendamentos')
-    .select('id, cliente_id, data_hora, empreendimento_interesse, clientes!inner(nome)')
-    .or(
-      `data_hora.gte.${hojeInicio.toISOString()},data_hora.lte.${hojeFim.toISOString()},data_hora.gte.${amanhaInicio.toISOString()},data_hora.lte.${amanhaFim.toISOString()}`
-    )
-    .order('data_hora', { ascending: true })
-    .limit(10)
-    .returns<(Pick<Agendamento, 'id' | 'cliente_id' | 'data_hora' | 'empreendimento_interesse'> & { clientes: { nome: string } })[]>()
+const etapasParado = ['NOVO_LEAD', 'CONTATOS', 'AGENDAMENTO', 'COMPARECIMENTO']
 
-  // 3. Documentos pendentes de validação
-  const { data: docsPendentes } = await supabase
-    .from('documentos')
-    .select('id, cliente_id, tipo, status_validacao')
-    .eq('status_validacao', 'PENDENTE')
-    .is('deleted_at', null)
-    .order('created_at', { ascending: false })
-    .limit(5)
-    .returns<Pick<Documento, 'id' | 'cliente_id' | 'tipo' | 'status_validacao'>[]>()
+  // ── Promise.all: paraleliza todas as queries independentes ──────────
+  const [
+    producao, clientesParados, agendamentosProximos, docsPendentes, posVendaAlertas,
+    resumoAgenda, resumoEquipe,
+  ] = await Promise.all([
+      // Q1: produção 7 dias
+      throwOnError(
+        supabase
+          .from('producao_diaria')
+          .select('*')
+          .eq('usuario_id', user!.id)
+          .gte('data', seteDiasAtras)
+          .lte('data', hoje)
+          .order('data', { ascending: false })
+          .returns<ProducaoDiaria[]>()
+      ),
+      // Q2: clientes sem contato há ≥ 5 dias
+      throwOnError(
+        supabase
+          .from('clientes')
+          .select('id, nome, etapa_atual, ultima_atividade_em')
+          .in('etapa_atual', etapasParado)
+          .lt('ultima_atividade_em', cincoDiasAtras)
+          .order('ultima_atividade_em', { ascending: true })
+          .limit(5)
+          .returns<Pick<Cliente, 'id' | 'nome' | 'etapa_atual' | 'ultima_atividade_em'>[]>()
+      ),
+      // Q3: agendamentos hoje + amanhã
+      throwOnError(
+        supabase
+          .from('agendamentos')
+          .select('id, cliente_id, data_hora, empreendimento_interesse, clientes!inner(nome)')
+          .or(
+            `data_hora.gte.${hojeInicio.toISOString()},data_hora.lte.${hojeFim.toISOString()},data_hora.gte.${amanhaInicio.toISOString()},data_hora.lte.${amanhaFim.toISOString()}`
+          )
+          .order('data_hora', { ascending: true })
+          .limit(10)
+          .returns<
+            (Pick<Agendamento, 'id' | 'cliente_id' | 'data_hora' | 'empreendimento_interesse'> & {
+              clientes: { nome: string }
+            })[]
+          >()
+      ),
+      // Q4: documentos pendentes
+      throwOnError(
+        supabase
+          .from('documentos')
+          .select('id, cliente_id, tipo, status_validacao')
+          .eq('status_validacao', 'PENDENTE')
+          .is('deleted_at', null)
+          .order('created_at', { ascending: false })
+          .limit(5)
+          .returns<Pick<Documento, 'id' | 'cliente_id' | 'tipo' | 'status_validacao'>[]>(),
+      ),
+      // Q5: pos-venda com prazo
+      throwOnError(
+        supabase
+          .from('clientes')
+          .select('id, nome, proxima_acao, proxima_acao_em')
+          .eq('etapa_atual', 'POS_VENDA')
+          .not('proxima_acao_em', 'is', null)
+          .lte('proxima_acao_em', tresDiasFuturo)
+          .order('proxima_acao_em', { ascending: true })
+          .limit(5)
+          .returns<
+            Pick<Cliente, 'id' | 'nome' | 'proxima_acao' | 'proxima_acao_em'>[]
+          >(),
+      ),
+      // Q6: resumo agenda hoje (cf. resumoAgendaHoje)
+      (async () => {
+        const hojeInicio2 = new Date(); hojeInicio2.setHours(0, 0, 0, 0)
+        const hojeFim = new Date(); hojeFim.setHours(23, 59, 59, 999)
+        const agora = new Date().toISOString()
+        const res = await Promise.all([
+          supabase.from('agendamentos').select('*', { count: 'exact', head: true }).gte('data_hora', hojeInicio2.toISOString()).lte('data_hora', hojeFim.toISOString()).eq('corretor_id', user!.id),
+          supabase.from('agendamentos').select('*', { count: 'exact', head: true }).gte('data_hora', hojeInicio2.toISOString()).lte('data_hora', hojeFim.toISOString()).eq('corretor_id', user!.id).eq('status', 'CONFIRMADO'),
+          supabase.from('agendamentos').select('*', { count: 'exact', head: true }).gte('data_hora', hojeInicio2.toISOString()).lte('data_hora', hojeFim.toISOString()).eq('corretor_id', user!.id).eq('status', 'AGENDADO'),
+          supabase.from('agendamentos').select('*', { count: 'exact', head: true }).gte('data_hora', hojeInicio2.toISOString()).lte('data_hora', hojeFim.toISOString()).eq('corretor_id', user!.id).eq('status', 'REMARCADO'),
+          supabase.from('agendamentos').select('*', { count: 'exact', head: true }).eq('corretor_id', user!.id).lt('data_hora', agora).in('status', ['AGENDADO', 'REMARCADO']),
+        ])
+        return {
+          total: res[0].count ?? 0,
+          confirmados: res[1].count ?? 0,
+          pendentes: res[2].count ?? 0,
+          reagendados: res[3].count ?? 0,
+          atrasados: res[4].count ?? 0,
+        }
+      })(),
+      // Q7: resumo equipe (cf. resumoEquipeEquipeDashboard)
+      (async () => {
+        const hojeStr = new Date().toISOString().slice(0, 10)
+        const [ativos, prod] = await Promise.all([
+          supabase.from('usuarios').select('*', { count: 'exact', head: true }).eq('status_usuario', 'ATIVO').is('deleted_at', null),
+          supabase.from('producao_diaria').select('usuario_id, ligacoes, whatsapp, agendamentos, comparecimentos').eq('data', hojeStr),
+        ])
+        const usuariosAtivos = [...new Set((prod.data ?? []).map((p) => p.usuario_id))]
+        const producaoDia = (prod.data ?? []).reduce((acc, p) => {
+          acc.ligacoes += p.ligacoes ?? 0
+          acc.whatsapps += p.whatsapp ?? 0
+          acc.agendamentos += p.agendamentos ?? 0
+          acc.comparecimentos += p.comparecimentos ?? 0
+          return acc
+        }, { ligacoes: 0, whatsapps: 0, agendamentos: 0, comparecimentos: 0 })
+        return {
+          corretoresAtivos: ativos.count ?? 0,
+          corretoresOnline: usuariosAtivos.length,
+          producaoDia,
+        }
+      })(),
+    ])
 
-  // Busca os nomes dos clientes dos documentos pendentes
-  const idsDocsPendentes = [...new Set((docsPendentes ?? []).map((d) => d.cliente_id))]
-  const { data: clientesDocs } = idsDocsPendentes.length > 0
-    ? await supabase.from('clientes').select('id, nome').in('id', idsDocsPendentes).returns<Pick<Cliente, 'id' | 'nome'>[]>()
-    : { data: [] }
-
-  const mapaNomesDocs = (clientesDocs ?? []).reduce(
-    (acc, c) => { acc[c.id] = c.nome; return acc },
-    {} as Record<string, string>
-  )
-
-  // 4. Pós-venda com prazo vencido ou próximo (até 3 dias)
-  const tresDiasFuturo = new Date(new Date().getTime() + 3 * 86400000).toISOString()
-  const { data: posVendaAlertas } = await supabase
-    .from('clientes')
-    .select('id, nome, proxima_acao, proxima_acao_em')
-    .eq('etapa_atual', 'POS_VENDA')
-    .not('proxima_acao_em', 'is', null)
-    .lte('proxima_acao_em', tresDiasFuturo)
-    .order('proxima_acao_em', { ascending: true })
-    .limit(5)
-    .returns<Pick<Cliente, 'id' | 'nome' | 'proxima_acao' | 'proxima_acao_em'>[]>()
+  const hojeStats = producao?.find((p) => p.data === hoje)
 
   return (
     <div className="space-y-5">
@@ -140,8 +184,8 @@ export default async function DashboardPage() {
         >
           <Funnel className="h-3.5 w-3.5" /> Pipeline
         </Link>
-        <CardAgendaHoje />
-        <CardEquipeDashboard />
+        <CardAgendaHoje resumo={resumoAgenda} />
+        <CardEquipeDashboard dados={resumoEquipe} />
       </div>
 
       {/* Alertas e Lembretes */}
@@ -156,7 +200,7 @@ export default async function DashboardPage() {
       <div className="rounded-lg bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-4">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-3">Últimos 7 dias</h2>
         {producao && producao.length > 0 ? (
-          <div className="grid grid-cols-7 gap-2">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-2">
             {producao.map((dia) => (
               <div
                 key={dia.data}

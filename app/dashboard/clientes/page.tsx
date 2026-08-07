@@ -1,8 +1,10 @@
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
 import { Cliente, EtapaFunil } from '@/src/types'
 import Link from 'next/link'
+import { Suspense } from 'react'
 import BarraBuscaFiltros from '@/src/components/clients/BarraBuscaFiltros'
 import { ETAPA_LABEL_PLURAL, ETAPA_ORDEM, ETAPA_BADGE_COLORS } from '@/src/config/pipeline'
+import { escaparLike } from '@/src/lib/sql-utils'
 
 // Valida se uma string é um EtapaFunil válido
 const ETAPAS_VALIDAS = new Set<string>(ETAPA_ORDEM)
@@ -44,11 +46,13 @@ export default async function ClientesPage({ searchParams }: Props) {
     // Remove caracteres não numéricos para busca de CPF
     const cpfLimpo = termoBusca.replace(/\D/g, '')
     if (cpfLimpo.length >= 3) {
-      // Busca por nome (case insensitive) OU CPF
-      query = query.or(`nome.ilike.%${termoBusca}%,cpf.ilike.%${cpfLimpo}%`)
+      // Busca por nome (case insensitive) OU CPF — valores escapados contra LIKE injection
+      const termoEscapado = escaparLike(termoBusca)
+      const cpfEscapado = escaparLike(cpfLimpo)
+      query = query.or(`nome.ilike.%${termoEscapado}%,cpf.ilike.%${cpfEscapado}%`)
     } else {
-      // Só busca por nome
-      query = query.ilike('nome', `%${termoBusca}%`)
+      // Só busca por nome — valor escapado contra LIKE injection
+      query = query.ilike('nome', `%${escaparLike(termoBusca)}%`)
     }
   }
 
@@ -114,7 +118,9 @@ export default async function ClientesPage({ searchParams }: Props) {
       </div>
 
       {/* Barra de busca e filtros */}
-      <BarraBuscaFiltros />
+      <Suspense fallback={<div className="h-12 rounded-lg bg-gray-100 dark:bg-gray-800 animate-pulse" />}>
+        <BarraBuscaFiltros />
+      </Suspense>
 
       {/* Se não tem nenhum cliente cadastrado (sem filtro) */}
       {!temFiltro && totalClientes === 0 && (

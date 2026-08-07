@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
@@ -16,6 +16,12 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "DNA CRM",
   description: "Sistema de gestão imobiliária — controle seu funil de vendas e leads",
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 export default function RootLayout({

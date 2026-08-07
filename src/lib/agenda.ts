@@ -1,7 +1,7 @@
 // ─── Biblioteca de Agenda ──────────────────────────────────────────────────────
 // Sprint 10 — utilitários de calendário, dias úteis e filtros de agenda
 
-import { hoje, diasAFrenteInicio, diasAFrenteFim } from '@/src/lib/analytics'
+
 
 /** Gera um resumo de agendamentos para o card do dashboard */
 export function calcularResumoAgenda(agendamentos: Array<{

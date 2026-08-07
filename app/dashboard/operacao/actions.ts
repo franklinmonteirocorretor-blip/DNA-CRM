@@ -1,6 +1,6 @@
 'use server'
 
-import { requireAuth } from '@/src/lib/auth/guards'
+import { requireRole } from '@/src/lib/auth/guards'
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
 import { hoje, inicioDoMes, ultimoDiaDoMes } from '@/src/lib/analytics'
 import { queryResumoOperacao, queryKPIsDiarios, queryRanking, queryFunilGerencial, queryAlertas, queryMetas } from '@/src/lib/server/queries-compartilhadas'
@@ -52,7 +52,7 @@ export interface OperacaoDadosIniciais {
 }
 
 export async function operacaoDadosIniciais(): Promise<OperacaoDadosIniciais> {
-  await requireAuth()
+  await requireRole('SUPERVISOR')
   const supabase = await createSupabaseServerClient()
   const hojeStr = hoje()
   const iniMes = inicioDoMes()
@@ -61,7 +61,8 @@ export async function operacaoDadosIniciais(): Promise<OperacaoDadosIniciais> {
   // ─── Resumo, KPIs, Ranking, Funil, Alertas, Metas (compartilhados) ───
   const resumo = await queryResumoOperacao({ inicio: iniMes, fim: fimMes })
 
-  const { data: corretores } = await supabase.from('usuarios').select('id').eq('status_usuario', 'ATIVO').is('deleted_at', null)
+  const { data: corretores, error: corError } = await supabase.from('usuarios').select('id').eq('status_usuario', 'ATIVO').is('deleted_at', null)
+  if (corError) throw new Error(corError.message)
   const ids = (corretores ?? []).map((c) => c.id)
 
   const [kpis, ranking, funil, alertas] = await Promise.all([
@@ -73,11 +74,12 @@ export async function operacaoDadosIniciais(): Promise<OperacaoDadosIniciais> {
   const metas = await queryMetas({ corretoresIds: ids, inicio: iniMes, fim: fimMes, vgvMes: resumo.vgvMes })
 
   // ─── Atividades recentes (últimas 50 para timeline) ───
-  const { data: atividades } = await supabase
+  const { data: atividades, error: ativError } = await supabase
     .from('atividades')
     .select('id, created_at, tipo, resultado, usuarios!inner(nome), clientes!inner(nome, id, etapa_atual, empreendimento_interesse)')
     .order('created_at', { ascending: false })
     .limit(50)
+  if (ativError) throw new Error(ativError.message)
 
   const atividadesRecentes = (atividades ?? []).map((a) => ({
     id: a.id,
@@ -92,8 +94,10 @@ export async function operacaoDadosIniciais(): Promise<OperacaoDadosIniciais> {
   }))
 
   // ─── Monitor da equipe ───
-  const { data: prodHoje } = ids.length > 0 ? await supabase.from('producao_diaria').select('*').in('usuario_id', ids).eq('data', hojeStr) : { data: [] }
-  const { data: corretoresFull } = await supabase.from('usuarios').select('id, nome, avatar_url, status_usuario, ultima_atividade_em').eq('status_usuario', 'ATIVO').is('deleted_at', null)
+  const { data: prodHoje, error: prodHojeError } = ids.length > 0 ? await supabase.from('producao_diaria').select('*').in('usuario_id', ids).eq('data', hojeStr) : { data: [], error: null }
+  if (prodHojeError) throw new Error(prodHojeError.message)
+  const { data: corretoresFull, error: fullError } = await supabase.from('usuarios').select('id, nome, avatar_url, status_usuario, ultima_atividade_em').eq('status_usuario', 'ATIVO').is('deleted_at', null)
+  if (fullError) throw new Error(fullError.message)
   const agora = Date.now()
   const corretoresMonitor = (corretoresFull ?? []).map((c) => {
     const p = (prodHoje ?? []).find((x) => x.usuario_id === c.id)
@@ -144,21 +148,23 @@ export interface ProdutividadeSeries {
  * Query do heatmap: produção por corretor × hora do dia (últimos 7 dias)
  */
 export async function queryHeatmapProducao(): Promise<HeatmapDados[]> {
-  await requireAuth()
+  await requireRole('SUPERVISOR')
   const supabase = await createSupabaseServerClient()
   const seteDiasAtras = new Date(Date.now() - 7 * 86400000).toISOString()
 
-  const { data: atividades } = await supabase
+  const { data: atividades, error: ativError } = await supabase
     .from('atividades')
     .select('usuario_id, created_at')
     .gte('created_at', seteDiasAtras)
     .order('created_at', { ascending: false })
+  if (ativError) throw new Error(ativError.message)
 
-  const { data: usuarios } = await supabase
+  const { data: usuarios, error: usuariosError } = await supabase
     .from('usuarios')
     .select('id, nome')
     .eq('ativo', true)
     .is('deleted_at', null)
+  if (usuariosError) throw new Error(usuariosError.message)
 
   if (!atividades || !usuarios) return []
 
@@ -188,10 +194,10 @@ export async function queryHeatmapProducao(): Promise<HeatmapDados[]> {
  * Fila de trabalho inteligente — clientes prioritários para o corretor logado
  */
 export async function queryFilaTrabalho(corretorId: string): Promise<FilaTrabalhoItem[]> {
-  await requireAuth()
+  await requireRole('SUPERVISOR')
   const supabase = await createSupabaseServerClient()
 
-  const { data: clientes } = await supabase
+  const { data: clientes, error: clientesError } = await supabase
     .from('clientes')
     .select('id, nome, etapa_atual, ultima_atividade_em, proxima_acao, proxima_acao_em, corretor_responsavel_id, tempo_etapas, entrou_etapa_em, usuarios!inner(nome)')
     .eq('corretor_responsavel_id', corretorId)
@@ -199,12 +205,11 @@ export async function queryFilaTrabalho(corretorId: string): Promise<FilaTrabalh
     .is('deleted_at', null)
     .order('created_at', { ascending: false })
     .limit(50)
+  if (clientesError) throw new Error(clientesError.message)
 
   if (!clientes) return []
 
-  const hojeStr = new Date().toISOString().slice(0, 10)
-
-  const items: FilaTrabalhoItem[] = []
+    const items: FilaTrabalhoItem[] = []
 
   for (const c of clientes) {
     const diasSemContato = c.ultima_atividade_em
@@ -255,21 +260,23 @@ export async function queryFilaTrabalho(corretorId: string): Promise<FilaTrabalh
  * Produtividade por equipe/turno — séries temporais dos últimos 30 dias
  */
 export async function queryProdutividadeEquipe(): Promise<ProdutividadeSeries[]> {
-  await requireAuth()
+  await requireRole('SUPERVISOR')
   const supabase = await createSupabaseServerClient()
   const dias30Atras = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10)
 
   // Busca equipes
-  const { data: equipes } = await supabase
+  const { data: equipes, error: equipesError } = await supabase
     .from('equipes')
     .select('id, nome, corretores:usuarios(id)')
     .is('deleted_at', null)
+  if (equipesError) throw new Error(equipesError.message)
 
   // Busca produção
-  const { data: prod } = await supabase
+  const { data: prod, error: prodError } = await supabase
     .from('producao_diaria')
     .select('usuario_id, data, ligacoes, whatsapp, follow_ups')
     .gte('data', dias30Atras)
+  if (prodError) throw new Error(prodError.message)
 
   const prodArr = (prod ?? []) as { usuario_id: string; ligacoes: number; whatsapp: number; follow_ups: number; data: string }[]
 

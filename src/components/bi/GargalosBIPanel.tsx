@@ -37,7 +37,7 @@ function GargaloItem({ item }: { item: BIGargaloItem }) {
         </div>
         <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{item.descricao}</p>
       </div>
-      <span className="ml-3 text-sm font-semibold text-gray-800 whitespace-nowrap">
+      <span className="ml-3 text-sm font-semibold text-gray-800 dark:text-gray-100 whitespace-nowrap">
         {formatarMoeda(item.valor)}
       </span>
     </div>

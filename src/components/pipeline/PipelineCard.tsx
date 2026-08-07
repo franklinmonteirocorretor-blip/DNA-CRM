@@ -26,6 +26,9 @@ export default function PipelineCard({
       draggable
       onDragStart={onDragStart}
       onClick={onClick}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } }}
+      role="button"
+      tabIndex={0}
       className={`rounded-md border bg-white dark:bg-gray-800 p-2 cursor-pointer transition hover:shadow-sm ${ isDragging ? 'opacity-40 scale-95' : '' } ${alertaTempo ? 'border-red-200' : 'border-gray-200'}`}
       style={{ borderLeftWidth: '3px', borderLeftColor: corEtapa }}
     >

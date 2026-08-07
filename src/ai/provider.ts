@@ -4,7 +4,6 @@
 // FASE 1: apenas MockProvider. FASE 2: providers reais com HTTP calls.
 
 import type {
-  AIProviderType,
   AIProviderConfig,
   AICompletionRequest,
   AICompletionResponse,
@@ -47,10 +46,6 @@ function criarMockProvider(): AIProvider {
       // Extrai o último prompt do usuário para gerar resposta contextual
       const userMessage = prompt.messages.filter(m => m.role === 'user').pop()
       const query = userMessage?.content ?? ''
-      const systemMessage = prompt.messages.find(m => m.role === 'system')
-
-      console.log('[Copilot Mock] System:', systemMessage?.content?.slice(0, 80) ?? '')
-      console.log('[Copilot Mock] Query:', query.slice(0, 80))
 
       return {
         ok: true,

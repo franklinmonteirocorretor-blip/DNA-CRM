@@ -1,8 +1,8 @@
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
+import { throwOnError, throwOnSingle } from '@/src/lib/server/safeQuery'
 import { EtapaFunil, ProducaoDiaria, Usuario } from '@/src/types'
 import { ETAPA_FULL_CONFIG, ETAPA_ORDEM } from '@/src/config/pipeline'
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
 
 // ── Página ───────────────────────────────────────────────────────────────────
 
@@ -18,11 +18,13 @@ export default async function EquipePage() {
   }
 
   // Busca o perfil do usuário logado
-  const { data: usuario } = await supabase
-    .from('usuarios')
-    .select('id, nome, perfil, gerente_id')
-    .eq('id', user.id)
-    .single<Usuario>()
+  const usuario = await throwOnSingle(
+    supabase
+      .from('usuarios')
+      .select('id, nome, perfil, gerente_id')
+      .eq('id', user.id)
+      .single<Usuario>()
+  )
 
   // Se não for GERENTE nem ADMIN, redireciona para o dashboard comum
   if (!usuario || (usuario.perfil !== 'GERENTE' && usuario.perfil !== 'ADMINISTRADOR')) {
@@ -43,11 +45,11 @@ export default async function EquipePage() {
     queryCorretores = queryCorretores.eq('gerente_id', usuario.id)
   }
 
-  const { data: corretores } = await queryCorretores.returns<
+  const corretores = await throwOnError(queryCorretores.returns<
     Pick<Usuario, 'id' | 'nome' | 'email' | 'perfil' | 'avatar_url'>[]
-  >()
+  >())
 
-  const idsCorretores = (corretores ?? []).map((c) => c.id)
+  const idsCorretores = corretores.map((c) => c.id)
 
   // ── Se não tem corretores na equipe ────────────────────────────────────
   if (idsCorretores.length === 0) {
@@ -74,15 +76,15 @@ export default async function EquipePage() {
   // ── Produção de hoje (agregada) ────────────────────────────────────────
   const hoje = new Date().toISOString().slice(0, 10)
 
-  const { data: producaoHoje } = await supabase
+  const producaoHoje = await throwOnError(supabase
     .from('producao_diaria')
     .select('*')
     .in('usuario_id', idsCorretores)
     .eq('data', hoje)
-    .returns<ProducaoDiaria[]>()
+    .returns<ProducaoDiaria[]>())
 
   // Agrega métricas do dia de todos os corretores
-  const totalHoje = (producaoHoje ?? []).reduce(
+  const totalHoje = producaoHoje.reduce(
     (acc, p) => ({
       ligacoes: acc.ligacoes + p.ligacoes,
       whatsapp: acc.whatsapp + p.whatsapp,
@@ -94,17 +96,17 @@ export default async function EquipePage() {
   )
 
   // ── Funil consolidado da equipe ────────────────────────────────────────
-  const { data: clientesEquipe } = await supabase
+  const clientesEquipe = await throwOnError(supabase
     .from('clientes')
     .select('etapa_atual, corretor_responsavel_id')
     .in('corretor_responsavel_id', idsCorretores)
-    .is('deleted_at', null)
+    .is('deleted_at', null))
 
-  const totalClientes = clientesEquipe?.length ?? 0
+  const totalClientes = clientesEquipe.length
 
   const funilConsolidado = ETAPA_ORDEM.reduce(
     (acc, etapa) => {
-      acc[etapa] = (clientesEquipe ?? []).filter((c) => c.etapa_atual === etapa).length
+      acc[etapa] = clientesEquipe.filter((c) => c.etapa_atual === etapa).length
       return acc
     },
     {} as Record<EtapaFunil, number>
@@ -113,17 +115,17 @@ export default async function EquipePage() {
   // ── Produção semanal da equipe ─────────────────────────────────────────
   const seteDiasAtras = new Date(new Date().getTime() - 7 * 86400000).toISOString().slice(0, 10)
 
-  const { data: producaoSemanal } = await supabase
+  const producaoSemanal = await throwOnError(supabase
     .from('producao_diaria')
     .select('*')
     .in('usuario_id', idsCorretores)
     .gte('data', seteDiasAtras)
     .lte('data', hoje)
     .order('data', { ascending: false })
-    .returns<ProducaoDiaria[]>()
+    .returns<ProducaoDiaria[]>())
 
   // Agrega por data
-  const producaoPorDia = (producaoSemanal ?? []).reduce(
+  const producaoPorDia = producaoSemanal.reduce(
     (acc, p) => {
       if (!acc[p.data]) {
         acc[p.data] = { ligacoes: 0, whatsapp: 0, agendamentos: 0, comparecimentos: 0, pontuacao: 0 }
@@ -139,9 +141,9 @@ export default async function EquipePage() {
   )
 
   // ── Métricas por corretor (clientes, produção hoje) ────────────────────
-  const statsPorCorretor = (corretores ?? []).map((corretor) => {
-    const minhaProd = (producaoHoje ?? []).find((p) => p.usuario_id === corretor.id)
-    const meusClientes = (clientesEquipe ?? []).filter((c) => c.corretor_responsavel_id === corretor.id)
+  const statsPorCorretor = corretores.map((corretor) => {
+    const minhaProd = producaoHoje.find((p) => p.usuario_id === corretor.id)
+    const meusClientes = clientesEquipe.filter((c) => c.corretor_responsavel_id === corretor.id)
 
     const funilCorretor = ETAPA_ORDEM.reduce(
       (acc, etapa) => {

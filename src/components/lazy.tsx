@@ -28,3 +28,15 @@ export const LazyProdutividade = dynamic(
   () => import('@/src/components/gestao/Produtividade'),
   { loading: () => <div className="flex items-center justify-center h-[200px] text-gray-400 dark:text-gray-500">Carregando produtividade...</div> },
 )
+
+// ─── Central de Operação (componente massivo: KPIs + ranking + corretores + funil) ──
+export const LazyCentralOperacao = dynamic(
+  () => import('@/src/components/operacao/CentralOperacao'),
+  { loading: () => <div className="flex items-center justify-center min-h-[400px] text-gray-400 dark:text-gray-500">Carregando operação...</div> },
+)
+
+// ─── Form Edição Cliente (28KB, raramente usado) ──────────────────────────────────
+export const LazyFormEdicaoCliente = dynamic(
+  () => import('@/src/components/clients/FormEdicaoCliente'),
+  { loading: () => <div className="flex items-center justify-center h-[300px] text-gray-400 dark:text-gray-500">Carregando editor...</div> },
+)

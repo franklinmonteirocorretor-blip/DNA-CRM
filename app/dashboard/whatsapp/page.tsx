@@ -19,11 +19,13 @@ export default async function WhatsAppPage() {
     return <div>Erro ao autenticar. Tente novamente.</div>
   }
 
-  const { data: usuario } = await supabase
+  const { data: usuario, error: usuarioErr } = await supabase
     .from('usuarios')
     .select('id, nome, perfil, telefone')
     .eq('id', user.id)
     .single()
+
+  if (usuarioErr) throw new Error(usuarioErr.message)
 
   if (!usuario) {
     return <div>Usuário não encontrado.</div>

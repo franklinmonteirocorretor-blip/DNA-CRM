@@ -81,7 +81,7 @@ function ComparecimentoItem({
   }
 
   return (
-    <div className={`rounded-lg border p-4 ${jaRegistrado ? 'border-green-200 bg-green-50/50' : 'border-gray-100 bg-gray-50'}`}>
+    <div className={`rounded-lg border p-4 ${jaRegistrado ? 'border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-900/10' : 'border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800'}`}>
       {/* Cabeçalho do agendamento */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -180,7 +180,7 @@ function ComparecimentoItem({
                 type="text"
                 maxLength={200}
                 placeholder="Ex: Cliente não atendeu, esqueceu..."
-                className="block w-full rounded-md border border-red-200 px-3 py-2 text-sm shadow-sm focus:border-red-400 focus:outline-none focus:ring-1 focus:ring-red-400"
+                className="block w-full rounded-md border border-red-200 dark:border-red-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 shadow-sm focus:border-red-400 dark:focus:border-red-400 focus:outline-none focus:ring-1 focus:ring-red-400"
               />
             </div>
           )}

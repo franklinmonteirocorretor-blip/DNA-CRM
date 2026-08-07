@@ -30,7 +30,7 @@ const LABELS_ALERTA_TIPO: Record<string, string> = {
 }
 
 function AlertaCard({ alerta }: { alerta: BIAlerta }) {
-  const borda = CORES_BORDA[alerta.severidade] ?? 'border-l-gray-400 bg-gray-50'
+  const borda = CORES_BORDA[alerta.severidade] ?? 'border-l-gray-400 bg-gray-50 dark:bg-gray-900'
   const badge = CORES_BADGE_SEVERIDADE[alerta.severidade] ?? 'bg-gray-100 text-gray-600 border-gray-200'
   const severidadeLabel = LABELS_SEVERIDADE[alerta.severidade] ?? alerta.severidade
 

@@ -2,6 +2,7 @@
 // Server Component que busca dados e renderiza via client wrapper interativo.
 
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
+import { throwOnError } from '@/src/lib/server/safeQuery'
 import AutomacoesClient from '@/src/components/automacoes/AutomacoesClient'
 import type { AutomationRecord, AutomationLog, AutomationQueueItem } from '@/src/lib/automation/types'
 
@@ -50,30 +51,38 @@ export default async function AutomacoesPage() {
 // ─── Queries ───────────────────────────────────────────────────
 
 async function buscarAutomacoes(supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>): Promise<AutomationRecord[]> {
-  const { data } = await supabase.from('automacoes').select('*').is('deleted_at', null).order('criado_em', { ascending: false })
-  return (data ?? []) as AutomationRecord[]
+  return await throwOnError(
+    supabase.from('automacoes').select('*').is('deleted_at', null).order('criado_em', { ascending: false })
+  ) as AutomationRecord[]
 }
 
 async function buscarLogs(supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>): Promise<AutomationLog[]> {
-  const { data } = await supabase.from('automacoes_log').select('*').order('criado_em', { ascending: false }).limit(50)
-  return (data ?? []) as AutomationLog[]
+  return await throwOnError(
+    supabase.from('automacoes_log').select('*').order('criado_em', { ascending: false }).limit(50)
+  ) as AutomationLog[]
 }
 
 async function buscarFila(supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>): Promise<AutomationQueueItem[]> {
-  const { data } = await supabase.from('automacoes_fila').select('*').order('prioridade', { ascending: false }).limit(50)
-  return (data ?? []) as AutomationQueueItem[]
+  return await throwOnError(
+    supabase.from('automacoes_fila').select('*').order('prioridade', { ascending: false }).limit(50)
+  ) as AutomationQueueItem[]
 }
 
 async function buscarMetricas(supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>) {
-  const { count: total } = await supabase.from('automacoes').select('*', { count: 'exact', head: true }).is('deleted_at', null)
-  const { count: ativas } = await supabase.from('automacoes').select('*', { count: 'exact', head: true }).eq('status', 'ATIVA').is('deleted_at', null)
+  const { count: total, error: errTotal } = await supabase.from('automacoes').select('*', { count: 'exact', head: true }).is('deleted_at', null)
+  if (errTotal) throw new Error(errTotal.message)
+  const { count: ativas, error: errAtivas } = await supabase.from('automacoes').select('*', { count: 'exact', head: true }).eq('status', 'ATIVA').is('deleted_at', null)
+  if (errAtivas) throw new Error(errAtivas.message)
 
   const hoje = new Date()
   hoje.setHours(0, 0, 0, 0)
 
-  const { count: execucoesHoje } = await supabase.from('automacoes_log').select('*', { count: 'exact', head: true }).gte('criado_em', hoje.toISOString())
-  const { count: falhas } = await supabase.from('automacoes_log').select('*', { count: 'exact', head: true }).eq('status', 'FALHA').gte('criado_em', hoje.toISOString())
-  const { count: filaPendente } = await supabase.from('automacoes_fila').select('*', { count: 'exact', head: true }).eq('status', 'PENDENTE')
+  const { count: execucoesHoje, error: errExec } = await supabase.from('automacoes_log').select('*', { count: 'exact', head: true }).gte('criado_em', hoje.toISOString())
+  if (errExec) throw new Error(errExec.message)
+  const { count: falhas, error: errFalhas } = await supabase.from('automacoes_log').select('*', { count: 'exact', head: true }).eq('status', 'FALHA').gte('criado_em', hoje.toISOString())
+  if (errFalhas) throw new Error(errFalhas.message)
+  const { count: filaPendente, error: errFila } = await supabase.from('automacoes_fila').select('*', { count: 'exact', head: true }).eq('status', 'PENDENTE')
+  if (errFila) throw new Error(errFila.message)
 
   return {
     ativas: ativas ?? 0,

@@ -16,7 +16,12 @@ const sizeClasses: Record<LoadingSize, string> = {
 
 export function LoadingIndicator({ text = 'Carregando...', size = 'md', className = '' }: LoadingIndicatorProps) {
   return (
-    <div className={`text-center animate-pulse text-gray-400 dark:text-gray-500 ${sizeClasses[size]} ${className}`.trim()}>
+    <div
+      role="status"
+      aria-label={text}
+      aria-busy="true"
+      className={`text-center animate-pulse text-gray-400 dark:text-gray-500 ${sizeClasses[size]} ${className}`.trim()}
+    >
       <div className="inline-flex items-center gap-2">
         <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />

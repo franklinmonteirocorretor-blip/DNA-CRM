@@ -13,7 +13,7 @@ import {
   Cell,
 } from 'recharts'
 
-interface Props {
+interface _Props {
   etapas: BIFunilEtapa[]
 }
 
@@ -48,8 +48,8 @@ interface CustomBarLabelProps {
   payload?: BIFunilEtapa & { conversaoLabel?: string }
 }
 
-function BarraLabel(props: CustomBarLabelProps) {
-  const { x = 0, y = 0, width = 0, height = 0, index = 0, payload } = props
+function _BarraLabel(props: CustomBarLabelProps) {
+  const { x = 0, y = 0, width = 0, height = 0, index: _index = 0, payload } = props
   if (!payload) return null
 
   const label = payload.conversaoLabel ?? '—'
@@ -60,9 +60,10 @@ function BarraLabel(props: CustomBarLabelProps) {
       <text
         x={x + width + 6}
         y={centerY + 4}
-        fill="#4B5563"
+        fill="#9CA3AF"
         fontSize={12}
         fontWeight={600}
+        className="dark:fill-gray-300"
       >
         {label}
       </text>
@@ -118,7 +119,7 @@ export default function FunilBIChart({ etapas }: { etapas: BIFunilEtapa[] }) {
               dataKey="label"
               axisLine={false}
               tickLine={false}
-              tick={{ fill: '#4B5563', fontSize: 12 }}
+              tick={{ fill: '#9CA3AF', fontSize: 12 }}
               width={110}
             />
             <Tooltip content={<CustomTooltipContent />} />

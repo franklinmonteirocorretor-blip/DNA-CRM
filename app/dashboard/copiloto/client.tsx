@@ -30,7 +30,7 @@ interface CopilotoClientProps {
 
 export default function CopilotoClientPage({
   usuarioId,
-  usuarioNome,
+  usuarioNome: _usuarioNome,
   resumoInicial,
   recomendacoesIniciais,
 }: CopilotoClientProps) {

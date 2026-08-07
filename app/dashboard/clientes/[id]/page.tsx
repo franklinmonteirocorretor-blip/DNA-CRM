@@ -8,7 +8,7 @@ import Cliente360PainelGerencial from '@/src/components/clients/Cliente360Painel
 import Cliente360Comunicacao from '@/src/components/clients/Cliente360Comunicacao'
 
 // Reaproveitamento de componentes Sprint 1-7
-import FormEdicaoCliente from '@/src/components/clients/FormEdicaoCliente'
+import { LazyFormEdicaoCliente } from '@/src/components/lazy'
 import FormAtividade from '@/src/components/clients/FormAtividade'
 import FormAgendamento from '@/src/components/clients/FormAgendamento'
 import SecaoDocumentos from '@/src/components/clients/SecaoDocumentos'
@@ -115,7 +115,7 @@ export default async function CentralClientePage({ params }: Props) {
       <Cliente360Comunicacao cliente={cliente} />
 
       {/* ═══ SEÇÃO 9: Ações rápidas (reaproveitados) ═══ */}
-      <FormEdicaoCliente
+      <LazyFormEdicaoCliente
         cliente={cliente}
         conjuge={conjuge ?? null}
         cpfFormatado={cpfFormatado}
@@ -158,7 +158,7 @@ function CardAnalise({ label, value, destaque }: { label: string; value: string;
   return (
     <div className="rounded-md bg-gray-50 dark:bg-gray-700 p-3">
       <span className="text-[11px] font-medium uppercase text-gray-400 dark:text-gray-500">{label}</span>
-      <p className={`mt-1 text-sm font-semibold ${destaque ?? 'text-gray-900'}`}>{value}</p>
+      <p className={`mt-1 text-sm font-semibold ${destaque ?? 'text-gray-900 dark:text-gray-100'}`}>{value}</p>
     </div>
   )
 }

@@ -29,6 +29,7 @@ export default function FiltrosCorretores({
       <input
         type="text"
         placeholder="Buscar nome ou e-mail..."
+        aria-label="Buscar corretor"
         value={filtros.busca ?? ''}
         onChange={(e) => onFiltrar({ ...filtros, busca: e.target.value || null })}
         className="rounded-md border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 placeholder-gray-400 focus:border-blue-500 focus:outline-none w-56"

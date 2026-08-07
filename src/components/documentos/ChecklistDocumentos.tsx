@@ -75,7 +75,7 @@ export default function ChecklistDocumentos({ clienteId }: { clienteId: string }
   return (
     <div className="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 p-4">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-gray-800">Checklist Documental</h3>
+        <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100">Checklist Documental</h3>
         {dados.checklistCompleto ? (
           <span className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
             ✓ Completo
@@ -109,7 +109,7 @@ export default function ChecklistDocumentos({ clienteId }: { clienteId: string }
           {dados.documentos.map((doc: Documento) => (
             <div key={doc.id} className="flex items-center justify-between rounded-md border border-gray-200 dark:border-gray-600 p-2.5 text-xs">
               <div className="flex items-center gap-2 flex-1">
-                <span className={`font-medium ${dados.checklistObrigatorio.includes(doc.tipo) ? 'text-gray-800' : 'text-gray-400'}`}>
+                <span className={`font-medium ${dados.checklistObrigatorio.includes(doc.tipo) ? 'text-gray-800 dark:text-gray-100' : 'text-gray-400'}`}>
                   {TIPO_DOCUMENTO_LABEL[doc.tipo]}
                 </span>
                 <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-semibold ${STATUS_COR[doc.status_validacao] ?? 'bg-gray-100 text-gray-500'}`}>

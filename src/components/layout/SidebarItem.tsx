@@ -24,6 +24,7 @@ export default function SidebarItem({ item, collapsed }: Props) {
   return (
     <Link
       href={item.href}
+      aria-current={isActive ? 'page' : undefined}
       className={`
         group flex items-center gap-2.5 rounded-md px-2.5 py-2
         text-sm font-medium transition-all duration-150 ease-out

@@ -3,7 +3,7 @@
 // Já existia CHECKLIST_OBRIGATORIO e TIPO_DOCUMENTO_LABEL em src/types/index.ts,
 // mas algumas duplicatas ainda estavam em componentes. Este arquivo consolida tudo.
 
-import type { EtapaFunil, TipoDocumento } from '@/src/types'
+import type { TipoDocumento } from '@/src/types'
 
 // Re-export do que já está nos types (para que config/ seja a fonte única)
 export { CHECKLIST_OBRIGATORIO, TIPO_DOCUMENTO_LABEL } from '@/src/types'

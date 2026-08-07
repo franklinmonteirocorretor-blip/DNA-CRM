@@ -6,7 +6,7 @@ import type { ReactNode } from 'react'
 
 interface SectionHeaderProps {
   title: string
-  subtitle?: string
+  subtitle?: ReactNode
   as?: 'h1' | 'h2' | 'h3'
   className?: string
   children?: ReactNode

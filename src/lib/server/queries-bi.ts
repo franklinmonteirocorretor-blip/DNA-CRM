@@ -11,8 +11,8 @@ import { ETAPA_ORDEM, ETAPA_LABEL_SINGULAR } from '@/src/config/pipeline'
 import type { EtapaFunil } from '@/src/types'
 import type {
   BIResumoExecutivo, BIFunilEtapa, BIRankingItem, BIEmpreendimento,
-  BIPrevisao, BIClientePrevisao, BIHorizonteMeta, BIGargalos,
-  BIGargaloItem, BIAlerta, BIMetas, BIMetaPadrao, BITimelineEvento, BIInsight,
+  BIPrevisao, BIClientePrevisao, BIGargalos,
+  BIGargaloItem, BIAlerta, BIMetas, BITimelineEvento, BIInsight,
 } from '@/src/types/bi'
 
 // ─────── Helpers ───────────────────────────────────────────────────────────
@@ -367,8 +367,8 @@ export async function queryEmpreendimentos(): Promise<BIEmpreendimento[]> {
 export async function queryPrevisoes(): Promise<BIPrevisao> {
   const supabase = await createSupabaseServerClient()
   const hojeStr = hoje()
-  const mi = inicioDoMes()
-  const mf = ultimoDiaDoMes()
+  const _mi = inicioDoMes()
+  const _mf = ultimoDiaDoMes()
 
   // Busca clientes ativos (não fechados) com seus dados
   const { data: clientes } = await supabase
@@ -469,7 +469,7 @@ export async function queryPrevisoes(): Promise<BIPrevisao> {
 export async function queryGargalos(): Promise<BIGargalos> {
   const supabase = await createSupabaseServerClient()
   const hojeStr = hoje()
-  const cincoDiasAtras = diasAtras(5)
+  const _cincoDiasAtras = diasAtras(5)
   const mi = inicioDoMes()
 
   const { data: clientes } = await supabase
@@ -495,7 +495,7 @@ export async function queryGargalos(): Promise<BIGargalos> {
   const etapasCongestionadas: BIGargaloItem[] = []
   for (const [etapa, qtd] of etapasCount) {
     if (qtd > 20) {
-      const obj = etapasEntidades.get(etapa)?.[0] ?? { id: '', nome: etapa }
+      const _obj = etapasEntidades.get(etapa)?.[0] ?? { id: '', nome: etapa }
       etapasCongestionadas.push({
         severidade: qtd > 50 ? 'critica' : 'alta',
         titulo: `Etapa ${ETAPA_LABEL_SINGULAR[etapa as EtapaFunil] ?? etapa} congestionada`,
@@ -583,7 +583,7 @@ export async function queryGargalos(): Promise<BIGargalos> {
 
 export async function queryAlertasBI(): Promise<BIAlerta[]> {
   const supabase = await createSupabaseServerClient()
-  const hojeStr = hoje()
+  const _hojeStr = hoje()
   const cincoDiasAtras = diasAtras(5)
   const mi = inicioDoMes()
   const mf = ultimoDiaDoMes()
@@ -809,7 +809,7 @@ export async function queryMetasBI(): Promise<BIMetas> {
 
 export async function queryTimelineBI(): Promise<BITimelineEvento[]> {
   const supabase = await createSupabaseServerClient()
-  const hojeStr = hoje()
+  const _hojeStr = hoje()
   const dias30Atras = diasAtras(30).slice(0, 10)
 
   // Fechamentos recentes (last 30 dias)

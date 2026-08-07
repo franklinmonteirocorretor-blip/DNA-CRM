@@ -105,10 +105,10 @@ export default function ComissaoAcoes({ clienteId, statusAtual, onStatusChange }
           const estaCarregando = loadingAcao === acao
           const classes =
             acao === 'RECEBIDA'
-              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
+              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300 dark:hover:bg-emerald-900/50'
               : acao === 'CANCELADA'
-                ? 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100'
-                : 'bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100'
+                ? 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-900/50'
+                : 'bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 dark:bg-amber-950/40 dark:text-amber-300 dark:hover:bg-amber-900/50'
 
           return (
             <button

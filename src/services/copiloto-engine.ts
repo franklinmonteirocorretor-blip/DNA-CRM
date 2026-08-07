@@ -3,20 +3,10 @@
 // Gera Resumo Inteligente, Recomendações, processa Perguntas e Comandos.
 
 import { buildCopilotContext } from './copiloto-context'
-import { criarAIProvider, buildSystemPrompt, completarComProvider } from '@/src/ai'
 import type {
-  AIProviderConfig,
   CopilotResumoInteligente,
   CopilotRecomendacao,
 } from '@/src/types/copiloto'
-
-const DEFAULT_PROVIDER_CONFIG: AIProviderConfig = {
-  tipo: 'mock',
-  apiKey: 'mock-key',
-  model: 'mock-model',
-  temperature: 0.3,
-  maxTokens: 2000,
-}
 
 async function getContext(usuarioId: string) {
   try {

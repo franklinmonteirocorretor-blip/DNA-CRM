@@ -27,7 +27,7 @@ export default function PipelineColuna({
 
   return (
     <div
-      className={`flex flex-col rounded-lg border w-60 shrink-0 transition ${ isTarget ? 'border-blue-400 bg-blue-50 shadow-sm' : 'border-gray-200 bg-gray-50' }`}
+      className={`flex flex-col rounded-lg border w-60 shrink-0 transition ${ isTarget ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/20 shadow-sm' : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800' }`}
       onDragOver={onDragOver}
       onDrop={(e) => onDrop(e, etapa)}
     >
@@ -44,7 +44,7 @@ export default function PipelineColuna({
       </div>
 
       {/* Cards */}
-      <div className="flex-1 p-2 space-y-1.5 overflow-y-auto max-h-[calc(100vh-300px)]">
+      <div className="flex-1 p-2 space-y-1.5 overflow-y-auto max-h-[calc(100vh-300px)] min-h-[120px]">
         {cards.length === 0 && !isTarget && (
           <p className="text-[10px] text-gray-300 dark:text-gray-600 text-center py-4">Arraste clientes para cá</p>
         )}

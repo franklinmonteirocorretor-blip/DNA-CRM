@@ -23,7 +23,7 @@ function mascaraTelefone(valor: string): string {
 }
 
 export default function NovoClientePage() {
-  const router = useRouter()
+  const _router = useRouter()
   const [enviando, setEnviando] = useState(false)
   const [erros, setErros] = useState<string[]>([])
 

@@ -36,13 +36,16 @@ export default function Button({
   variant = 'primary',
   size = 'md',
   loading = false,
+  disabled: _disabled,
   children,
   className,
-  disabled,
   ...props
 }: ButtonProps) {
+  const isDisabled = _disabled || loading
   return (
     <button
+      aria-busy={loading}
+      aria-disabled={isDisabled}
       className={`
         inline-flex items-center justify-center font-medium
         transition-all duration-150 ease-out
@@ -50,7 +53,7 @@ export default function Button({
         disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100
         ${variantClasses[variant]} ${sizeClasses[size]} ${className ?? ''}
       `.trim()}
-      disabled={disabled || loading}
+      disabled={isDisabled}
       {...props}
     >
       {loading && (

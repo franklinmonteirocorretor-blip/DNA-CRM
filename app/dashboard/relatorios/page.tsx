@@ -11,7 +11,7 @@ const TIPOS_RELATORIO = [
 ]
 
 export default function RelatoriosPage() {
-  const router = useRouter()
+  const _router = useRouter()
   const [tipo, setTipo] = useState('producao')
   const [dataInicio, setDataInicio] = useState(() => {
     const d = new Date()
@@ -84,7 +84,7 @@ export default function RelatoriosPage() {
           {TIPOS_RELATORIO.map((t) => (
             <label
               key={t.valor}
-              className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition ${ tipo === t.valor ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500' : 'border-gray-200 hover:border-gray-300' }`}
+              className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition ${ tipo === t.valor ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20 ring-1 ring-blue-500 dark:ring-blue-400' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600' }`}
             >
               <input
                 type="radio"

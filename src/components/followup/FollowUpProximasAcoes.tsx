@@ -8,9 +8,9 @@ interface Props {
 }
 
 const PRIORIDADE_COR: Record<string, string> = {
-  ALTA: 'border-l-red-500 bg-red-50',
-  MEDIA: 'border-l-amber-500 bg-amber-50',
-  BAIXA: 'border-l-gray-300 bg-gray-50',
+  ALTA: 'border-l-red-500 bg-red-50 dark:bg-red-900/20',
+  MEDIA: 'border-l-amber-500 bg-amber-50 dark:bg-amber-900/20',
+  BAIXA: 'border-l-gray-300 dark:border-l-gray-600 bg-gray-50 dark:bg-gray-800',
 }
 
 function formatarTempo(minutos: number): string {
@@ -52,7 +52,7 @@ export default function FollowUpProximasAcoes({ acoes }: Props) {
                 </div>
               </div>
               <div className="shrink-0 text-right">
-                <span className={`text-xs font-bold ${acao.tempoRestanteMinutos < 0 ? 'text-red-600' : acao.tempoRestanteMinutos < 60 ? 'text-amber-600' : 'text-gray-500'}`}>
+                <span className={`text-xs font-bold ${acao.tempoRestanteMinutos < 0 ? 'text-red-600 dark:text-red-400' : acao.tempoRestanteMinutos < 60 ? 'text-amber-600 dark:text-amber-400' : 'text-gray-500 dark:text-gray-400'}`}>
                   {formatarTempo(acao.tempoRestanteMinutos)}
                 </span>
               </div>

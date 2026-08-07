@@ -1,5 +1,3 @@
-'use client'
-
 // ─── KpiCard v2.0 — SaaS Premium (Fase 3) ──────────────────────────────────
 // Referências: Vercel, Linear, Stripe.
 // Menor densidade. Delta percentual. Loading state. Dark mode nativo.
@@ -61,7 +59,12 @@ export default function KpiCard({
   // Skeleton
   if (loading) {
     return (
-      <div className={`rounded-lg border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 ${actualPadding} ${className ?? ''}`}>
+      <div
+        role="status"
+        aria-label={`Carregando ${label}`}
+        aria-busy="true"
+        className={`rounded-lg border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 ${actualPadding} ${className ?? ''}`}
+      >
         <div className="h-3 w-14 rounded bg-gray-100 dark:bg-gray-800 animate-pulse" />
         <div className="mt-1.5 h-6 w-16 rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
       </div>
@@ -69,7 +72,10 @@ export default function KpiCard({
   }
 
   return (
-    <div className={cn(
+    <div
+      role="metric"
+      aria-label={`${label}: ${displayValue}`}
+      className={cn(
       `group rounded-lg border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 ${actualPadding}`,
       'transition-all duration-150 ease-out hover:border-gray-200 dark:hover:border-gray-700 hover:shadow-sm',
       className,

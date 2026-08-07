@@ -25,10 +25,10 @@ function PainelAlerta({
   }
 
   const badges = {
-    red: 'bg-red-100 text-red-700',
-    amber: 'bg-amber-100 text-amber-700',
-    blue: 'bg-blue-100 text-blue-700',
-    purple: 'bg-purple-100 text-purple-700',
+    red: 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400',
+    amber: 'bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400',
+    blue: 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400',
+    purple: 'bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400',
   }
 
   return (

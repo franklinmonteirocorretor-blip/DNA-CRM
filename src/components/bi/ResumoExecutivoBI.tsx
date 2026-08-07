@@ -3,10 +3,6 @@
 import type { BIResumoExecutivo } from '@/src/types/bi'
 import { formatarMoeda } from '@/src/lib/formatters'
 
-interface Props {
-  resumo: BIResumoExecutivo
-}
-
 function formatoPercentual(valor: number): string {
   return Math.round(valor) + '%'
 }

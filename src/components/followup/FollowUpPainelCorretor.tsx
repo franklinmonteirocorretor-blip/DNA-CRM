@@ -32,7 +32,7 @@ function Card({ label, value, destaque }: { label: string; value: string; destaq
   return (
     <div className="rounded-md bg-gray-50 dark:bg-gray-700 p-3">
       <span className="text-[11px] font-medium uppercase text-gray-400 dark:text-gray-500">{label}</span>
-      <p className={`mt-1 text-sm font-semibold ${destaque ?? 'text-gray-900'}`}>{value}</p>
+      <p className={`mt-1 text-sm font-semibold ${destaque ?? 'text-gray-900 dark:text-gray-100'}`}>{value}</p>
     </div>
   )
 }

@@ -1,6 +1,6 @@
 'use server'
 
-import { requireAuth } from '@/src/lib/auth/guards'
+import { requireAuth, requirePermission } from '@/src/lib/auth/guards'
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
 import { revalidatePath } from 'next/cache'
 import {
@@ -20,18 +20,20 @@ export async function painelDocumentos(): Promise<PainelDocumentos> {
   const supabase = await createSupabaseServerClient()
 
   // Todos os clientes ativos
-  const { data: clientes } = await supabase
+  const { data: clientes, error: clientesError } = await supabase
     .from('clientes')
     .select('id, nome, etapa_atual, ultima_atividade_em, corretor_responsavel_id, usuarios!inner(nome)')
     .is('deleted_at', null)
     .in('etapa_atual', ['ANALISE', 'RESTRICOES', 'CONDICIONADOS', 'APROVADOS', 'FECHAMENTOS'])
+  if (clientesError) throw new Error(clientesError.message)
 
   const ids = (clientes ?? []).map((c) => c.id)
 
   // Todos os documentos desses clientes
-  const { data: docs } = ids.length > 0
+  const { data: docs, error: docsError } = ids.length > 0
     ? await supabase.from('documentos').select('*').in('cliente_id', ids).is('deleted_at', null)
-    : { data: [] }
+    : { data: [], error: null }
+  if (docsError) throw new Error(docsError.message)
 
   const docsPorCliente: Record<string, { aprovados: number; pendentes: number; rejeitados: number; ultimo: string | null }> = {}
   for (const d of docs ?? []) {
@@ -70,7 +72,8 @@ export async function painelDocumentos(): Promise<PainelDocumentos> {
   const documentosRejeitados = clientesResumo.reduce((s, c) => s + c.docsRejeitados, 0)
 
   // Tempo médio: do primeiro doc PENDENTE ao último VALIDADO (simplificado)
-  const { data: tempos } = await supabase.rpc('fn_tempo_medio_etapas')
+  const { data: tempos, error: temposError } = await supabase.rpc('fn_tempo_medio_etapas')
+  if (temposError) throw new Error(temposError.message)
   const tempoDocs = (tempos ?? []).filter((t: { etapa: string }) =>
     ['ANALISE', 'RESTRICOES', 'CONDICIONADOS', 'APROVADOS', 'FECHAMENTOS'].includes(t.etapa)
   )
@@ -94,23 +97,25 @@ export async function clienteDossie(clienteId: string): Promise<ClienteDossie | 
   await requireAuth()
   const supabase = await createSupabaseServerClient()
 
-  const { data: cliente } = await supabase
+  const { data: cliente, error: clienteError } = await supabase
     .from('clientes')
     .select('nome, telefone, etapa_atual, empreendimento_interesse, corretor_responsavel_id, usuarios!inner(nome)')
     .eq('id', clienteId)
     .single()
 
+  if (clienteError) throw new Error(clienteError.message)
   if (!cliente) return null
 
   const etapa = cliente.etapa_atual as EtapaFunil
   const obrigatorios = CHECKLIST_OBRIGATORIO[etapa] ?? []
 
-  const { data: documentos } = await supabase
+  const { data: documentos, error: docsError2 } = await supabase
     .from('documentos')
     .select('*')
     .eq('cliente_id', clienteId)
     .is('deleted_at', null)
     .order('created_at', { ascending: false })
+  if (docsError2) throw new Error(docsError2.message)
 
   const aprovadosTipos = new Set((documentos ?? []).filter((d) => d.status_validacao === 'VALIDADO').map((d) => d.tipo))
   const faltantes = obrigatorios.filter((t) => !aprovadosTipos.has(t))
@@ -136,15 +141,16 @@ export async function clienteDossie(clienteId: string): Promise<ClienteDossie | 
 // ─── Aprovar documento ───────────────────────────────────────────────────────
 
 export async function aprovarDocumento(docId: string, observacoes?: string): Promise<{ success: boolean; error?: string }> {
-  await requireAuth()
+  await requirePermission('documentos', 'aprovar')
   const supabase = await createSupabaseServerClient()
 
   // Busca dados do documento para o dispatch
-  const { data: docAntes } = await supabase
+  const { data: docAntes, error: docAntesError } = await supabase
     .from('documentos')
     .select('cliente_id, tipo')
     .eq('id', docId)
     .single()
+  if (docAntesError) throw new Error(docAntesError.message)
 
   const { error } = await supabase
     .from('documentos')
@@ -165,15 +171,16 @@ export async function aprovarDocumento(docId: string, observacoes?: string): Pro
 // ─── Rejeitar documento ──────────────────────────────────────────────────────
 
 export async function rejeitarDocumento(docId: string, observacoes: string): Promise<{ success: boolean; error?: string }> {
-  await requireAuth()
+  await requirePermission('documentos', 'rejeitar')
   const supabase = await createSupabaseServerClient()
 
   // Busca dados do documento para o dispatch
-  const { data: docAntes } = await supabase
+  const { data: docAntes, error: docAntesError } = await supabase
     .from('documentos')
     .select('cliente_id, tipo')
     .eq('id', docId)
     .single()
+  if (docAntesError) throw new Error(docAntesError.message)
 
   const { error } = await supabase
     .from('documentos')
@@ -215,11 +222,12 @@ export async function verificarChecklist(clienteId: string, etapa: EtapaFunil): 
 
   if (obrigatorios.length === 0) return { completo: true, faltantes: [] }
 
-  const { data: docs } = await supabase
+  const { data: docs, error: docsError } = await supabase
     .from('documentos')
     .select('tipo, status_validacao')
     .eq('cliente_id', clienteId)
     .is('deleted_at', null)
+  if (docsError) throw new Error(docsError.message)
 
   const aprovadosTipos = new Set((docs ?? []).filter((d) => d.status_validacao === 'VALIDADO').map((d) => d.tipo))
   const faltantes = obrigatorios.filter((t) => !aprovadosTipos.has(t))

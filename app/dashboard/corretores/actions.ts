@@ -1,6 +1,7 @@
 'use server'
 
-import { requireAuth } from '@/src/lib/auth/guards'
+import { requirePermission } from '@/src/lib/auth/guards'
+import { escaparLike } from '@/src/lib/sql-utils'
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
 import { revalidatePath } from 'next/cache'
 import {
@@ -15,7 +16,7 @@ import {
 // ─── Lista de corretores (página principal) ──────────────────────────────────
 
 export async function listarCorretores(filtros?: CorretoresFiltros): Promise<CorretorGestao[]> {
-  await requireAuth()
+  await requirePermission('corretores', 'visualizar')
   const supabase = await createSupabaseServerClient()
 
   let query = supabase.from('usuarios')
@@ -24,7 +25,8 @@ export async function listarCorretores(filtros?: CorretoresFiltros): Promise<Cor
     .order('nome')
 
   if (filtros?.busca) {
-    query = query.or(`nome.ilike.%${filtros.busca}%,email.ilike.%${filtros.busca}%`)
+    const buscaEscapada = escaparLike(filtros.busca)
+    query = query.or(`nome.ilike.%${buscaEscapada}%,email.ilike.%${buscaEscapada}%`)
   }
   if (filtros?.status && filtros.status !== 'TODOS') {
     query = query.eq('status_usuario', filtros.status)
@@ -36,7 +38,8 @@ export async function listarCorretores(filtros?: CorretoresFiltros): Promise<Cor
     query = query.eq('supervisor_id', filtros.supervisorId)
   }
 
-  const { data: usuarios } = await query
+  const { data: usuarios, error: usuariosError } = await query
+  if (usuariosError) throw new Error(usuariosError.message)
 
   // Busca produção do mês atual para todos
   const hoje = new Date()
@@ -44,25 +47,27 @@ export async function listarCorretores(filtros?: CorretoresFiltros): Promise<Cor
   const hojeStr = new Date().toISOString().slice(0, 10)
   const ids = (usuarios ?? []).map((u) => u.id)
 
-  const { data: producaoMes } = ids.length > 0
+  const { data: producaoMes, error: prodMesError } = ids.length > 0
     ? await supabase.from('producao_diaria')
         .select('*')
         .in('usuario_id', ids)
         .gte('data', inicioMes)
         .lte('data', hojeStr)
-    : { data: [] }
+    : { data: [], error: null }
+  if (prodMesError) throw new Error(prodMesError.message)
 
-  const { data: producaoHoje } = ids.length > 0
+  const { data: producaoHoje, error: prodHojeError } = ids.length > 0
     ? await supabase.from('producao_diaria')
         .select('*')
         .in('usuario_id', ids)
         .eq('data', hojeStr)
-    : { data: [] }
+    : { data: [], error: null }
+  if (prodHojeError) throw new Error(prodHojeError.message)
 
   const METAS_DIARIAS = { ligacoes: 80, whatsapps: 40, followUps: 20, agendamentos: 2, comparecimentos: 2, pastas: 1 }
 
   // Batch: VGV e comissão por corretor (todos de uma vez)
-  const { data: todasVendasMes } = ids.length > 0
+  const { data: todasVendasMes, error: vendasMesError } = ids.length > 0
     ? await supabase
         .from('clientes')
         .select('corretor_responsavel_id, vgv, comissao_valor')
@@ -70,16 +75,18 @@ export async function listarCorretores(filtros?: CorretoresFiltros): Promise<Cor
         .eq('ficha_proposta_assinada', true)
         .gte('data_fechamento', `${inicioMes}T00:00:00`)
         .is('deleted_at', null)
-    : { data: [] }
+    : { data: [], error: null }
+  if (vendasMesError) throw new Error(vendasMesError.message)
 
   // Batch: total de clientes por corretor
-  const { data: todosClientes } = ids.length > 0
+  const { data: todosClientes, error: clientesError } = ids.length > 0
     ? await supabase
         .from('clientes')
         .select('corretor_responsavel_id')
         .in('corretor_responsavel_id', ids)
         .is('deleted_at', null)
-    : { data: [] }
+    : { data: [], error: null }
+  if (clientesError) throw new Error(clientesError.message)
 
   // Agrega VGV e comissão por corretor
   const vgvPorCorretor: Record<string, number> = {}
@@ -198,7 +205,7 @@ export async function criarCorretor(dados: {
   equipe_id?: string
   supervisor_id?: string
 }): Promise<{ success: boolean; error?: string; id?: string }> {
-  await requireAuth()
+  await requirePermission('corretores', 'cadastrar')
   const supabase = await createSupabaseServerClient()
 
   // Cria usuário no auth (senha temporária)
@@ -258,7 +265,7 @@ export async function editarCorretor(
     status_usuario: string
   }>
 ): Promise<{ success: boolean; error?: string }> {
-  await requireAuth()
+  await requirePermission('corretores', 'editar')
   const supabase = await createSupabaseServerClient()
 
   const { error } = await supabase
@@ -280,7 +287,7 @@ export async function alterarStatusCorretor(
   id: string,
   novoStatus: 'ATIVO' | 'DESLIGADO' | 'FERIAS' | 'AFASTADO'
 ): Promise<{ success: boolean; error?: string }> {
-  await requireAuth()
+  await requirePermission('corretores', 'desativar')
   const supabase = await createSupabaseServerClient()
 
   const { error } = await supabase
@@ -299,7 +306,7 @@ export async function alterarStatusCorretor(
 // ─── Transferir carteira de clientes ─────────────────────────────────────────
 
 export async function transferirCarteira(dados: TransferenciaCarteira): Promise<{ success: boolean; error?: string }> {
-  await requireAuth()
+  await requirePermission('corretores', 'transferir_carteira')
   const supabase = await createSupabaseServerClient()
 
   if (dados.transferirClientes) {
@@ -328,35 +335,38 @@ export async function transferirCarteira(dados: TransferenciaCarteira): Promise<
 // ─── Perfil completo do corretor ─────────────────────────────────────────────
 
 export async function perfilCorretor(id: string): Promise<PerfilCorretor | null> {
-  await requireAuth()
+  await requirePermission('corretores', 'visualizar')
   const supabase = await createSupabaseServerClient()
 
-  const { data: usuario } = await supabase
+  const { data: usuario, error: usuarioError } = await supabase
     .from('usuarios')
     .select('*, equipes!usuarios_equipe_id_fkey(nome), supervisor:usuarios!usuarios_supervisor_id_fkey(nome)')
     .eq('id', id)
     .single()
 
+  if (usuarioError) throw new Error(usuarioError.message)
   if (!usuario) return null
 
   // Produção diária (últimos 30 dias)
   const trintaDiasAtras = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10)
   const hojeStr = new Date().toISOString().slice(0, 10)
-  const { data: producaoDiaria } = await supabase
+  const { data: producaoDiaria, error: prodDiariaError } = await supabase
     .from('producao_diaria')
     .select('*')
     .eq('usuario_id', id)
     .gte('data', trintaDiasAtras)
     .lte('data', hojeStr)
     .order('data', { ascending: true })
+  if (prodDiariaError) throw new Error(prodDiariaError.message)
 
   // Produção mensal (últimos 12 meses)
-  const { data: producaoMensalRaw } = await supabase
+  const { data: producaoMensalRaw, error: prodMensalError } = await supabase
     .from('producao_diaria')
     .select('data, vendas, aprovacoes, pontuacao_gamificacao')
     .eq('usuario_id', id)
     .gte('data', `${new Date().getFullYear() - 1}-01-01`)
     .order('data', { ascending: true })
+  if (prodMensalError) throw new Error(prodMensalError.message)
 
   const porMes: Record<string, { vendas: number; vgv: number; comissao: number; aprovacoes: number; pontuacao: number }> = {}
   for (const p of producaoMensalRaw ?? []) {
@@ -367,18 +377,25 @@ export async function perfilCorretor(id: string): Promise<PerfilCorretor | null>
     porMes[mes].pontuacao += p.pontuacao_gamificacao
   }
 
-  // VGV e comissao mensal
-  for (const mes of Object.keys(porMes)) {
-    const { data: vendasMes } = await supabase
-      .from('clientes')
-      .select('vgv, comissao_valor')
-      .eq('corretor_responsavel_id', id)
-      .eq('ficha_proposta_assinada', true)
-      .gte('data_fechamento', `${mes}-01T00:00:00`)
-      .lte('data_fechamento', `${mes}-31T23:59:59`)
-      .is('deleted_at', null)
-    porMes[mes].vgv = (vendasMes ?? []).reduce((s, v) => s + (v.vgv ?? 0), 0)
-    porMes[mes].comissao = (vendasMes ?? []).reduce((s, v) => s + (v.comissao_valor ?? 0), 0)
+  // VGV e comissao mensal — single batch query instead of N+1 per month
+  const minMes = Object.keys(porMes).sort()[0] ?? new Date().toISOString().slice(0, 7)
+  const maxMes = Object.keys(porMes).sort().pop() ?? new Date().toISOString().slice(0, 7)
+  const { data: todasVendasMensais, error: vendasBatchError } = await supabase
+    .from('clientes')
+    .select('vgv, comissao_valor, data_fechamento')
+    .eq('corretor_responsavel_id', id)
+    .eq('ficha_proposta_assinada', true)
+    .gte('data_fechamento', `${minMes}-01T00:00:00`)
+    .lte('data_fechamento', `${maxMes}-31T23:59:59`)
+    .is('deleted_at', null)
+  if (vendasBatchError) throw new Error(vendasBatchError.message)
+  for (const v of todasVendasMensais ?? []) {
+    if (!v.data_fechamento) continue
+    const mesVenda = v.data_fechamento.slice(0, 7)
+    if (porMes[mesVenda]) {
+      porMes[mesVenda].vgv += v.vgv ?? 0
+      porMes[mesVenda].comissao += v.comissao_valor ?? 0
+    }
   }
 
   const producaoMensal = Object.entries(porMes)
@@ -393,38 +410,48 @@ export async function perfilCorretor(id: string): Promise<PerfilCorretor | null>
     porAno[ano].vendas += p.vendas
     porAno[ano].pontuacao += p.pontuacao_gamificacao
   }
-  for (const ano of Object.keys(porAno)) {
-    const { data: vendasAno } = await supabase
-      .from('clientes')
-      .select('vgv, comissao_valor')
-      .eq('corretor_responsavel_id', id)
-      .eq('ficha_proposta_assinada', true)
-      .gte('data_fechamento', `${ano}-01-01T00:00:00`)
-      .lte('data_fechamento', `${ano}-12-31T23:59:59`)
-      .is('deleted_at', null)
-    porAno[ano].vgv = (vendasAno ?? []).reduce((s, v) => s + (v.vgv ?? 0), 0)
-    porAno[ano].comissao = (vendasAno ?? []).reduce((s, v) => s + (v.comissao_valor ?? 0), 0)
+  // VGV e comissao anual — single batch query instead of N+1 per year
+  const minAno = Object.keys(porAno).sort()[0] ?? new Date().getFullYear().toString()
+  const maxAno = Object.keys(porAno).sort().pop() ?? new Date().getFullYear().toString()
+  const { data: todasVendasAnuais, error: vendasAnoBatchError } = await supabase
+    .from('clientes')
+    .select('vgv, comissao_valor, data_fechamento')
+    .eq('corretor_responsavel_id', id)
+    .eq('ficha_proposta_assinada', true)
+    .gte('data_fechamento', `${minAno}-01-01T00:00:00`)
+    .lte('data_fechamento', `${maxAno}-12-31T23:59:59`)
+    .is('deleted_at', null)
+  if (vendasAnoBatchError) throw new Error(vendasAnoBatchError.message)
+  for (const v of todasVendasAnuais ?? []) {
+    if (!v.data_fechamento) continue
+    const anoVenda = v.data_fechamento.slice(0, 4)
+    if (porAno[anoVenda]) {
+      porAno[anoVenda].vgv += v.vgv ?? 0
+      porAno[anoVenda].comissao += v.comissao_valor ?? 0
+    }
   }
   const producaoAnual = Object.entries(porAno)
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([ano, dados]) => ({ ano, ...dados }))
 
   // Clientes ativos (primeiros 10)
-  const { data: clientes } = await supabase
+  const { data: clientes, error: clientesPerfilError } = await supabase
     .from('clientes')
     .select('id, nome, etapa_atual')
     .eq('corretor_responsavel_id', id)
     .is('deleted_at', null)
     .order('updated_at', { ascending: false })
     .limit(10)
+  if (clientesPerfilError) throw new Error(clientesPerfilError.message)
 
   // Ranking (fn_ranking_mes)
-  const { data: ranking } = await supabase.rpc('fn_ranking_mes')
+  const { data: ranking, error: rankingError } = await supabase.rpc('fn_ranking_mes')
+  if (rankingError) throw new Error(rankingError.message)
   const posicao = (ranking ?? []).findIndex((r: { usuario_id: string }) => r.usuario_id === id) + 1
   const pontuacao = (ranking ?? []).find((r: { usuario_id: string }) => r.usuario_id === id)?.pontos ?? 0
 
   // Próximos agendamentos
-  const { data: agendamentos } = await supabase
+  const { data: agendamentos, error: agendError } = await supabase
     .from('agendamentos')
     .select('id, data_hora, status, clientes(nome)')
     .eq('corretor_id', id)
@@ -432,6 +459,7 @@ export async function perfilCorretor(id: string): Promise<PerfilCorretor | null>
     .in('status', ['AGENDADO', 'CONFIRMADO', 'REMARCADO'])
     .order('data_hora', { ascending: true })
     .limit(10)
+  if (agendError) throw new Error(agendError.message)
 
   const equipesData = usuario.equipes as unknown as { nome: string } | null
   const supervisorData = usuario.supervisor as unknown as { nome: string } | null
@@ -472,28 +500,30 @@ export async function perfilCorretor(id: string): Promise<PerfilCorretor | null>
 // ─── Listar equipes (para selects/filtros) ───────────────────────────────────
 
 export async function listarEquipes(): Promise<Equipe[]> {
-  await requireAuth()
+  await requirePermission('corretores', 'visualizar')
   const supabase = await createSupabaseServerClient()
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('equipes')
     .select('*')
     .is('deleted_at', null)
     .order('nome')
+  if (error) throw new Error(error.message)
   return (data ?? []) as Equipe[]
 }
 
 // ─── Listar supervisores/gerentes (para selects) ─────────────────────────────
 
 export async function listarSupervisores(): Promise<{ id: string; nome: string }[]> {
-  await requireAuth()
+  await requirePermission('corretores', 'visualizar')
   const supabase = await createSupabaseServerClient()
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('usuarios')
     .select('id, nome')
     .in('perfil', ['GERENTE', 'SUPERVISOR', 'ADMINISTRADOR'])
     .eq('status_usuario', 'ATIVO')
     .is('deleted_at', null)
     .order('nome')
+  if (error) throw new Error(error.message)
   return (data ?? []) as { id: string; nome: string }[]
 }
 
@@ -504,21 +534,23 @@ export async function resumoEquipeDashboard(): Promise<{
   corretoresOnline: number
   producaoDia: { ligacoes: number; whatsapps: number; agendamentos: number; comparecimentos: number }
 }> {
-  await requireAuth()
+  await requirePermission('equipe', 'visualizar')
   const supabase = await createSupabaseServerClient()
   const hojeStr = new Date().toISOString().slice(0, 10)
 
-  const { count: corretoresAtivos } = await supabase
+  const { count: corretoresAtivos, error: countError } = await supabase
     .from('usuarios')
     .select('*', { count: 'exact', head: true })
     .eq('status_usuario', 'ATIVO')
     .is('deleted_at', null)
+  if (countError) throw new Error(countError.message)
 
   // "Online" = tiveram atividade hoje
-  const { data: prodHoje } = await supabase
+  const { data: prodHoje, error: prodHojeError } = await supabase
     .from('producao_diaria')
     .select('usuario_id, ligacoes, whatsapp, agendamentos, comparecimentos')
     .eq('data', hojeStr)
+  if (prodHojeError) throw new Error(prodHojeError.message)
 
   const usuariosAtivos = [...new Set((prodHoje ?? []).map((p) => p.usuario_id))]
 

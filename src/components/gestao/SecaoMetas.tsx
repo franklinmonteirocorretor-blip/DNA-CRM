@@ -17,7 +17,7 @@ export default function SecaoMetas({ dados }: { dados: GestaoMeta }) {
       <div className="mt-3 space-y-4">
         {/* Meta da Equipe */}
         <div className="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 p-4">
-          <h3 className="text-sm font-semibold text-gray-800">Equipe</h3>
+          <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100">Equipe</h3>
           <div className="mt-2 grid grid-cols-3 gap-3 text-xs">
             {(['vendas', 'aprovacoes', 'agendamentos', 'comparecimentos', 'pastas'] as const).map((k) => {
               const meta = dados.metaEquipe[k]
@@ -75,7 +75,7 @@ export default function SecaoMetas({ dados }: { dados: GestaoMeta }) {
         <div className="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 p-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-semibold text-gray-800">Projeção de fechamento</h3>
+              <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100">Projeção de fechamento</h3>
               <p className="text-xs text-gray-400 dark:text-gray-500">{dados.diasRestantes} dias restantes</p>
             </div>
             <div className="text-right">

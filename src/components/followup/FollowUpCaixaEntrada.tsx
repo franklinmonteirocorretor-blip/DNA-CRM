@@ -16,11 +16,11 @@ const CATEGORIA_LABEL: Record<FollowUpItem['categoria'], string> = {
 }
 
 const CATEGORIA_COR: Record<FollowUpItem['categoria'], string> = {
-  NOVO_LEAD: 'bg-blue-50 border-blue-200',
-  SEM_CONTATO: 'bg-amber-50 border-amber-200',
-  AGUARDANDO_RETORNO: 'bg-gray-50 border-gray-200',
-  VENCIDO: 'bg-red-50 border-red-200',
-  ESQUECIDO: 'bg-red-100 border-red-300',
+  NOVO_LEAD: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800',
+  SEM_CONTATO: 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800',
+  AGUARDANDO_RETORNO: 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700',
+  VENCIDO: 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800',
+  ESQUECIDO: 'bg-red-100 dark:bg-red-900/40 border-red-300 dark:border-red-700',
 }
 
 /** Seção 1 — Caixa de Entrada ordenada por prioridade */

@@ -29,13 +29,15 @@ const i = (Icon: React.ComponentType<{ className?: string }>) => (
 )
 
 // ─── Sidebar Groups ─────────────────────────────────────────────────────
-function buildGroups(isManager: boolean, canSeeFinance: boolean): SidebarGroupData[] {
+function buildGroups(isManager: boolean, isSupervisor: boolean, canSeeFinance: boolean): SidebarGroupData[] {
   return [
     {
       label: 'Principal',
       items: [
         { label: 'Dashboard', href: '/dashboard',          icon: i(LayoutDashboard) },
-        { label: 'Operação',  href: '/dashboard/operacao', icon: i(Clock4) },
+        ...(isSupervisor
+          ? [{ label: 'Operação', href: '/dashboard/operacao', icon: i(Clock4) }]
+          : []),
       ],
     },
     {
@@ -54,10 +56,18 @@ function buildGroups(isManager: boolean, canSeeFinance: boolean): SidebarGroupDa
         ...(canSeeFinance
           ? [{ label: 'Financeiro', href: '/dashboard/financeiro', icon: i(DollarSign) }]
           : []),
-        { label: 'Corretores', href: '/dashboard/corretores', icon: i(Users) },
-        { label: 'Rankings',   href: '/dashboard/rankings',   icon: i(Star) },
-        { label: 'BI',         href: '/dashboard/bi',         icon: i(BarChart3) },
-        { label: 'Gestão',     href: '/dashboard/gestao',     icon: i(Settings) },
+        ...(isManager
+          ? [{ label: 'Corretores', href: '/dashboard/corretores', icon: i(Users) }]
+          : []),
+        ...(isSupervisor
+          ? [{ label: 'Rankings', href: '/dashboard/rankings', icon: i(Star) }]
+          : []),
+        ...(isSupervisor
+          ? [{ label: 'BI', href: '/dashboard/bi', icon: i(BarChart3) }]
+          : []),
+        ...(isSupervisor
+          ? [{ label: 'Gestão', href: '/dashboard/gestao', icon: i(Settings) }]
+          : []),
       ],
     },
     {
@@ -70,9 +80,15 @@ function buildGroups(isManager: boolean, canSeeFinance: boolean): SidebarGroupDa
     {
       label: 'Configuração',
       items: [
-        { label: 'Empreendimentos', href: '/dashboard/empreendimentos', icon: i(Building2) },
-        { label: 'Automações',      href: '/dashboard/automacoes',      icon: i(Settings) },
-        { label: 'Relatórios',      href: '/dashboard/relatorios',       icon: i(FileSpreadsheet) },
+        ...(isManager
+          ? [{ label: 'Empreendimentos', href: '/dashboard/empreendimentos', icon: i(Building2) }]
+          : []),
+        ...(isManager
+          ? [{ label: 'Automações', href: '/dashboard/automacoes', icon: i(Settings) }]
+          : []),
+        ...(isManager
+          ? [{ label: 'Relatórios', href: '/dashboard/relatorios', icon: i(FileSpreadsheet) }]
+          : []),
         ...(isManager
           ? [{ label: 'Equipe', href: '/dashboard/equipe', icon: i(Users) }]
           : []),
@@ -98,8 +114,9 @@ export default async function DashboardLayout({
     .single()
 
   const isManager = usuario?.perfil === 'GERENTE' || usuario?.perfil === 'ADMINISTRADOR'
-  const canSeeFinance = isManager || usuario?.perfil === 'SUPERVISOR'
-  const groups = buildGroups(isManager, canSeeFinance)
+  const isSupervisor = isManager || usuario?.perfil === 'SUPERVISOR'
+  const canSeeFinance = isSupervisor
+  const groups = buildGroups(isManager, isSupervisor, canSeeFinance)
 
   const displayName = usuario?.nome ?? user.email ?? 'Usuário'
   const initials = displayName
@@ -111,6 +128,14 @@ export default async function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+      {/* ── Skip link para acessibilidade ── */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[99] focus:rounded-lg focus:bg-blue-600 focus:px-4 focus:py-2 focus:text-white focus:text-sm focus:font-medium"
+      >
+        Pular para conteúdo principal
+      </a>
+
       {/* ── Header compacto ── */}
       <DashboardHeader
         userId={user.id}
@@ -129,7 +154,9 @@ export default async function DashboardLayout({
 
         {/* ── Conteúdo ── */}
         <main
-          className="flex-1 min-h-[calc(100vh-48px)] p-6"
+          id="main-content"
+          role="main"
+          className="flex-1 min-h-[calc(100vh-48px)] px-4 py-6 md:px-6"
           style={{ minWidth: 0 }}
         >
           {children}

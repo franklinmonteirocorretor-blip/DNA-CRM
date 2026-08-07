@@ -25,7 +25,11 @@ export default function ErrorState({
   }, [error])
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
+    <div
+      role="alert"
+      aria-live="assertive"
+      className="flex flex-col items-center justify-center min-h-[60vh] px-4"
+    >
       <div className="text-center space-y-4 max-w-md">
         <div className="text-6xl">&#x26A0;&#xFE0F;</div>
         <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Algo deu errado</h2>

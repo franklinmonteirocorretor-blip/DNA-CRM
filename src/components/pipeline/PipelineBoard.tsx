@@ -67,8 +67,17 @@ export default function PipelineBoard() {
     setColunas(novasColunas)
     setArrastando(null)
 
-    // Persiste no banco
-    await moverEtapa(clienteId, etapaDestino)
+    // Persiste no banco (com fallback em caso de falha)
+    const { success } = await moverEtapa(clienteId, etapaDestino)
+    if (!success) {
+      // Reverte o estado otimista
+      console.error('[PipelineBoard] Falha ao mover cliente. Revertendo estado.')
+      const revertido = { ...colunas }
+      revertido[etapaDestino] = revertido[etapaDestino].filter((c) => c.id !== clienteId)
+      card.etapaAtual = arrastando.etapaOrigem
+      revertido[arrastando.etapaOrigem] = [...revertido[arrastando.etapaOrigem], card]
+      setColunas(revertido)
+    }
   }
 
   function abrirPainel(clienteId: string) {

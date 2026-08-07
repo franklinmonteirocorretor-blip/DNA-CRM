@@ -9,7 +9,7 @@ export default function TestSupabase() {
   useEffect(() => {
     async function test() {
       try {
-        const { data, error } = await supabase.from('usuarios').select('*').limit(1)
+        const { data: _data, error } = await supabase.from('usuarios').select('*').limit(1)
         
         if (error) {
           setStatus('❌ Erro: ' + error.message)

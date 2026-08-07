@@ -1,6 +1,6 @@
 'use client'
 
-import type { BIMetas, BIMetaPadrao } from '@/src/types/bi'
+import type { BIMetas } from '@/src/types/bi'
 import { formatarMoeda } from '@/src/lib/formatters'
 
 function formatoPontos(valor: number): string {
@@ -66,7 +66,7 @@ function MetaBar({
           </span>
         </div>
         <span
-          className={`text-sm font-bold ${ pct >= 80 ? 'text-emerald-700' : pct >= 60 ? 'text-yellow-700' : 'text-red-600' }`}
+          className={`text-sm font-bold ${ pct >= 80 ? 'text-emerald-700 dark:text-emerald-400' : pct >= 60 ? 'text-yellow-700 dark:text-yellow-400' : 'text-red-600 dark:text-red-400' }`}
         >
           {Math.round(pct)}%
         </span>

@@ -17,19 +17,8 @@ const ICONES_TIPO: Record<string, string> = {
   AGENDAMENTO: '📅',
 }
 
-const COR_FUNDO_TIPO: Record<string, string> = {
-  FECHAMENTO: 'bg-emerald-100',
-  ENTRADA: 'bg-yellow-100',
-  APROVACAO: 'bg-green-100',
-  DOCUMENTO: 'bg-blue-100',
-  COMISSAO: 'bg-purple-100',
-  ATIVIDADE: 'bg-gray-100',
-  AGENDAMENTO: 'bg-orange-100',
-}
-
 function TimelineItem({ evento }: { evento: BITimelineEvento }) {
   const icone = ICONES_TIPO[evento.tipo] ?? '●'
-  const corFundo = COR_FUNDO_TIPO[evento.tipo] ?? 'bg-gray-100'
 
   return (
     <div className="flex gap-4">
@@ -48,7 +37,7 @@ function TimelineItem({ evento }: { evento: BITimelineEvento }) {
           </div>
           <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">{evento.descricao}</p>
           {evento.valor != null && (
-            <p className="mt-1 text-xs font-medium text-gray-800">
+            <p className="mt-1 text-xs font-medium text-gray-800 dark:text-gray-200">
               {formatarMoeda(evento.valor)}
             </p>
           )}

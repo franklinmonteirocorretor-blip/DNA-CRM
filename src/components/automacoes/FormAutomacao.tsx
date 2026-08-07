@@ -66,16 +66,16 @@ export default function FormAutomacao({ onClose }: { onClose: () => void }) {
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-xl max-h-[90vh] overflow-y-auto p-6">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Nova Automacao</h2>
         {erro && <p className="text-sm text-red-600 mb-3 bg-red-50 p-2 rounded">{erro}</p>}
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nome</label>
-        <input className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md px-3 py-2 text-sm mb-3" value={nome} onChange={e => setNome(e.target.value)} placeholder="Ex: Alerta de inatividade 7 dias" />
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descricao</label>
-        <input className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md px-3 py-2 text-sm mb-3" value={desc} onChange={e => setDesc(e.target.value)} placeholder="O que esta automacao faz?" />
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Evento disparador</label>
-        <select className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md px-3 py-2 text-sm mb-3" value={evento} onChange={e => setEvento(e.target.value as AutomationEvent)}>
+        <label htmlFor="automacao-nome" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nome</label>
+        <input id="automacao-nome" className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md px-3 py-2 text-sm mb-3" value={nome} onChange={e => setNome(e.target.value)} placeholder="Ex: Alerta de inatividade 7 dias" />
+        <label htmlFor="automacao-desc" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descricao</label>
+        <input id="automacao-desc" className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md px-3 py-2 text-sm mb-3" value={desc} onChange={e => setDesc(e.target.value)} placeholder="O que esta automacao faz?" />
+        <label htmlFor="automacao-evento" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Evento disparador</label>
+        <select id="automacao-evento" className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md px-3 py-2 text-sm mb-3" value={evento} onChange={e => setEvento(e.target.value as AutomationEvent)}>
           {EVENTOS.map(ev => <option key={ev.value} value={ev.value}>{ev.label}</option>)}
         </select>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status inicial</label>
-        <select className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md px-3 py-2 text-sm mb-3" value={status} onChange={e => setStatus(e.target.value as 'ATIVA' | 'INATIVA')}>
+        <label htmlFor="automacao-status" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status inicial</label>
+        <select id="automacao-status" className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md px-3 py-2 text-sm mb-3" value={status} onChange={e => setStatus(e.target.value as 'ATIVA' | 'INATIVA')}>
           <option value="ATIVA">ATIVA</option>
           <option value="INATIVA">INATIVA</option>
         </select>

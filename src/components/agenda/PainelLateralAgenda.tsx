@@ -162,7 +162,7 @@ export default function PainelLateralAgenda({ evento, onFechar, onAtualizado }: 
         {/* Cabeçalho */}
         <div className="sticky top-0 z-10 bg-white dark:bg-gray-800 border-b px-4 py-3 flex items-center justify-between">
           <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 truncate">{evento.cliente.nome}</h2>
-          <button onClick={onFechar} className="rounded-full p-1 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400">
+          <button onClick={onFechar} aria-label="Fechar painel" className="rounded-full p-1 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400">
             ✕
           </button>
         </div>
@@ -180,7 +180,7 @@ export default function PainelLateralAgenda({ evento, onFechar, onAtualizado }: 
           <div className="p-4 space-y-4">
             {/* Dados do cliente */}
             <div className="rounded-lg bg-gray-50 dark:bg-gray-700 p-3 space-y-2 text-sm">
-              <p className="font-semibold text-gray-800">
+              <p className="font-semibold text-gray-800 dark:text-gray-100">
                 {STATUS_LABEL[evento.agendamento.status]} — {new Date(evento.agendamento.data_hora).toLocaleDateString('pt-BR')}
                 {' às '}{new Date(evento.agendamento.data_hora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
               </p>

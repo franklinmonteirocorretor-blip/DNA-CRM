@@ -25,13 +25,6 @@ const TIPOS_DOC: { valor: TipoDocumento; label: string; obrigatorio: boolean }[]
 ]
 
 // Conjunto mínimo para "pasta completa": identidade (RG ou CNH) + CPF + Comprovante de Renda
-function verificaPastaCompleta(documentos: Documento[]): boolean {
-  const tipos = documentos.map((d) => d.tipo)
-  const temIdentidade = tipos.includes('RG') || tipos.includes('CNH')
-  const temCpf = tipos.includes('CPF')
-  const temRenda = tipos.includes('COMPROVANTE_RENDA')
-  return temIdentidade && temCpf && temRenda
-}
 
 export default function SecaoDocumentos({
   clienteId,

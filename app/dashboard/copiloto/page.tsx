@@ -3,7 +3,6 @@
 // Carrega contexto e dados iniciais, delega UI para o Client Component.
 
 import { createSupabaseServerClient } from '@/src/lib/server/supabase'
-import { buildCopilotContext } from '@/src/services/copiloto-context'
 import { gerarResumoInteligente, gerarRecomendacoes } from '@/src/services/copiloto-engine'
 import CopilotoClientPage from './client'
 
@@ -15,11 +14,13 @@ export default async function CopilotoPage() {
     return <div className="p-6 text-red-600">Erro ao autenticar. Tente novamente.</div>
   }
 
-  const { data: usuario } = await supabase
+  const { data: usuario, error: usuarioErr } = await supabase
     .from('usuarios')
     .select('id, nome, perfil')
     .eq('id', user.id)
     .single()
+
+  if (usuarioErr) throw new Error(usuarioErr.message)
 
   if (!usuario) {
     return <div className="p-6">Usuário não encontrado.</div>
