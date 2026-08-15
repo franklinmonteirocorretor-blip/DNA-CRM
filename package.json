@@ -1,0 +1,35 @@
+{
+  "name": "monteiro-crm",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build --webpack",
+    "lint": "eslint",
+    "backup": "node scripts/backup.mjs",
+    "import:bases": "node scripts/import-normalized-bases.mjs",
+    "migrate:supabase": "node scripts/migrate-to-supabase.mjs",
+    "seed:test-client": "node scripts/ensure-test-client.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.112.2",
+    "@types/pdf-parse": "^1.1.5",
+    "exceljs": "^4.4.0",
+    "next": "^16.3.0",
+    "pdf-lib": "^1.17.1",
+    "pdf-parse": "^1.1.1",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "^16.3.0",
+    "prettier": "^3.6.2",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

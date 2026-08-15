@@ -1,0 +1,9 @@
+backups/
+data/
+storage/
+tmp/
+.credentials.local.txt
+.env*
+*.db
+*.db-shm
+*.db-wal

@@ -1,0 +1,248 @@
+:root {
+  --crm-black: #070707;
+  --crm-panel: #101010;
+  --crm-gold: #d9aa3d;
+  --crm-gold-light: #f0c75b;
+  --crm-white: #f4f2ed;
+  --crm-green: #27c982;
+  --crm-red: #ff4c41;
+  --crm-profile-photo: none;
+}
+
+html { scrollbar-gutter: stable; }
+body { overflow-x: hidden; }
+
+button:not(:disabled), a[href], select:not(:disabled), input[type="file"]:not(:disabled), label:has(input[type="file"]), [role="button"] { cursor: pointer !important; }
+button:disabled, select:disabled { cursor: not-allowed !important; }
+
+/* Navegação compartilhada: nenhuma central pode redefinir fonte, altura ou espaçamento. */
+.crm-navigation {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+  width: 100% !important;
+  font-family: Arial, Helvetica, sans-serif !important;
+}
+.crm-navigation a {
+  width: 100% !important;
+  height: 46px !important;
+  min-height: 46px !important;
+  padding: 0 15px !important;
+  border: 0 !important;
+  border-radius: 8px !important;
+  background: transparent !important;
+  color: #bdbdbd !important;
+  text-decoration: none !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 13px !important;
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  line-height: 1 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+.crm-navigation a:hover { background: #121212 !important; color: #fff !important; }
+.crm-navigation a.active {
+  background: linear-gradient(90deg, rgba(217,170,61,.16), rgba(217,170,61,.06)) !important;
+  color: var(--crm-gold-light) !important;
+  box-shadow: inset 2px 0 var(--crm-gold) !important;
+}
+.crm-navigation a i {
+  width: 17px !important;
+  min-width: 17px !important;
+  height: 17px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: currentColor !important;
+  display: grid !important;
+  place-items: center !important;
+  font: normal 15px/1 Arial, Helvetica, sans-serif !important;
+}
+.crm-navigation a span {
+  display: inline !important;
+  margin: 0 !important;
+  color: currentColor !important;
+  font: inherit !important;
+  letter-spacing: 0 !important;
+}
+
+/* Identidade única em todas as centrais. */
+@media (min-width: 1001px) {
+  aside:has(> .crm-navigation) {
+    width: 230px !important;
+    padding: 26px 14px 20px !important;
+    background: #050505 !important;
+    border-right: 1px solid #292929 !important;
+    font-size: 12px !important;
+    line-height: 1 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+  aside:has(> .crm-navigation)::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+  }
+  aside:has(> .crm-navigation) + main,
+  aside:has(> .crm-navigation) + section {
+    margin-left: 230px !important;
+    width: calc(100% - 230px) !important;
+  }
+  aside:has(> .crm-navigation) > .brand,
+  aside:has(> .crm-navigation) > [class$="-brand"] {
+    height: 150px !important;
+    min-height: 150px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    color: var(--crm-gold-light) !important;
+    letter-spacing: .17em !important;
+  }
+  aside:has(> .crm-navigation) > .brand img,
+  aside:has(> .crm-navigation) > [class$="-brand"] img {
+    width: 70px !important;
+    height: 74px !important;
+    object-fit: contain !important;
+  }
+  aside:has(> .crm-navigation) > .brand b,
+  aside:has(> .crm-navigation) > .brand strong,
+  aside:has(> .crm-navigation) > [class$="-brand"] b,
+  aside:has(> .crm-navigation) > [class$="-brand"] strong {
+    display: block !important;
+    margin-top: 5px !important;
+    font: 700 20px/1 Georgia, serif !important;
+    letter-spacing: .17em !important;
+  }
+  aside:has(> .crm-navigation) > .brand span,
+  aside:has(> .crm-navigation) > [class$="-brand"] span {
+    display: block !important;
+    margin-top: 3px !important;
+    font-size: 11px !important;
+    line-height: 1 !important;
+  }
+  aside:has(> .crm-navigation) > [class$="-user"],
+  aside:has(> .crm-navigation) > .profile {
+    margin-top: auto !important;
+    padding: 18px 8px 0 !important;
+    border-top: 1px solid #222 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 11px !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    min-height: 57px !important;
+    max-height: 57px !important;
+  }
+  aside:has(> .crm-navigation) > [class$="-user"] > i,
+  aside:has(> .crm-navigation) > .profile > .avatar {
+    width: 38px !important;
+    min-width: 38px !important;
+    max-width: 38px !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    max-height: 38px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 1px solid #555 !important;
+    border-radius: 50% !important;
+    background-color: #191919 !important;
+    background-image: var(--crm-profile-photo) !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    display: grid !important;
+    place-items: center !important;
+    flex: 0 0 38px !important;
+    overflow: hidden !important;
+    font: normal 11px/1 Arial, Helvetica, sans-serif !important;
+    color: var(--crm-gold-light);
+  }
+  aside:has(> .crm-navigation) > [class$="-user"] > div,
+  aside:has(> .crm-navigation) > .profile > div:last-child {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    min-width: 0 !important;
+  }
+  aside:has(> .crm-navigation) > [class$="-user"] b,
+  aside:has(> .crm-navigation) > .profile b { font-size: 12px !important; line-height: 1.15 !important; }
+  aside:has(> .crm-navigation) > [class$="-user"] span,
+  aside:has(> .crm-navigation) > .profile span { font-size: 10px !important; line-height: 1.15 !important; color: #888 !important; }
+}
+
+/* Escala das centrais: CCA e Indicadores não podem ampliar a interface. */
+.cca-header,
+.ind-header {
+  height: 90px !important;
+  min-height: 90px !important;
+  padding: 0 24px !important;
+}
+.cca-header h1,
+.ind-header h1 {
+  margin: 5px 0 3px !important;
+  font: 700 16px/1.1 Arial, Helvetica, sans-serif !important;
+  letter-spacing: 0 !important;
+}
+.cca-header p,
+.ind-header p { font-size: 8px !important; line-height: 1.3 !important; }
+.cca-header > div:first-child > span,
+.ind-header > div:first-child > span { font-size: 7px !important; line-height: 1 !important; }
+.cca-header button,
+.ind-header button {
+  min-height: 34px !important;
+  padding: 0 14px !important;
+  font-size: 8px !important;
+  line-height: 1 !important;
+}
+.cca-content { max-width: 1450px !important; margin: 0 auto !important; padding: 18px 24px 40px !important; }
+.cca-list > header { min-height: 55px !important; padding: 12px 14px !important; }
+.cca-list h2 { margin: 4px 0 0 !important; font-size: 13px !important; line-height: 1.1 !important; }
+.cca-list > article { min-height: 64px !important; padding: 13px 14px !important; }
+.cca-list > article b { font-size: 10px !important; line-height: 1.15 !important; }
+.cca-list article span,
+.cca-list article small,
+.cca-empty span { font-size: 8px !important; line-height: 1.25 !important; }
+.cca-contact a,
+.cca-contact button { min-height: 34px !important; padding: 0 12px !important; font-size: 8px !important; }
+
+.crm-navigation, .crm-navigation *, aside:has(> .crm-navigation), aside:has(> .crm-navigation) > * {
+  animation: none !important;
+}
+
+/* Controles financeiros sempre dizem explicitamente unidade. */
+.crm-currency-input { font-variant-numeric: tabular-nums; }
+.crm-percentage-input { position: relative; display: flex; align-items: center; }
+.crm-percentage-input input { width: 100%; padding-right: 34px !important; }
+.crm-percentage-input > span { position: absolute; right: 13px; color: var(--crm-gold-light); font-weight: 800; pointer-events: none; }
+
+/* Paleta operacional: dourado em andamento, verde concluído, vermelho falha/atraso. */
+button:not(:disabled) { transition: border-color .18s, color .18s, background .18s, transform .18s; }
+button:not(:disabled):hover { border-color: var(--crm-gold-light) !important; color: var(--crm-gold-light); }
+button[class*="success"], button[class*="conclu"], button[class*="confirm"], button[class*="recebid"], button[class*="aprovad"], button[class*="compareceu"],
+span[class*="success"], span[class*="conclu"], span[class*="confirm"], span[class*="recebid"], span[class*="aprovad"] { color: var(--crm-green) !important; border-color: rgba(39,201,130,.55) !important; }
+button[class*="danger"], button[class*="atras"], button[class*="vencid"], button[class*="diverg"],
+span[class*="danger"], span[class*="atras"], span[class*="vencid"], span[class*="diverg"] { color: var(--crm-red) !important; border-color: rgba(255,76,65,.55) !important; }
+button[class*="pending"], button[class*="pendente"], button[class*="parcial"], button[class*="aguardando"],
+span[class*="pending"], span[class*="pendente"], span[class*="parcial"], span[class*="aguardando"] { color: var(--crm-gold-light) !important; border-color: rgba(217,170,61,.55) !important; }
+
+@media (max-width: 1000px) and (min-width: 651px) {
+  aside:has(> .crm-navigation) { width: 74px !important; }
+  aside:has(> .crm-navigation) + main,
+  aside:has(> .crm-navigation) + section { margin-left: 74px !important; width: calc(100% - 74px) !important; }
+  .crm-navigation a { justify-content: center !important; padding: 0 !important; }
+  .crm-navigation a span,
+  aside:has(> .crm-navigation) > [class$="-brand"] b,
+  aside:has(> .crm-navigation) > [class$="-brand"] span,
+  aside:has(> .crm-navigation) > .brand b,
+  aside:has(> .crm-navigation) > .brand span,
+  aside:has(> .crm-navigation) > [class$="-user"] div,
+  aside:has(> .crm-navigation) > .profile > div:last-child { display: none !important; }
+}

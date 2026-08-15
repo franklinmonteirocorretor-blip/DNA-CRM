@@ -1,0 +1,55 @@
+.ind-shell .funnel-panel article {
+  position: relative;
+  height: 58px;
+  min-height: 58px;
+  padding-left: 12%;
+  padding-right: 12%;
+  grid-template-columns: 34px minmax(130px, 1fr);
+  gap: 12px;
+}
+.ind-shell .funnel-panel article div {
+  min-width: 0;
+  padding-right: 35%;
+}
+.ind-shell .funnel-panel article div b {
+  display: block;
+  font-size: 11px;
+  line-height: 1.05;
+  white-space: nowrap;
+  text-align: left;
+}
+.ind-shell .funnel-panel article div small {
+  display: block;
+  margin-top: 5px;
+  font-size: 6px;
+  line-height: 1;
+  color: #a99d83;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  white-space: nowrap;
+  text-align: left;
+}
+.ind-shell .funnel-panel article > strong {
+  position: absolute;
+  left: 72%;
+  transform: translateX(-50%);
+  font-size: 18px;
+  white-space: nowrap;
+}
+.ind-shell .funnel-panel article:nth-child(n + 6) {
+  grid-template-columns: 26px minmax(105px, 1fr);
+  padding-left: 14%;
+  padding-right: 14%;
+}
+.ind-shell .funnel-panel article:nth-child(n + 6) div b { font-size: 10px; }
+.ind-shell .funnel-panel article:nth-child(n + 6) div small { font-size: 5.5px; }
+.ind-shell .funnel-panel article:nth-child(n + 6) > strong { left: 74%; }
+.ind-shell .funnel-panel article:nth-child(7) > strong { left: 78%; }
+.ind-shell .funnel-panel article:nth-child(8) {
+  width: 40%;
+  min-width: 280px;
+}
+@media (max-width: 800px) {
+  .ind-shell .funnel-panel article { grid-template-columns: 24px minmax(100px, 1fr); }
+  .ind-shell .funnel-panel article:nth-child(8) { min-width: 260px; }
+}

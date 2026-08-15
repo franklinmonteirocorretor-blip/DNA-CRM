@@ -1,0 +1,3 @@
+import fs from "node:fs";
+import path from "node:path";
+const root=process.cwd();const stamp=new Date().toISOString().replace(/[:.]/g,"-");const out=path.join(root,"backups",stamp);fs.mkdirSync(out,{recursive:true});const db=path.join(process.env.CRM_DATA_DIR||path.join(root,"data"),"monteiro-crm.db");if(fs.existsSync(db))fs.copyFileSync(db,path.join(out,"monteiro-crm.db"));const storage=process.env.CRM_UPLOAD_DIR||path.join(root,"storage");if(fs.existsSync(storage))fs.cpSync(storage,path.join(out,"storage"),{recursive:true});fs.writeFileSync(path.join(out,"backup.json"),JSON.stringify({createdAt:new Date().toISOString(),database:fs.existsSync(db),documents:fs.existsSync(storage)},null,2));console.log(`Backup criado: ${out}`);

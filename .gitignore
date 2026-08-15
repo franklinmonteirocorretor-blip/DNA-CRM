@@ -1,0 +1,17 @@
+.next/
+node_modules/
+data/
+storage/
+.env
+.env.local
+.credentials.local.txt
+*.db
+*.db-shm
+*.db-wal
+
+.vercel
+.env*
+tmp/
+.tmp-*/
+.tmp-cookie
+backups/
