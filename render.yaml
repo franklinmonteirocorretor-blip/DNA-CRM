@@ -9,7 +9,7 @@ services:
     autoDeployTrigger: "off"
     envVars:
       - key: NODE_VERSION
-        value: 20.19.4
+        value: 22.16.0
       - key: WHATSAPP_REAL_OUTBOUND_ENABLED
         value: "false"
       - key: WHATSAPP_CIRCUIT_COOLDOWN_MS
