@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import makeWASocket, { DisconnectReason, type WASocket } from "@whiskeysockets/baileys";
-import pino from "pino";
+import { pino } from "pino";
 import { config } from "./config.js";
 import { SupabaseBaileysAuthStore } from "./auth-store.js";
 import { reconnectPlan } from "./recovery.js";
