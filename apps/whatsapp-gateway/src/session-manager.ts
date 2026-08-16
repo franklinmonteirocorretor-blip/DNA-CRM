@@ -84,7 +84,7 @@ export class SessionManager {
     socket.ev.on("creds.update", auth.saveCreds);
     socket.ev.on("connection.update", async ({ connection, qr, lastDisconnect }) => {
       if (qr) { runtime.qr = { value: qr, expiresAt: new Date(Date.now() + 55_000).toISOString() }; await this.update(id, "waiting_qr", { qr_expires_at: runtime.qr.expiresAt }); }
-      if (connection === "open") { runtime.qr = undefined; runtime.failures = 0; await this.update(id, "connected", { qr_expires_at: null, connected_phone: socket.user?.id || null, last_connected_at: new Date().toISOString(), last_activity_at: new Date().toISOString(), reconnect_attempts: 0, circuit_state: "closed", circuit_open_until: null }); }
+      if (connection === "open") { runtime.qr = undefined; runtime.failures = 0; await this.update(id, "connected", { qr_expires_at: null, connected_phone: socket.user?.id || null, last_connected_at: new Date().toISOString(), last_activity_at: new Date().toISOString(), failure_reason: null, reconnect_attempts: 0, circuit_state: "closed", circuit_open_until: null }); }
       if (connection === "close" && !runtime.stopped) {
         runtime.socket = undefined;
         const code = (lastDisconnect?.error as { output?: { statusCode?: number } } | undefined)?.output?.statusCode;
