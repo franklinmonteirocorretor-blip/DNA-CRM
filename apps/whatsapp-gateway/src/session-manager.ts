@@ -1,8 +1,9 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import makeWASocket, { DisconnectReason, type WASocket } from "@whiskeysockets/baileys";
 import { config } from "./config.js";
 import { SupabaseBaileysAuthStore } from "./auth-store.js";
 import { reconnectPlan } from "./recovery.js";
+import { createGatewaySupabaseClient } from "./supabase-client.js";
 
 export type Lifecycle = "created" | "waiting_qr" | "connecting" | "connected" | "reconnecting" | "disconnected" | "failed" | "logged_out";
 type Runtime = { socket?: WASocket; qr?: { value: string; expiresAt: string }; reconnectTimer?: NodeJS.Timeout; failures: number; stopped: boolean; gatewayMessageIds: Set<string> };
@@ -10,7 +11,7 @@ type Runtime = { socket?: WASocket; qr?: { value: string; expiresAt: string }; r
 export class SessionManager {
   private readonly db: SupabaseClient;
   private readonly runtimes = new Map<string, Runtime>();
-  constructor(db?: SupabaseClient) { this.db = db || createClient(config.supabaseUrl, config.supabaseSecretKey, { auth: { persistSession: false, autoRefreshToken: false } }); }
+  constructor(db?: SupabaseClient) { this.db = db || createGatewaySupabaseClient(); }
 
   private async update(id: string, status: Lifecycle, extra: Record<string, unknown> = {}) {
     const { error } = await this.db.from("whatsapp_sessions").update({ status, heartbeat_at: new Date().toISOString(), updated_at: new Date().toISOString(), ...extra }).eq("id", id);

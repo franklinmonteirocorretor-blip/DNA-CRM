@@ -1,14 +1,15 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { BufferJSON, initAuthCreds, proto, type AuthenticationCreds, type AuthenticationState, type SignalDataSet, type SignalDataTypeMap } from "@whiskeysockets/baileys";
 import { config } from "./config.js";
 import { decryptJson, encryptJson, type EncryptedValue } from "./crypto.js";
+import { createGatewaySupabaseClient } from "./supabase-client.js";
 
 type StoredRow = { ciphertext: string; iv: string; auth_tag: string; key_version: number; record_type: string; record_id: string };
 
 export class SupabaseBaileysAuthStore {
   private readonly db: SupabaseClient;
   constructor(private readonly sessionId: string, db?: SupabaseClient) {
-    this.db = db || createClient(config.supabaseUrl, config.supabaseSecretKey, { auth: { persistSession: false, autoRefreshToken: false } });
+    this.db = db || createGatewaySupabaseClient();
   }
 
   private serialize(value: unknown) { return JSON.parse(JSON.stringify(value, BufferJSON.replacer)); }
