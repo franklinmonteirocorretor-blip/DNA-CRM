@@ -5,6 +5,15 @@ import { decryptJson, encryptJson, type EncryptedValue } from "./crypto.js";
 import { createGatewaySupabaseClient } from "./supabase-client.js";
 
 type StoredRow = { ciphertext: string; iv: string; auth_tag: string; key_version: number; record_type: string; record_id: string };
+type StoredWrite = { session_id: string; record_type: string; record_id: string; ciphertext: string; iv: string; auth_tag: string; key_version: number; updated_at: string };
+
+const AUTH_BATCH_SIZE = 200;
+
+function chunks<T>(values: T[], size = AUTH_BATCH_SIZE) {
+  const result: T[][] = [];
+  for (let index = 0; index < values.length; index += size) result.push(values.slice(index, index + size));
+  return result;
+}
 
 export class SupabaseBaileysAuthStore {
   private readonly db: SupabaseClient;
@@ -28,6 +37,46 @@ export class SupabaseBaileysAuthStore {
     if (error) throw new Error(`Auth state write falhou: ${error.code}`);
   }
 
+  private async readMany<T>(recordType: string, recordIds: string[]): Promise<Record<string, T>> {
+    const values: Record<string, T> = {};
+    for (const recordIdBatch of chunks(recordIds)) {
+      const { data, error } = await this.db
+        .from("whatsapp_auth_state")
+        .select("ciphertext,iv,auth_tag,key_version,record_type,record_id")
+        .eq("session_id", this.sessionId)
+        .eq("record_type", recordType)
+        .in("record_id", recordIdBatch);
+      if (error) throw new Error(`Auth state batch read falhou: ${error.code}`);
+      for (const row of (data || []) as StoredRow[]) {
+        values[row.record_id] = this.deserialize<T>(decryptJson({ ciphertext: row.ciphertext, iv: row.iv, authTag: row.auth_tag, keyVersion: row.key_version } satisfies EncryptedValue, config.encryptionKey));
+      }
+    }
+    return values;
+  }
+
+  private async writeMany(rows: Array<{ recordType: string; recordId: string; value: unknown }>) {
+    const now = new Date().toISOString();
+    const writes: StoredWrite[] = rows.map(({ recordType, recordId, value }) => {
+      const encrypted = encryptJson(this.serialize(value), config.encryptionKey);
+      return { session_id: this.sessionId, record_type: recordType, record_id: recordId, ciphertext: encrypted.ciphertext, iv: encrypted.iv, auth_tag: encrypted.authTag, key_version: encrypted.keyVersion, updated_at: now };
+    });
+    for (const writeBatch of chunks(writes)) {
+      const { error } = await this.db.from("whatsapp_auth_state").upsert(writeBatch);
+      if (error) throw new Error(`Auth state batch write falhou: ${error.code}`);
+    }
+  }
+
+  private async removeMany(rows: Array<{ recordType: string; recordId: string }>) {
+    const byType = new Map<string, string[]>();
+    for (const row of rows) byType.set(row.recordType, [...(byType.get(row.recordType) || []), row.recordId]);
+    for (const [recordType, recordIds] of byType) {
+      for (const recordIdBatch of chunks(recordIds)) {
+        const { error } = await this.db.from("whatsapp_auth_state").delete().eq("session_id", this.sessionId).eq("record_type", recordType).in("record_id", recordIdBatch);
+        if (error) throw new Error(`Auth state batch delete falhou: ${error.code}`);
+      }
+    }
+  }
+
   private async remove(recordType: string, recordId: string) {
     const { error } = await this.db.from("whatsapp_auth_state").delete().eq("session_id", this.sessionId).eq("record_type", recordType).eq("record_id", recordId);
     if (error) throw new Error(`Auth state delete falhou: ${error.code}`);
@@ -40,17 +89,25 @@ export class SupabaseBaileysAuthStore {
       keys: {
         get: async <T extends keyof SignalDataTypeMap>(type: T, ids: string[]) => {
           const values: { [id: string]: SignalDataTypeMap[T] } = {};
-          await Promise.all(ids.map(async id => {
-            let value = await this.read<SignalDataTypeMap[T]>(type, id);
+          const stored = await this.readMany<SignalDataTypeMap[T]>(type, ids);
+          for (const id of ids) {
+            let value = stored[id];
             if (type === "app-state-sync-key" && value) value = proto.Message.AppStateSyncKeyData.fromObject(value as Record<string, unknown>) as unknown as SignalDataTypeMap[T];
             if (value) values[id] = value;
-          }));
+          }
           return values;
         },
         set: async (data: SignalDataSet) => {
-          const work: Promise<void>[] = [];
-          for (const [type, records] of Object.entries(data)) for (const [id, value] of Object.entries(records || {})) work.push(value == null ? this.remove(type, id) : this.write(type, id, value));
-          await Promise.all(work);
+          const writes: Array<{ recordType: string; recordId: string; value: unknown }> = [];
+          const removals: Array<{ recordType: string; recordId: string }> = [];
+          for (const [type, records] of Object.entries(data)) {
+            for (const [id, value] of Object.entries(records || {})) {
+              if (value == null) removals.push({ recordType: type, recordId: id });
+              else writes.push({ recordType: type, recordId: id, value });
+            }
+          }
+          if (writes.length) await this.writeMany(writes);
+          if (removals.length) await this.removeMany(removals);
         },
         clear: async () => { await this.clearAll(); },
       },

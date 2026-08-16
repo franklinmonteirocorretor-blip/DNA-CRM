@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import makeWASocket, { DisconnectReason, type WASocket } from "@whiskeysockets/baileys";
+import pino from "pino";
 import { config } from "./config.js";
 import { SupabaseBaileysAuthStore } from "./auth-store.js";
 import { reconnectPlan } from "./recovery.js";
@@ -71,7 +72,14 @@ export class SessionManager {
     this.runtimes.set(id, runtime);
     await this.update(id, reconnecting ? "reconnecting" : "connecting", { failure_reason: null });
     const auth = await new SupabaseBaileysAuthStore(id, this.db).load();
-    const socket = makeWASocket({ auth: auth.state, printQRInTerminal: false, markOnlineOnConnect: false, syncFullHistory: false, generateHighQualityLinkPreview: false });
+    const socket = makeWASocket({
+      auth: auth.state,
+      logger: pino({ level: "silent" }),
+      printQRInTerminal: false,
+      markOnlineOnConnect: false,
+      syncFullHistory: false,
+      generateHighQualityLinkPreview: false,
+    });
     runtime.socket = socket;
     socket.ev.on("creds.update", auth.saveCreds);
     socket.ev.on("connection.update", async ({ connection, qr, lastDisconnect }) => {
