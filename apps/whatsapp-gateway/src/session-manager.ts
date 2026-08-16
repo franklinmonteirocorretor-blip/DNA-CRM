@@ -9,6 +9,21 @@ import { createGatewaySupabaseClient } from "./supabase-client.js";
 export type Lifecycle = "created" | "waiting_qr" | "connecting" | "connected" | "reconnecting" | "disconnected" | "failed" | "logged_out";
 type Runtime = { socket?: WASocket; qr?: { value: string; expiresAt: string }; reconnectTimer?: NodeJS.Timeout; failures: number; stopped: boolean; gatewayMessageIds: Set<string> };
 
+function numericValue(value: unknown) {
+  if (typeof value === "number") return value;
+  if (typeof value === "bigint") return Number(value);
+  if (value && typeof value === "object" && "toString" in value) {
+    const parsed = Number(String(value));
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }
+  return undefined;
+}
+
+function providerTimestamp(value: unknown) {
+  const seconds = numericValue(value);
+  return seconds && seconds > 0 ? new Date(seconds * 1_000).toISOString() : new Date().toISOString();
+}
+
 export class SessionManager {
   private readonly db: SupabaseClient;
   private readonly runtimes = new Map<string, Runtime>();
@@ -99,7 +114,42 @@ export class SessionManager {
     socket.ev.on("messages.upsert", async ({ messages }) => {
       await this.update(id, "connected", { last_activity_at: new Date().toISOString() });
       if (!config.crmInboundUrl) return;
-      for (const message of messages) if (message.key.id && message.key.remoteJid) { const gatewayOrigin = runtime.gatewayMessageIds.delete(message.key.id); await fetch(config.crmInboundUrl, { method: "POST", headers: { "content-type": "application/json", "x-gateway-secret": config.gatewaySecret }, body: JSON.stringify({ sessionId: id, providerMessageId: message.key.id, providerConversationId: message.key.remoteJid, fromMe: Boolean(message.key.fromMe), manual: Boolean(message.key.fromMe) && !gatewayOrigin, text: message.message?.conversation || message.message?.extendedTextMessage?.text, messageType: message.message?.audioMessage ? "audio" : message.message?.documentMessage ? "document" : message.message?.imageMessage ? "image" : message.message?.videoMessage ? "video" : "text", occurredAt: new Date().toISOString() }) }).catch(() => undefined); }
+      for (const message of messages) if (message.key.id && message.key.remoteJid) {
+        const audio = message.message?.audioMessage;
+        const document = message.message?.documentMessage;
+        const image = message.message?.imageMessage;
+        const video = message.message?.videoMessage;
+        const media = audio || document || image || video;
+        const gatewayOrigin = runtime.gatewayMessageIds.delete(message.key.id);
+        try {
+          const response = await fetch(config.crmInboundUrl, {
+            method: "POST",
+            headers: { "content-type": "application/json", "x-gateway-secret": config.gatewaySecret },
+            body: JSON.stringify({
+              sessionId: id,
+              providerMessageId: message.key.id,
+              providerConversationId: message.key.remoteJid,
+              fromMe: Boolean(message.key.fromMe),
+              manual: Boolean(message.key.fromMe) && !gatewayOrigin,
+              text: message.message?.conversation || message.message?.extendedTextMessage?.text || document?.caption || image?.caption || video?.caption,
+              messageType: audio ? "audio" : document ? "document" : image ? "image" : video ? "video" : "text",
+              occurredAt: providerTimestamp(message.messageTimestamp),
+              mediaMetadata: media ? {
+                mimeType: media.mimetype || null,
+                fileName: document?.fileName || null,
+                fileLength: numericValue(media.fileLength),
+                durationSeconds: numericValue(audio?.seconds || video?.seconds),
+                caption: document?.caption || image?.caption || video?.caption || null,
+                pageCount: numericValue(document?.pageCount),
+              } : null,
+            }),
+          });
+          if (!response.ok) console.error(JSON.stringify({ level: "error", event: "inbound_forward_failed", sessionId: id, status: response.status, messageType: audio ? "audio" : document ? "document" : image ? "image" : video ? "video" : "text" }));
+          else console.log(JSON.stringify({ level: "info", event: "inbound_forwarded", sessionId: id, messageType: audio ? "audio" : document ? "document" : image ? "image" : video ? "video" : "text" }));
+        } catch (error) {
+          console.error(JSON.stringify({ level: "error", event: "inbound_forward_failed", sessionId: id, status: 0, message: error instanceof Error ? error.message : "unknown" }));
+        }
+      }
     });
     return this.status(id);
   }
