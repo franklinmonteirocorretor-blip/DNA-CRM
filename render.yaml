@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: monteiro-whatsapp-gateway
+    runtime: node
+    rootDir: apps/whatsapp-gateway
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeployTrigger: "off"
+    envVars:
+      - key: NODE_VERSION
+        value: 20.19.4
+      - key: WHATSAPP_REAL_OUTBOUND_ENABLED
+        value: "false"
+      - key: WHATSAPP_CIRCUIT_COOLDOWN_MS
+        value: "300000"
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SECRET_KEY
+        sync: false
+      - key: WHATSAPP_GATEWAY_SECRET
+        sync: false
+      - key: WHATSAPP_AUTH_ENCRYPTION_KEY
+        sync: false
+      - key: CRM_INBOUND_URL
+        sync: false
+      - key: WHATSAPP_AUTHORIZED_TEST_NUMBERS
+        sync: false
