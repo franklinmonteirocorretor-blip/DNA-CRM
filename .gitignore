@@ -11,6 +11,11 @@ storage/
 
 .vercel
 .env*
+dist/
+coverage/
+*.log
+*.tsbuildinfo
+hierarchy-vgv.png
 tmp/
 .tmp-*/
 .tmp-cookie
