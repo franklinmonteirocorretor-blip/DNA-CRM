@@ -1,1 +1,137 @@
-.client-header-actions .notification-trigger{position:relative;width:34px;height:33px;border:1px solid #3b3424;border-radius:6px;background:#15130e;color:#d9aa3d;font-size:16px}.notification-trigger i{position:absolute;right:-4px;top:-5px;width:15px;height:15px;border-radius:50%;background:#d9aa3d;color:#090909;display:grid;place-items:center;font:7px Arial}.notification-center{position:fixed;right:22px;top:68px;width:355px;z-index:50;border:1px solid #4d3b18;border-radius:9px;background:#0d0d0d;box-shadow:0 18px 60px #000;padding:0;overflow:hidden}.notification-center>header{padding:11px 13px;border-bottom:1px solid #292929;display:flex;justify-content:space-between;align-items:center}.notification-center>header>div{display:flex;flex-direction:column;gap:3px}.notification-center>header span{font-size:6px;color:#d9aa3d;text-transform:uppercase}.notification-center>header b{font-size:10px}.notification-center>header button{border:0;background:transparent;color:#777;font-size:18px}.notification-center article{margin:10px;padding:10px;border:1px solid #2d2d2d;border-radius:6px;display:grid;grid-template-columns:45px 1fr;gap:9px}.notification-center article.unread{border-color:#6a5019;background:linear-gradient(110deg,rgba(217,170,61,.1),#111)}.notification-center article>i{font-style:normal;font-size:5px;color:#d9aa3d;border:1px solid #5b4518;border-radius:4px;height:23px;display:grid;place-items:center}.notification-center article>div{display:flex;flex-direction:column;gap:4px}.notification-center article b{font-size:8px;line-height:1.4}.notification-center article span,.notification-center article small{font-size:6px;color:#777}.notification-center>footer{padding:9px 11px;border-top:1px solid #292929;display:flex;justify-content:flex-end;gap:6px}.notification-center>footer button,.notification-center>footer a{height:28px;border:1px solid #383838;border-radius:5px;background:#151515;color:#999;padding:0 9px;font-size:6px;text-decoration:none;display:flex;align-items:center}.notification-center>footer a{border-color:#5b4518;color:#d9aa3d}.finance-journey>header small{display:block;margin-top:4px;font-size:6px;color:#777}@media(max-width:600px){.notification-center{left:10px;right:10px;top:68px;width:auto}}
+.client-header-actions .notification-trigger {
+  position: relative;
+  width: 34px;
+  height: 33px;
+  border: 1px solid #3b3424;
+  border-radius: 6px;
+  background: #15130e;
+  color: #d9aa3d;
+  font-size: 16px;
+}
+.notification-trigger i {
+  position: absolute;
+  right: -4px;
+  top: -5px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #d9aa3d;
+  color: #090909;
+  display: grid;
+  place-items: center;
+  font: 7px Arial;
+}
+.notification-center {
+  position: fixed;
+  right: 22px;
+  top: 68px;
+  width: 355px;
+  z-index: 50;
+  border: 1px solid #4d3b18;
+  border-radius: 9px;
+  background: #0d0d0d;
+  box-shadow: 0 18px 60px #000;
+  padding: 0;
+  overflow: hidden;
+}
+.notification-center > header {
+  padding: 11px 13px;
+  border-bottom: 1px solid #292929;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.notification-center > header > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.notification-center > header span {
+  font-size: 6px;
+  color: #d9aa3d;
+  text-transform: uppercase;
+}
+.notification-center > header b {
+  font-size: 10px;
+}
+.notification-center > header button {
+  border: 0;
+  background: transparent;
+  color: #777;
+  font-size: 18px;
+}
+.notification-center article {
+  margin: 10px;
+  padding: 10px;
+  border: 1px solid #2d2d2d;
+  border-radius: 6px;
+  display: grid;
+  grid-template-columns: 45px 1fr;
+  gap: 9px;
+}
+.notification-center article.unread {
+  border-color: #6a5019;
+  background: linear-gradient(110deg, rgba(217, 170, 61, 0.1), #111);
+}
+.notification-center article > i {
+  font-style: normal;
+  font-size: 5px;
+  color: #d9aa3d;
+  border: 1px solid #5b4518;
+  border-radius: 4px;
+  height: 23px;
+  display: grid;
+  place-items: center;
+}
+.notification-center article > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.notification-center article b {
+  font-size: 8px;
+  line-height: 1.4;
+}
+.notification-center article span,
+.notification-center article small {
+  font-size: 6px;
+  color: #777;
+}
+.notification-center > footer {
+  padding: 9px 11px;
+  border-top: 1px solid #292929;
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+.notification-center > footer button,
+.notification-center > footer a {
+  height: 28px;
+  border: 1px solid #383838;
+  border-radius: 5px;
+  background: #151515;
+  color: #999;
+  padding: 0 9px;
+  font-size: 6px;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+}
+.notification-center > footer a {
+  border-color: #5b4518;
+  color: #d9aa3d;
+}
+.finance-journey > header small {
+  display: block;
+  margin-top: 4px;
+  font-size: 6px;
+  color: #777;
+}
+@media (max-width: 600px) {
+  .notification-center {
+    left: 10px;
+    right: 10px;
+    top: 68px;
+    width: auto;
+  }
+}

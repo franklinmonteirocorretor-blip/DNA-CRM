@@ -21,12 +21,15 @@ export async function GET() {
     .select(
       "id,status,closed_at,vgv,clients(id,name,phone,email,data_quality,post_sale_stage,next_action,next_action_at,project_interest),projects(name)",
     )
+    .is("cancelled_at", null)
     .order("closed_at", { ascending: false });
   if (error)
     return NextResponse.json({ error: error.message }, { status: 500 });
   const clientIds = (data || [])
     .map((sale) => {
-      const client = Array.isArray(sale.clients) ? sale.clients[0] : sale.clients;
+      const client = Array.isArray(sale.clients)
+        ? sale.clients[0]
+        : sale.clients;
       return client?.id;
     })
     .filter((id): id is number => Boolean(id));
@@ -35,7 +38,11 @@ export async function GET() {
         .from("client_events")
         .select("client_id,event_type,title,description,occurred_at")
         .in("client_id", clientIds)
-        .in("event_type", ["REFERRAL_GIVEN", "BIRTHDAY_REGISTERED", "POST_SALE_CHECKLIST"])
+        .in("event_type", [
+          "REFERRAL_GIVEN",
+          "BIRTHDAY_REGISTERED",
+          "POST_SALE_CHECKLIST",
+        ])
         .order("occurred_at", { ascending: false })
     : { data: [], error: null };
   if (events.error)
@@ -66,16 +73,22 @@ export async function GET() {
         vgv: Number(sale.vgv || 0),
         isTest: client?.data_quality === "teste",
         referrals: (events.data || []).filter(
-          (event) => event.client_id === client?.id && event.event_type === "REFERRAL_GIVEN",
+          (event) =>
+            event.client_id === client?.id &&
+            event.event_type === "REFERRAL_GIVEN",
         ).length,
         birthDate:
           (events.data || []).find(
-            (event) => event.client_id === client?.id && event.event_type === "BIRTHDAY_REGISTERED",
+            (event) =>
+              event.client_id === client?.id &&
+              event.event_type === "BIRTHDAY_REGISTERED",
           )?.description || "",
         checklist: Object.fromEntries(
           (events.data || [])
             .filter(
-              (event) => event.client_id === client?.id && event.event_type === "POST_SALE_CHECKLIST",
+              (event) =>
+                event.client_id === client?.id &&
+                event.event_type === "POST_SALE_CHECKLIST",
             )
             .reduce<Array<[string, boolean]>>((items, event) => {
               const key = event.title.replace(/^Checklist:\s*/, "");
@@ -109,7 +122,9 @@ export async function POST(request: Request) {
     const activeStage = client.post_sale_stage || "Contrato com a construtora";
     if (activeStage !== stage)
       return NextResponse.json(
-        { error: `A etapa ativa é "${activeStage}". Atualize a tela antes de registrar.` },
+        {
+          error: `A etapa ativa é "${activeStage}". Atualize a tela antes de registrar.`,
+        },
         { status: 409 },
       );
     const stageNames = Object.keys(allowed);
@@ -123,7 +138,9 @@ export async function POST(request: Request) {
       body.manager ? `Gerente: ${body.manager}` : "",
       body.agency ? `Agência: ${body.agency}` : "",
       body.notes ? `Observação: ${body.notes}` : "",
-    ].filter(Boolean).join(" · ");
+    ]
+      .filter(Boolean)
+      .join(" · ");
     const nextAction = shouldAdvance
       ? nextStage === stage
         ? "Jornada pós-venda concluída"
@@ -136,14 +153,19 @@ export async function POST(request: Request) {
         title: `${stage}: ${body.result || "registro salvo"}`,
         description: context,
         new_stage: nextStage,
-        metric_key: shouldAdvance ? "post_sale_stage_completed" : "post_sale_stage_followup",
+        metric_key: shouldAdvance
+          ? "post_sale_stage_completed"
+          : "post_sale_stage_followup",
       }),
-      supabase.from("clients").update({
-        post_sale_stage: nextStage,
-        next_action: nextAction,
-        next_action_at: body.startsAt || null,
-        updated_at: new Date().toISOString(),
-      }).eq("id", clientId),
+      supabase
+        .from("clients")
+        .update({
+          post_sale_stage: nextStage,
+          next_action: nextAction,
+          next_action_at: body.startsAt || null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", clientId),
     ]);
     if (body.startsAt) {
       actions.push(
@@ -178,13 +200,15 @@ export async function POST(request: Request) {
         { error: "Cliente e item do checklist são obrigatórios." },
         { status: 400 },
       );
-    const { error } = await supabaseAdmin().from("client_events").insert({
-      client_id: clientId,
-      event_type: "POST_SALE_CHECKLIST",
-      title: `Checklist: ${item}`,
-      description: body.completed ? "concluido" : "pendente",
-      metric_key: body.completed ? "post_sale_check_completed" : null,
-    });
+    const { error } = await supabaseAdmin()
+      .from("client_events")
+      .insert({
+        client_id: clientId,
+        event_type: "POST_SALE_CHECKLIST",
+        title: `Checklist: ${item}`,
+        description: body.completed ? "concluido" : "pendente",
+        metric_key: body.completed ? "post_sale_check_completed" : null,
+      });
     return error
       ? NextResponse.json({ error: error.message }, { status: 500 })
       : NextResponse.json({ saved: true });
@@ -218,16 +242,14 @@ export async function POST(request: Request) {
       );
     const nextActionAt = body.startsAt || null;
     const results = await Promise.all([
-      supabase
-        .from("client_events")
-        .insert({
-          client_id: clientId,
-          event_type: "POST_SALE_MOVEMENT",
-          title: `Pós-venda atualizado: ${body.stage}`,
-          description: body.notes || "Movimentação registrada.",
-          new_stage: body.stage,
-          metric_key: "post_sale_movement",
-        }),
+      supabase.from("client_events").insert({
+        client_id: clientId,
+        event_type: "POST_SALE_MOVEMENT",
+        title: `Pós-venda atualizado: ${body.stage}`,
+        description: body.notes || "Movimentação registrada.",
+        new_stage: body.stage,
+        metric_key: "post_sale_movement",
+      }),
       supabase
         .from("clients")
         .update({
@@ -240,17 +262,15 @@ export async function POST(request: Request) {
     ]);
     if (nextActionAt) {
       results.push(
-        await supabase
-          .from("appointments")
-          .insert({
-            client_id: clientId,
-            kind: body.stage,
-            starts_at: nextActionAt,
-            status: "Confirmado",
-            notes: body.notes || null,
-            next_action: body.nextAction || body.stage,
-            next_action_at: nextActionAt,
-          }),
+        await supabase.from("appointments").insert({
+          client_id: clientId,
+          kind: body.stage,
+          starts_at: nextActionAt,
+          status: "Confirmado",
+          notes: body.notes || null,
+          next_action: body.nextAction || body.stage,
+          next_action_at: nextActionAt,
+        }),
       );
     }
     const error = results.find((result) => result.error)?.error;
@@ -296,24 +316,20 @@ export async function POST(request: Request) {
       referralId = created.id;
     }
     await Promise.all([
-      supabase
-        .from("client_events")
-        .insert({
-          client_id: clientId,
-          event_type: "REFERRAL_GIVEN",
-          title: "Indicação registrada",
-          description: `${body.name} · ${phone}`,
-          metric_key: "referral",
-        }),
-      supabase
-        .from("client_events")
-        .insert({
-          client_id: referralId,
-          event_type: "ORIGIN_UPDATE",
-          title: "Origem: indicação",
-          description: `Indicado por ${source?.name || "cliente do pós-venda"}`,
-          metric_key: "new_referral",
-        }),
+      supabase.from("client_events").insert({
+        client_id: clientId,
+        event_type: "REFERRAL_GIVEN",
+        title: "Indicação registrada",
+        description: `${body.name} · ${phone}`,
+        metric_key: "referral",
+      }),
+      supabase.from("client_events").insert({
+        client_id: referralId,
+        event_type: "ORIGIN_UPDATE",
+        title: "Origem: indicação",
+        description: `Indicado por ${source?.name || "cliente do pós-venda"}`,
+        metric_key: "new_referral",
+      }),
     ]);
     return NextResponse.json(
       { created: !existing, id: referralId },
@@ -343,35 +359,29 @@ export async function POST(request: Request) {
       next = new Date(now.getFullYear() + 1, month - 1, day, 9, 0, 0);
     const message = `Feliz aniversário, ${client.name}! Que este novo ciclo seja cheio de saúde, conquistas e bons momentos no seu lar.`;
     const results = await Promise.all([
-      supabase
-        .from("client_events")
-        .insert({
-          client_id: clientId,
-          event_type: "BIRTHDAY_REGISTERED",
-          title: "Data de nascimento confirmada",
-          description: birthDate,
-          metric_key: "birthday",
-        }),
-      supabase
-        .from("appointments")
-        .insert({
-          client_id: clientId,
-          kind: "Aniversário do cliente",
-          starts_at: next.toISOString(),
-          status: "Programado",
-          notes: message,
-          next_action: "Enviar mensagem de aniversário",
-          next_action_at: next.toISOString(),
-        }),
-      supabase
-        .from("notifications")
-        .insert({
-          client_id: clientId,
-          kind: "CLIENT_BIRTHDAY",
-          title: `Aniversário de ${client.name}`,
-          body: message,
-          due_at: next.toISOString(),
-        }),
+      supabase.from("client_events").insert({
+        client_id: clientId,
+        event_type: "BIRTHDAY_REGISTERED",
+        title: "Data de nascimento confirmada",
+        description: birthDate,
+        metric_key: "birthday",
+      }),
+      supabase.from("appointments").insert({
+        client_id: clientId,
+        kind: "Aniversário do cliente",
+        starts_at: next.toISOString(),
+        status: "Programado",
+        notes: message,
+        next_action: "Enviar mensagem de aniversário",
+        next_action_at: next.toISOString(),
+      }),
+      supabase.from("notifications").insert({
+        client_id: clientId,
+        kind: "CLIENT_BIRTHDAY",
+        title: `Aniversário de ${client.name}`,
+        body: message,
+        due_at: next.toISOString(),
+      }),
     ]);
     const error = results.find((result) => result.error)?.error;
     return error
@@ -401,8 +411,7 @@ export async function POST(request: Request) {
       { error: "Cliente não encontrado na ficha única." },
       { status: 404 },
     );
-  const currentStage =
-    client.post_sale_stage || "Contrato com a construtora";
+  const currentStage = client.post_sale_stage || "Contrato com a construtora";
   if (currentStage !== body.kind)
     return NextResponse.json(
       { error: `Registre primeiro o marco "${currentStage}".` },
@@ -411,37 +420,30 @@ export async function POST(request: Request) {
   const nextStage = allowed[body.nextStage] ? body.nextStage : body.kind;
   const title = allowed[body.kind];
   const actions = await Promise.all([
-    supabase
-      .from("appointments")
-      .insert({
-        client_id: client.id,
-        kind: body.kind,
-        starts_at: body.startsAt,
-        status: "Confirmado",
-        notes: body.notes || null,
-        next_action: title,
-        next_action_at: body.startsAt,
-      }),
-    supabase
-      .from("notifications")
-      .insert({
-        client_id: client.id,
-        kind: "POST_SALE_EVENT",
-        title: `${title} · ${client.name}`,
-        body:
-          body.notes || "Compromisso gerado automaticamente pelo pós-venda.",
-        due_at: body.startsAt,
-      }),
-    supabase
-      .from("client_events")
-      .insert({
-        client_id: client.id,
-        event_type: "POST_SALE_SCHEDULED",
-        title: `${title} agendado`,
-        description: body.notes || `Data confirmada: ${body.startsAt}`,
-        new_stage: nextStage,
-        metric_key: "post_sale_scheduled",
-      }),
+    supabase.from("appointments").insert({
+      client_id: client.id,
+      kind: body.kind,
+      starts_at: body.startsAt,
+      status: "Confirmado",
+      notes: body.notes || null,
+      next_action: title,
+      next_action_at: body.startsAt,
+    }),
+    supabase.from("notifications").insert({
+      client_id: client.id,
+      kind: "POST_SALE_EVENT",
+      title: `${title} · ${client.name}`,
+      body: body.notes || "Compromisso gerado automaticamente pelo pós-venda.",
+      due_at: body.startsAt,
+    }),
+    supabase.from("client_events").insert({
+      client_id: client.id,
+      event_type: "POST_SALE_SCHEDULED",
+      title: `${title} agendado`,
+      description: body.notes || `Data confirmada: ${body.startsAt}`,
+      new_stage: nextStage,
+      metric_key: "post_sale_scheduled",
+    }),
     supabase
       .from("clients")
       .update({

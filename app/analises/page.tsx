@@ -3,8 +3,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { CrmNavigation } from "../components/crm-navigation";
+import { CrmCenterTabs } from "../components/crm-center-tabs";
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
-import { deleteClientDocument, uploadClientDocument } from "@/lib/upload-client-document";
+import {
+  deleteClientDocument,
+  uploadClientDocument,
+} from "@/lib/upload-client-document";
 import "./analises.css";
 import "./distribution.css";
 import "./distribution-override.css";
@@ -12,6 +16,8 @@ import "./analysis-queue.css";
 import "./management-metrics.css";
 
 type Status =
+  | "Aguardando documentação"
+  | "Documentação recebida"
   | "Em análise"
   | "Restrição"
   | "Condicionado"
@@ -150,10 +156,27 @@ const seedProcesses: Process[] = [
   },
 ];
 seedProcesses.splice(0);
-const emptyProcess: Process = {id:0,name:"Nenhum processo registrado",status:"Em análise",detail:"Aguardando envio real ao CCA",next:"Cadastre o primeiro processo",due:"—",bank:"Não iniciado",value:"R$ 0,00",origin:"—",phone:"",cadence:"—",cca:"Nenhum CCA",sentAt:"—",waiting:"—"};
+const emptyProcess: Process = {
+  id: 0,
+  name: "Nenhum processo registrado",
+  status: "Em análise",
+  detail: "Aguardando envio real ao CCA",
+  next: "Cadastre o primeiro processo",
+  due: "—",
+  bank: "Não iniciado",
+  value: "R$ 0,00",
+  origin: "—",
+  phone: "",
+  cadence: "—",
+  cca: "Nenhum CCA",
+  sentAt: "—",
+  waiting: "—",
+};
 
 const filters = [
   "Todos",
+  "Aguardando documentação",
+  "Documentação recebida",
   "Em análise",
   "Restrição",
   "Condicionado",
@@ -167,7 +190,14 @@ export default function AnalisesPage() {
   const [period, setPeriod] = useState<"month" | "quarter" | "year">("month");
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
-  const [documents, setDocuments] = useState<Array<{id:number;document_type:string;file_name:string;url:string|null}>>([]);
+  const [documents, setDocuments] = useState<
+    Array<{
+      id: number;
+      document_type: string;
+      file_name: string;
+      url: string | null;
+    }>
+  >([]);
   const [filter, setFilter] = useState<(typeof filters)[number]>("Todos");
   const [selected, setSelected] = useState<Process>(emptyProcess);
   const [distributionOpen, setDistributionOpen] = useState(false);
@@ -176,28 +206,162 @@ export default function AnalisesPage() {
   >("Aprovado sem fechamento");
   const [distributionQuantity, setDistributionQuantity] = useState(50);
   const [distributed, setDistributed] = useState(false);
-  const [executionDate, setExecutionDate] = useState(new Date().toISOString().slice(0, 10));
+  const [executionDate, setExecutionDate] = useState(
+    new Date().toISOString().slice(0, 10),
+  );
   const loadProcesses = async () => {
     setLoading(true);
-    const response = await fetch(`/api/analyses?period=${period}`, { cache: "no-store" });
+    const response = await fetch(`/api/analyses?period=${period}`, {
+      cache: "no-store",
+    });
     const data = await response.json();
-    if (!response.ok) { setMessage(data.error || "Falha ao carregar análises."); setLoading(false); return; }
-    const rows: Process[] = data.map((client: any) => ({ id:Number(client.id), name:client.name, status:(client.finance_stage || "Em análise") as Status, detail:client.next_action || "Sem observação registrada", next:client.next_action || "Definir próxima ação", due:client.next_action_at ? new Date(client.next_action_at).toLocaleString("pt-BR") : "Sem prazo", bank:"Consultar ficha", value:"Em avaliação", origin:[client.origin_type,client.origin_detail].filter(Boolean).join(" · ") || "Não informada", phone:client.phone || "", cadence:"Ativa", cca:"Consultar prontuário", sentAt:new Date(client.updated_at).toLocaleDateString("pt-BR"), waiting:"Atualização registrada" }));
-    setProcesses(rows); setSelected((current) => rows.find((row) => row.id === current.id) || rows[0] || emptyProcess); setLoading(false);
+    if (!response.ok) {
+      setMessage(data.error || "Falha ao carregar análises.");
+      setLoading(false);
+      return;
+    }
+    const rows: Process[] = data.map((client: any) => ({
+      id: Number(client.id),
+      name: client.name,
+      status: (client.finance_stage || "Em análise") as Status,
+      detail: client.next_action || "Sem observação registrada",
+      next: client.next_action || "Definir próxima ação",
+      due: client.next_action_at
+        ? new Date(client.next_action_at).toLocaleString("pt-BR")
+        : "Sem prazo",
+      bank: "Consultar ficha",
+      value: "Em avaliação",
+      origin:
+        [client.origin_type, client.origin_detail]
+          .filter(Boolean)
+          .join(" · ") || "Não informada",
+      phone: client.phone || "",
+      cadence: "Ativa",
+      cca: "Consultar prontuário",
+      sentAt: new Date(client.updated_at).toLocaleDateString("pt-BR"),
+      waiting: "Atualização registrada",
+    }));
+    setProcesses(rows);
+    setSelected(
+      (current) =>
+        rows.find((row) => row.id === current.id) || rows[0] || emptyProcess,
+    );
+    setLoading(false);
   };
-  useEffect(() => { loadProcesses(); }, [period]);
-  useEffect(() => { if (!selected.id) return setDocuments([]); fetch(`/api/documents?clientId=${selected.id}`, {cache:"no-store"}).then((r)=>r.json()).then((data)=>setDocuments(Array.isArray(data)?data:[])); }, [selected.id]);
-  const analysisDocType = selected.id ? `Análises | Cliente ${selected.id} | Evidências` : "";
-  const analysisDocument = documents.find((document) => document.document_type === analysisDocType);
-  const uploadAnalysis = async (event: ChangeEvent<HTMLInputElement>) => { if (!selected.id || !event.target.files?.length) return; setMessage("Enviando anexos..."); try { await uploadClientDocument({clientId:selected.id,documentType:analysisDocType,files:Array.from(event.target.files)}); const response=await fetch(`/api/documents?clientId=${selected.id}`,{cache:"no-store"}); setDocuments(await response.json()); setMessage("Anexos enviados e unificados com sucesso."); } catch(error) { setMessage(error instanceof Error?error.message:"Falha no anexo."); } finally { event.target.value=""; } };
-  const removeAnalysisDoc = async () => { if (!selected.id || !analysisDocument || !confirm("Excluir os anexos desta análise?")) return; await deleteClientDocument(selected.id,analysisDocType); setDocuments((items)=>items.filter((item)=>item.document_type!==analysisDocType)); setMessage("Anexo excluído."); };
-  const distributeRecovery = async () => { setDistributed(false); setMessage("Distribuindo carteira..."); const response=await fetch("/api/analyses",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({stage:distributionSource,quantity:distributionQuantity,assignedDate:executionDate})}); const result=await response.json(); if(!response.ok)return setMessage(result.error||"Falha ao distribuir."); setDistributed(true); setMessage(`${result.distributed} cliente(s) enviados para a carteira de ${new Date(`${result.assignedDate}T12:00:00`).toLocaleDateString("pt-BR")}.`); };
+  useEffect(() => {
+    const timer = window.setTimeout(() => void loadProcesses(), 0);
+    return () => window.clearTimeout(timer);
+    // loadProcesses reads current period and intentionally reloads on period changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [period]);
+  useEffect(() => {
+    if (!selected.id) {
+      const timer = window.setTimeout(() => setDocuments([]), 0);
+      return () => window.clearTimeout(timer);
+    }
+    const controller = new AbortController();
+    fetch(`/api/documents?clientId=${selected.id}`, {
+      cache: "no-store",
+      signal: controller.signal,
+    })
+      .then((r) => r.json())
+      .then((data) => setDocuments(Array.isArray(data) ? data : []))
+      .catch((error) => {
+        if (error?.name !== "AbortError") setDocuments([]);
+      });
+    return () => controller.abort();
+  }, [selected.id]);
+  const analysisDocType = selected.id
+    ? `Análises | Cliente ${selected.id} | Evidências`
+    : "";
+  const analysisDocument = documents.find(
+    (document) => document.document_type === analysisDocType,
+  );
+  const uploadAnalysis = async (event: ChangeEvent<HTMLInputElement>) => {
+    if (!selected.id || !event.target.files?.length) return;
+    setMessage("Enviando anexos...");
+    try {
+      await uploadClientDocument({
+        clientId: selected.id,
+        documentType: analysisDocType,
+        files: Array.from(event.target.files),
+      });
+      const response = await fetch(`/api/documents?clientId=${selected.id}`, {
+        cache: "no-store",
+      });
+      setDocuments(await response.json());
+      setMessage("Anexos enviados e unificados com sucesso.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Falha no anexo.");
+    } finally {
+      event.target.value = "";
+    }
+  };
+  const removeAnalysisDoc = async () => {
+    if (
+      !selected.id ||
+      !analysisDocument ||
+      !confirm("Excluir os anexos desta análise?")
+    )
+      return;
+    await deleteClientDocument(selected.id, analysisDocType);
+    setDocuments((items) =>
+      items.filter((item) => item.document_type !== analysisDocType),
+    );
+    setMessage("Anexo excluído.");
+  };
+  const distributeRecovery = async () => {
+    setDistributed(false);
+    setMessage("Distribuindo carteira...");
+    const response = await fetch("/api/analyses", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        stage: distributionSource,
+        quantity: distributionQuantity,
+        assignedDate: executionDate,
+      }),
+    });
+    const result = await response.json();
+    if (!response.ok) return setMessage(result.error || "Falha ao distribuir.");
+    setDistributed(true);
+    setMessage(
+      `${result.distributed} cliente(s) enviados para a carteira de ${new Date(`${result.assignedDate}T12:00:00`).toLocaleDateString("pt-BR")}.`,
+    );
+  };
+  const countStatus = (status: Status) =>
+    processes.filter((item) => item.status === status).length;
+  const saveResult = async (
+    status: "Restrição" | "Condicionado" | "Aprovado",
+  ) => {
+    if (!selected.id) return;
+    setMessage("Salvando resultado...");
+    const response = await fetch("/api/clients", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: selected.id,
+        financeStage: status,
+        nextAction:
+          status === "Aprovado"
+            ? "Montar proposta e agendar apresentação"
+            : status === "Condicionado"
+              ? "Registrar condição e plano de ação"
+              : "Orientar regularização e programar nova análise",
+      }),
+    });
+    const data = await response.json();
+    if (!response.ok)
+      return setMessage(data.error || "Falha ao salvar resultado.");
+    setMessage(`Resultado ${status} salvo na ficha e no histórico.`);
+    await loadProcesses();
+  };
   const visible = useMemo(
     () =>
       filter === "Todos"
         ? processes
         : processes.filter((item) => item.status === filter),
-    [filter],
+    [filter, processes],
   );
   const guidance =
     selected.status === "Em análise"
@@ -274,6 +438,15 @@ export default function AnalisesPage() {
             </p>
           </div>
           <div className="analysis-header-actions">
+            <aside>
+              <span>Visão atual</span>
+              <b>Corretor + Gestor</b>
+            </aside>
+          </div>
+        </header>
+        <div className="analysis-content">
+          <CrmCenterTabs />
+          <div className="crm-page-toolbar">
             <button
               onClick={() => {
                 setDistributionOpen((value) => !value);
@@ -282,13 +455,7 @@ export default function AnalisesPage() {
             >
               ＋ Gerar carteira de recuperação
             </button>
-            <aside>
-              <span>Visão atual</span>
-              <b>Corretor + Gestor</b>
-            </aside>
           </div>
-        </header>
-        <div className="analysis-content">
           {message && <div className="analysis-message">{message}</div>}
           <section className="analysis-kpis">
             <article className="total-folders">
@@ -301,71 +468,51 @@ export default function AnalisesPage() {
               onClick={() => setFilter("Em análise")}
             >
               <span>Em análise agora</span>
-              <strong>0</strong>
-              <small>21,7% · 2 com SLA vencido</small>
+              <strong>{countStatus("Em análise")}</strong>
+              <small>fila atual registrada</small>
             </article>
             <article className="danger">
               <span>Com restrição</span>
-              <strong>0</strong>
-              <small>21,7% das pastas</small>
+              <strong>{countStatus("Restrição")}</strong>
+              <small>resultado oficial registrado</small>
             </article>
             <article className="warning">
               <span>Condicionados</span>
-              <strong>0</strong>
-              <small>17,4% · R$ 612 mil potenciais</small>
+              <strong>{countStatus("Condicionado")}</strong>
+              <small>resultado oficial registrado</small>
             </article>
             <article className="success">
               <span>Aprovados</span>
-              <strong>0</strong>
-              <small>26,1% · 3 propostas pendentes</small>
+              <strong>{countStatus("Aprovado")}</strong>
+              <small>encaminhados ao fechamento</small>
             </article>
             <article>
               <span>Fechados no mês</span>
-              <strong>0</strong>
-              <small>13,0% · R$ 641 mil de VGV</small>
+              <strong>{countStatus("Fechado")}</strong>
+              <small>vendas confirmadas no período</small>
             </article>
-          </section>
-          <section className="management-insights">
-            <article>
-              <span>Resultado favorável</span>
-              <strong>39,1%</strong>
-              <small>9 de 23 chegaram a aprovado ou fechado</small>
-              <i>
-                <b style={{ width: "39.1%" }}></b>
-              </i>
-            </article>
-            <article>
-              <span>Conversão final</span>
-              <strong>13,0%</strong>
-              <small>3 vendas para 23 pastas enviadas</small>
-              <i>
-                <b style={{ width: "13%" }}></b>
-              </i>
-            </article>
-            <article>
-              <span>Aprovado → fechado</span>
-              <strong>33,3%</strong>
-              <small>3 fechamentos em 9 aprovações acumuladas</small>
-              <i>
-                <b style={{ width: "33.3%" }}></b>
-              </i>
-            </article>
-            <aside>
-              <span>Gargalo principal</span>
-              <b>39,1% exigem recuperação</b>
-              <p>
-                5 restrições + 4 condicionados. Prioridade: reduzir
-                comprometimento de renda, tratar SCR e fortalecer relacionamento
-                CAIXA.
-              </p>
-            </aside>
           </section>
           <section className="analysis-filters">
             <div>
               <span>Período</span>
-              <button className={period === "month" ? "active" : ""} onClick={() => setPeriod("month")}>Mês</button>
-              <button className={period === "quarter" ? "active" : ""} onClick={() => setPeriod("quarter")}>Trimestre</button>
-              <button className={period === "year" ? "active" : ""} onClick={() => setPeriod("year")}>Ano</button>
+              <button
+                className={period === "month" ? "active" : ""}
+                onClick={() => setPeriod("month")}
+              >
+                Mês
+              </button>
+              <button
+                className={period === "quarter" ? "active" : ""}
+                onClick={() => setPeriod("quarter")}
+              >
+                Trimestre
+              </button>
+              <button
+                className={period === "year" ? "active" : ""}
+                onClick={() => setPeriod("year")}
+              >
+                Ano
+              </button>
             </div>
             <div>
               {filters.map((item) => (
@@ -440,7 +587,14 @@ export default function AnalisesPage() {
                 </label>
                 <label>
                   <span>Data de execução</span>
-                  <input type="date" value={executionDate} onChange={(e) => { setExecutionDate(e.target.value); setDistributed(false); }} />
+                  <input
+                    type="date"
+                    value={executionDate}
+                    onChange={(e) => {
+                      setExecutionDate(e.target.value);
+                      setDistributed(false);
+                    }}
+                  />
                   <small>Distribuição automática às 08:00</small>
                 </label>
               </div>
@@ -506,8 +660,16 @@ export default function AnalisesPage() {
                 </div>
                 <small>Ordenados por SLA e próxima ação</small>
               </header>
-              {loading && <div className="analysis-empty">Carregando processos reais...</div>}
-              {!loading && !visible.length && <div className="analysis-empty">Nenhum processo encontrado neste período.</div>}
+              {loading && (
+                <div className="analysis-empty">
+                  Carregando processos reais...
+                </div>
+              )}
+              {!loading && !visible.length && (
+                <div className="analysis-empty">
+                  Nenhum processo encontrado neste período.
+                </div>
+              )}
               {visible.map((item) => (
                 <button
                   key={item.id}
@@ -584,26 +746,75 @@ export default function AnalisesPage() {
                     />{" "}
                     WhatsApp
                   </a>
-<Link href="/clientes">Abrir prontuário</Link>
+                  <Link
+                    href={
+                      selected.id ? `/clientes/${selected.id}` : "/clientes"
+                    }
+                  >
+                    Abrir prontuário
+                  </Link>
                 </div>
               </section>
-              <section className="stage-playbook">
+              {selected.id > 0 && (
+                <section className="stage-playbook">
+                  <header>
+                    <span>Resultado oficial do CCA</span>
+                    <b>Registrar na ficha única</b>
+                  </header>
+                  <div className="analysis-result-actions">
+                    <button onClick={() => saveResult("Restrição")}>
+                      Restrição
+                    </button>
+                    <button onClick={() => saveResult("Condicionado")}>
+                      Condicionado
+                    </button>
+                    <button onClick={() => saveResult("Aprovado")}>
+                      Aprovado
+                    </button>
+                  </div>
+                </section>
+              )}
+              <section
+                className={`analysis-documents ${analysisDocument ? "attached" : ""}`}
+              >
                 <header>
-                  <span>Metodologia aplicada</span>
-                  <b>Plano para {selected.status.toLowerCase()}</b>
+                  <div>
+                    <span>Documentos e evidências</span>
+                    <b>Anexos da análise selecionada</b>
+                  </div>
+                  {analysisDocument && <em>ANEXADO</em>}
                 </header>
-                {guidance.map((item, index) => (
-                  <article key={item}>
-                    <i>{String(index + 1).padStart(2, "0")}</i>
-                    <span>{item}</span>
-                    <button>{index === 0 ? "Executar" : "Programar"}</button>
-                  </article>
-                ))}
-              </section>
-              <section className={`analysis-documents ${analysisDocument ? "attached" : ""}`}>
-                <header><div><span>Documentos e evidências</span><b>Anexos da análise selecionada</b></div>{analysisDocument && <em>ANEXADO</em>}</header>
-                <label><input type="file" accept="application/pdf,image/jpeg,image/png" multiple onChange={uploadAnalysis}/><span>{analysisDocument ? analysisDocument.file_name : "Selecionar PDFs ou fotos"}</span><small>É permitido selecionar vários arquivos; o CRM os reúne em um único PDF.</small></label>
-                {analysisDocument && <div><a href={analysisDocument.url || "#"} target="_blank" rel="noreferrer">Visualizar anexo</a><button onClick={removeAnalysisDoc}>Excluir e substituir</button></div>}
+                <label>
+                  <input
+                    type="file"
+                    accept="application/pdf,image/jpeg,image/png"
+                    multiple
+                    onChange={uploadAnalysis}
+                  />
+                  <span>
+                    {analysisDocument
+                      ? analysisDocument.file_name
+                      : "Selecionar PDFs ou fotos"}
+                  </span>
+                  <small>
+                    É permitido selecionar vários arquivos; o CRM os reúne em um
+                    único PDF.
+                  </small>
+                </label>
+                {analysisDocument && (
+                  <div>
+                    <a
+                      href={analysisDocument.url || "#"}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Visualizar anexo
+                    </a>
+                    <button onClick={removeAnalysisDoc}>
+                      Excluir e substituir
+                    </button>
+                  </div>
+                )}
               </section>
               <section className="bank-rule">
                 <i>CAIXA</i>

@@ -1,1 +1,33 @@
-.client-content{display:flex;flex-direction:column}.client-identity{order:1}.profile-rules{order:2}.document-tabs{order:3}.doc-command{order:4}.docs-layout{order:5}.finance-journey{order:6}.guidance-center{order:7}.cca-contact a:first-of-type::before{content:"☎";font-size:10px;color:#d9aa3d}.guidance-center article button{gap:5px}
+.client-content {
+  display: flex;
+  flex-direction: column;
+}
+.client-identity {
+  order: 1;
+}
+.profile-rules {
+  order: 2;
+}
+.document-tabs {
+  order: 3;
+}
+.doc-command {
+  order: 4;
+}
+.docs-layout {
+  order: 5;
+}
+.finance-journey {
+  order: 6;
+}
+.guidance-center {
+  order: 7;
+}
+.cca-contact a:first-of-type::before {
+  content: "☎";
+  font-size: 10px;
+  color: #d9aa3d;
+}
+.guidance-center article button {
+  gap: 5px;
+}

@@ -3,7 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { CrmNavigation } from "../../components/crm-navigation";
-import { deleteClientDocument, uploadClientDocument } from "@/lib/upload-client-document";
+import {
+  deleteClientDocument,
+  uploadClientDocument,
+} from "@/lib/upload-client-document";
 import { useEffect, useMemo, useState } from "react";
 import "./cliente.css";
 import "./guidance.css";
@@ -27,8 +30,31 @@ type StoredDocument = {
   url: string | null;
 };
 type Sex = "Feminino" | "Masculino";
-type ClientChoice = { id: number; name: string; phone: string; email: string | null; sex: string | null; marital_status: string | null; project_interest?:string|null; funnel_stage?:string|null; finance_stage?:string|null; post_sale_stage?:string|null; origin_type?:string|null; origin_detail?:string|null; next_action?:string|null };
-type ClientEvent = { id:number; title:string; description:string|null; event_type:string; old_stage:string|null; new_stage:string|null; occurred_at:string|null; created_at?:string|null };
+type ClientChoice = {
+  id: number;
+  name: string;
+  phone: string;
+  email: string | null;
+  sex: string | null;
+  marital_status: string | null;
+  project_interest?: string | null;
+  funnel_stage?: string | null;
+  finance_stage?: string | null;
+  post_sale_stage?: string | null;
+  origin_type?: string | null;
+  origin_detail?: string | null;
+  next_action?: string | null;
+};
+type ClientEvent = {
+  id: number;
+  title: string;
+  description: string | null;
+  event_type: string;
+  old_stage: string | null;
+  new_stage: string | null;
+  occurred_at: string | null;
+  created_at?: string | null;
+};
 
 const genderTerms = (sex: Sex) =>
   sex === "Feminino"
@@ -223,8 +249,12 @@ const ccaContacts = {
   "CCA Centro": { phone: "5586999990001", display: "(86) 99999-0001" },
   "CCA Zona Leste": { phone: "5586999990002", display: "(86) 99999-0002" },
 };
-preDocs.forEach((doc) => { doc.status = "Pendente"; });
-fullDocs.forEach((doc) => { doc.status = "Pendente"; });
+preDocs.forEach((doc) => {
+  doc.status = "Pendente";
+});
+fullDocs.forEach((doc) => {
+  doc.status = "Pendente";
+});
 
 const cadenceAlerts = [
   {
@@ -281,32 +311,70 @@ export default function ClientePage() {
   const [clientEvents, setClientEvents] = useState<ClientEvent[]>([]);
   const [documentNotice, setDocumentNotice] = useState("");
   const [sendingPackage, setSendingPackage] = useState(false);
-  const [ccas, setCcas] = useState<Array<{id:number;name:string;phone:string;whatsapp:string;responsible_name:string;active:boolean}>>([]);
+  const [ccas, setCcas] = useState<
+    Array<{
+      id: number;
+      name: string;
+      phone: string;
+      whatsapp: string;
+      responsible_name: string;
+      active: boolean;
+    }>
+  >([]);
   const [tab, setTab] = useState<"pre" | "full">("pre");
   const [docs, setDocs] = useState(preDocs);
   const [storedDocuments, setStoredDocuments] = useState<StoredDocument[]>([]);
   const [message, setMessage] = useState(false);
   const [cca, setCca] = useState("");
   useEffect(() => {
-    fetch("/api/ccas").then((response) => response.ok ? response.json() : []).then((rows) => setCcas(rows.filter((row:{active:boolean}) => row.active))).catch(() => setCcas([]));
-    const requested = new URLSearchParams(window.location.search).get("clientId");
-    if (requested) fetch(`/api/clients?id=${requested}`, { cache: "no-store" }).then((response) => response.ok ? response.json() : null).then((row) => { if(row){setClients([row]);setClientId(String(row.id))} }).catch(() => setClients([]));
-    else fetch("/api/clients?limit=200", { cache: "no-store" }).then((response) => response.ok ? response.json() : []).then((rows) => setClients(rows)).catch(() => setClients([]));
+    fetch("/api/ccas")
+      .then((response) => (response.ok ? response.json() : []))
+      .then((rows) =>
+        setCcas(rows.filter((row: { active: boolean }) => row.active)),
+      )
+      .catch(() => setCcas([]));
+    const requested = new URLSearchParams(window.location.search).get(
+      "clientId",
+    );
+    if (requested)
+      fetch(`/api/clients?id=${requested}`, { cache: "no-store" })
+        .then((response) => (response.ok ? response.json() : null))
+        .then((row) => {
+          if (row) {
+            setClients([row]);
+            setClientId(String(row.id));
+          }
+        })
+        .catch(() => setClients([]));
+    else
+      fetch("/api/clients?limit=200", { cache: "no-store" })
+        .then((response) => (response.ok ? response.json() : []))
+        .then((rows) => setClients(rows))
+        .catch(() => setClients([]));
   }, []);
   const selectedCca = ccas.find((item) => String(item.id) === cca);
   const selectedClient = clients.find((item) => String(item.id) === clientId);
   useEffect(() => {
-    if (!clientId) { setClientEvents([]); return; }
-    fetch(`/api/clients/${clientId}/events`, { cache: "no-store" }).then(r=>r.ok?r.json():[]).then(setClientEvents).catch(()=>setClientEvents([]));
+    if (!clientId) {
+      const timer = window.setTimeout(() => setClientEvents([]), 0);
+      return () => window.clearTimeout(timer);
+    }
+    const controller = new AbortController();
+    fetch(`/api/clients/${clientId}/events`, {
+      cache: "no-store",
+      signal: controller.signal,
+    })
+      .then((r) => (r.ok ? r.json() : []))
+      .then(setClientEvents)
+      .catch((error) => {
+        if (error?.name !== "AbortError") setClientEvents([]);
+      });
+    return () => controller.abort();
   }, [clientId]);
   const [packagePreview, setPackagePreview] = useState(false);
   const [ccaSent, setCcaSent] = useState(false);
   const [creditStatus, setCreditStatus] = useState<
-    | "Documentação"
-    | "Em análise"
-    | "Restrição"
-    | "Condicionado"
-    | "Aprovado"
+    "Documentação" | "Em análise" | "Restrição" | "Condicionado" | "Aprovado"
   >("Documentação");
   const [ccaReturn, setCcaReturn] = useState<
     "Enviado" | "Recebido" | "Em análise" | "Pendência" | "Concluído"
@@ -337,14 +405,18 @@ export default function ClientePage() {
   const storedDocumentFor = (doc: Doc) =>
     storedDocuments.find((item) => item.document_type === documentTypeFor(doc));
   const cancellationDocument = storedDocuments.find(
-    (item) => item.document_type === "Pré-análise | Autorização de cancelamento do CCA anterior",
+    (item) =>
+      item.document_type ===
+      "Pré-análise | Autorização de cancelamento do CCA anterior",
   );
   const loadStoredDocuments = async () => {
     if (!clientId) {
       setStoredDocuments([]);
       return;
     }
-    const response = await fetch(`/api/documents?clientId=${clientId}`, { cache: "no-store" });
+    const response = await fetch(`/api/documents?clientId=${clientId}`, {
+      cache: "no-store",
+    });
     const result = await response.json().catch(() => []);
     if (!response.ok) {
       setDocumentNotice(result.error || "Falha ao carregar anexos.");
@@ -352,16 +424,30 @@ export default function ClientePage() {
     }
     setStoredDocuments(result);
     const prefix = tab === "pre" ? "Pré-análise" : "Dossiê completo";
-    setDocs((currentDocs) => currentDocs.map((doc) => ({
-      ...doc,
-      status: result.some((item: StoredDocument) => item.document_type === `${prefix} | ${doc.holder} - ${doc.name}`)
-        ? "Aprovado"
-        : doc.status,
-    })));
-    setLetterUploaded(result.some((item: StoredDocument) => item.document_type === "Pré-análise | Autorização de cancelamento do CCA anterior"));
+    setDocs((currentDocs) =>
+      currentDocs.map((doc) => ({
+        ...doc,
+        status: result.some(
+          (item: StoredDocument) =>
+            item.document_type === `${prefix} | ${doc.holder} - ${doc.name}`,
+        )
+          ? "Aprovado"
+          : doc.status,
+      })),
+    );
+    setLetterUploaded(
+      result.some(
+        (item: StoredDocument) =>
+          item.document_type ===
+          "Pré-análise | Autorização de cancelamento do CCA anterior",
+      ),
+    );
   };
   useEffect(() => {
-    void loadStoredDocuments();
+    const timer = window.setTimeout(() => void loadStoredDocuments(), 0);
+    return () => window.clearTimeout(timer);
+    // Reload when client or dossier tab changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clientId, tab]);
   const sourceDocs = docs;
   const current = sourceDocs.filter((doc) => {
@@ -382,13 +468,19 @@ export default function ClientePage() {
   const uploadDocument = async (doc: Doc, files: FileList | null) => {
     if (!files?.length) return;
     if (!clientId) {
-      setDocumentNotice("Selecione o cliente real antes de anexar qualquer documento.");
+      setDocumentNotice(
+        "Selecione o cliente real antes de anexar qualquer documento.",
+      );
       return;
     }
     const key = `${doc.holder}-${doc.name}`;
     setUploading(key);
     try {
-      const result = await uploadClientDocument({ clientId: Number(clientId), documentType: documentTypeFor(doc), files: Array.from(files) });
+      const result = await uploadClientDocument({
+        clientId: Number(clientId),
+        documentType: documentTypeFor(doc),
+        files: Array.from(files),
+      });
       setFileCounts((old) => ({ ...old, [key]: Number(result.filesMerged) }));
       setDocs((old) =>
         old.map((item) =>
@@ -397,10 +489,14 @@ export default function ClientePage() {
             : item,
         ),
       );
-      setDocumentNotice(`${result.filesMerged} arquivo(s) unido(s) em PDF único.`);
+      setDocumentNotice(
+        `${result.filesMerged} arquivo(s) unido(s) em PDF único.`,
+      );
       await loadStoredDocuments();
     } catch (error) {
-      setDocumentNotice(error instanceof Error ? error.message : "Falha ao anexar documento.");
+      setDocumentNotice(
+        error instanceof Error ? error.message : "Falha ao anexar documento.",
+      );
     } finally {
       setUploading("");
     }
@@ -414,15 +510,20 @@ export default function ClientePage() {
     try {
       const result = await uploadClientDocument({
         clientId: Number(clientId),
-        documentType: "Pré-análise | Autorização de cancelamento do CCA anterior",
+        documentType:
+          "Pré-análise | Autorização de cancelamento do CCA anterior",
         files: Array.from(files),
       });
       setLetterUploaded(true);
-      setDocumentNotice(`${result.filesMerged} arquivo(s) da carta unidos em PDF único.`);
+      setDocumentNotice(
+        `${result.filesMerged} arquivo(s) da carta unidos em PDF único.`,
+      );
       await loadStoredDocuments();
     } catch (error) {
       setLetterUploaded(false);
-      setDocumentNotice(error instanceof Error ? error.message : "Falha ao anexar carta.");
+      setDocumentNotice(
+        error instanceof Error ? error.message : "Falha ao anexar carta.",
+      );
     }
   };
   const removeStoredDocument = async (documentType: string) => {
@@ -433,7 +534,9 @@ export default function ClientePage() {
       setDocumentNotice("Anexo excluído. Uma nova versão pode ser enviada.");
       await loadStoredDocuments();
     } catch (error) {
-      setDocumentNotice(error instanceof Error ? error.message : "Falha ao excluir anexo.");
+      setDocumentNotice(
+        error instanceof Error ? error.message : "Falha ao excluir anexo.",
+      );
     } finally {
       setUploading("");
     }
@@ -450,14 +553,25 @@ export default function ClientePage() {
     const result = await response.json().catch(() => ({}));
     setSendingPackage(false);
     if (!response.ok || !result.signedUrl) {
-      setDocumentNotice(result.error || "Não foi possível montar o PDF consolidado.");
+      setDocumentNotice(
+        result.error || "Não foi possível montar o PDF consolidado.",
+      );
       return;
     }
-    const phone = (selectedCca.whatsapp || selectedCca.phone || "").replace(/\D/g, "");
+    const phone = (selectedCca.whatsapp || selectedCca.phone || "").replace(
+      /\D/g,
+      "",
+    );
     const text = `${analysisText}\n\nDOCUMENTAÇÃO CONSOLIDADA (${result.documentsMerged} itens, ${result.pages} páginas):\n${result.signedUrl}`;
-    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
+    window.open(
+      `https://wa.me/${phone}?text=${encodeURIComponent(text)}`,
+      "_blank",
+      "noopener,noreferrer",
+    );
     setCcaSent(true);
-    setDocumentNotice("PDF consolidado gerado. WhatsApp aberto com texto e link seguro.");
+    setDocumentNotice(
+      "PDF consolidado gerado. WhatsApp aberto com texto e link seguro.",
+    );
   };
   const clientGrammar = genderTerms(clientSex);
   const spouseGrammar = genderTerms(spouseSex);
@@ -513,14 +627,31 @@ export default function ClientePage() {
     status: "Restrição" | "Condicionado" | "Aprovado",
   ) => {
     if (!clientId) {
-      setDocumentNotice("Selecione um cliente real antes de registrar o resultado do CCA.");
+      setDocumentNotice(
+        "Selecione um cliente real antes de registrar o resultado do CCA.",
+      );
       return;
     }
-    const nextAction = status === "Aprovado" ? "Montar proposta e agendar apresentação" : status === "Condicionado" ? "Registrar condição e definir plano de ação" : "Orientar regularização e programar nova análise";
-    const response = await fetch("/api/clients", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: Number(clientId), financeStage: status, nextAction }) });
+    const nextAction =
+      status === "Aprovado"
+        ? "Montar proposta e agendar apresentação"
+        : status === "Condicionado"
+          ? "Registrar condição e definir plano de ação"
+          : "Orientar regularização e programar nova análise";
+    const response = await fetch("/api/clients", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: Number(clientId),
+        financeStage: status,
+        nextAction,
+      }),
+    });
     const result = await response.json().catch(() => ({}));
     if (!response.ok) {
-      setDocumentNotice(result.error || "Não foi possível registrar o resultado do CCA.");
+      setDocumentNotice(
+        result.error || "Não foi possível registrar o resultado do CCA.",
+      );
       return;
     }
     setCreditStatus(status);
@@ -632,7 +763,11 @@ export default function ClientePage() {
               aria-label="Selecionar cliente"
             >
               <option value="">Selecione o cliente real</option>
-              {clients.map((client) => <option key={client.id} value={client.id}>{client.name} · {client.phone}</option>)}
+              {clients.map((client) => (
+                <option key={client.id} value={client.id}>
+                  {client.name} · {client.phone}
+                </option>
+              ))}
             </select>
           </div>
           <div className="client-header-actions">
@@ -717,7 +852,9 @@ export default function ClientePage() {
           </aside>
         )}
         <div className="client-content">
-          {documentNotice && <p className="document-notice">{documentNotice}</p>}
+          {documentNotice && (
+            <p className="document-notice">{documentNotice}</p>
+          )}
           <section className="client-identity">
             <div className="identity-avatar">—</div>
             <div className="identity-main">
@@ -730,12 +867,12 @@ export default function ClientePage() {
                   : relationship === "Solteiro"
                     ? clientGrammar.single
                     : "União estável"}{" "}
-                · {hasDependent ? "Dependente informado" : "Sem dependentes"}
-                · Renda não informada
+                · {hasDependent ? "Dependente informado" : "Sem dependentes"}·
+                Renda não informada
               </p>
               <small className="income-sync">
-                {autonomousActivity} · {autonomousDuration} ·
-                preencha dados na qualificação
+                {autonomousActivity} · {autonomousDuration} · preencha dados na
+                qualificação
               </small>
             </div>
             <div className="identity-stage">
@@ -754,7 +891,9 @@ export default function ClientePage() {
               <div>
                 <span>Jornada do financiamento</span>
                 <h2>Prontuário completo do processo</h2>
-                <small>Resultado oficial informado pelo CCA e registrado na ficha</small>
+                <small>
+                  Resultado oficial informado pelo CCA e registrado na ficha
+                </small>
               </div>
               <strong>{creditStatus}</strong>
             </header>
@@ -1071,8 +1210,24 @@ export default function ClientePage() {
                     </span>
                     {cancellationDocument?.url && (
                       <span className="letter-upload-actions">
-                        <a href={cancellationDocument.url} target="_blank" rel="noreferrer">Visualizar</a>
-                        <button type="button" onClick={(event) => { event.preventDefault(); void removeStoredDocument(cancellationDocument.document_type); }}>Excluir</button>
+                        <a
+                          href={cancellationDocument.url}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          Visualizar
+                        </a>
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.preventDefault();
+                            void removeStoredDocument(
+                              cancellationDocument.document_type,
+                            );
+                          }}
+                        >
+                          Excluir
+                        </button>
                       </span>
                     )}
                   </label>
@@ -1202,8 +1357,23 @@ export default function ClientePage() {
                         </label>
                         {storedDocumentFor(doc)?.url && (
                           <span className="doc-file-actions">
-                            <a className="doc-view" href={storedDocumentFor(doc)?.url || "#"} target="_blank" rel="noreferrer">Visualizar</a>
-                            <button type="button" className="doc-delete" onClick={() => void removeStoredDocument(documentTypeFor(doc))}>Excluir</button>
+                            <a
+                              className="doc-view"
+                              href={storedDocumentFor(doc)?.url || "#"}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              Visualizar
+                            </a>
+                            <button
+                              type="button"
+                              className="doc-delete"
+                              onClick={() =>
+                                void removeStoredDocument(documentTypeFor(doc))
+                              }
+                            >
+                              Excluir
+                            </button>
                           </span>
                         )}
                       </article>
@@ -1284,7 +1454,11 @@ export default function ClientePage() {
                     <option value="" disabled>
                       Selecione o CCA
                     </option>
-                    {ccas.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+                    {ccas.map((item) => (
+                      <option key={item.id} value={item.id}>
+                        {item.name}
+                      </option>
+                    ))}
                   </select>
                 </label>
                 {tab === "pre" && cca && (
@@ -1297,14 +1471,12 @@ export default function ClientePage() {
                       <span>
                         <b>{selectedCca?.name}</b>
                         <small>
-                          {selectedCca?.responsible_name || "Responsável não informado"} · cadastro do CCA
+                          {selectedCca?.responsible_name ||
+                            "Responsável não informado"}{" "}
+                          · cadastro do CCA
                         </small>
                       </span>
-                      <a
-                        href={`tel:+${selectedCca?.phone || ""}`}
-                      >
-                        Ligar
-                      </a>
+                      <a href={`tel:+${selectedCca?.phone || ""}`}>Ligar</a>
                       <a
                         className="cca-whatsapp"
                         href={`https://wa.me/${(selectedCca?.whatsapp || selectedCca?.phone || "").replace(/\D/g, "")}`}
@@ -1362,7 +1534,9 @@ export default function ClientePage() {
                     <button
                       className="send-cca"
                       type="button"
-                      disabled={blockers.length > 0 || !clientId || sendingPackage}
+                      disabled={
+                        blockers.length > 0 || !clientId || sendingPackage
+                      }
                       onClick={sendPackageToCca}
                     >
                       {ccaSent
@@ -1385,23 +1559,49 @@ export default function ClientePage() {
                   <textarea placeholder="Contexto necessário para análise" />
                 </label>
                 {tab === "full" && (
-                  <button type="button" onClick={sendPackageToCca} disabled={blockers.length > 0 || !cca || !clientId || sendingPackage}>
+                  <button
+                    type="button"
+                    onClick={sendPackageToCca}
+                    disabled={
+                      blockers.length > 0 || !cca || !clientId || sendingPackage
+                    }
+                  >
                     {!cca
                       ? "Selecione o CCA"
                       : !clientId
                         ? "Selecione o cliente"
                         : blockers.length
-                        ? `Resolver ${blockers.length} bloqueios`
-                        : sendingPackage ? "Unificando PDF..." : "Enviar dossiê completo ao CCA"}
+                          ? `Resolver ${blockers.length} bloqueios`
+                          : sendingPackage
+                            ? "Unificando PDF..."
+                            : "Enviar dossiê completo ao CCA"}
                   </button>
                 )}
               </section>
               <section className="audit-card">
                 <span>Auditoria</span>
                 <h3>Últimos movimentos</h3>
-                {!selectedClient && <p>Selecione um cliente para consultar o prontuário.</p>}
-                {selectedClient && !clientEvents.length && <p>Cadastro importado. Nenhum atendimento registrado. Etapa atual: {selectedClient.funnel_stage || "não trabalhado"}.</p>}
-                {clientEvents.slice(0,12).map(event=><div className="audit-event" key={event.id}><b>{event.title}</b><small>{event.description || event.event_type}</small><time>{event.new_stage || "Registro"} · {event.occurred_at ? new Date(event.occurred_at).toLocaleString("pt-BR") : "Data não informada"}</time></div>)}
+                {!selectedClient && (
+                  <p>Selecione um cliente para consultar o prontuário.</p>
+                )}
+                {selectedClient && !clientEvents.length && (
+                  <p>
+                    Cadastro importado. Nenhum atendimento registrado. Etapa
+                    atual: {selectedClient.funnel_stage || "não trabalhado"}.
+                  </p>
+                )}
+                {clientEvents.slice(0, 12).map((event) => (
+                  <div className="audit-event" key={event.id}>
+                    <b>{event.title}</b>
+                    <small>{event.description || event.event_type}</small>
+                    <time>
+                      {event.new_stage || "Registro"} ·{" "}
+                      {event.occurred_at
+                        ? new Date(event.occurred_at).toLocaleString("pt-BR")
+                        : "Data não informada"}
+                    </time>
+                  </div>
+                ))}
               </section>
             </aside>
           </div>

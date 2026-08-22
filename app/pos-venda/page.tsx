@@ -2,12 +2,16 @@
 import Image from "next/image";
 import Link from "next/link";
 import { CrmNavigation } from "../components/crm-navigation";
+import { CrmCenterTabs } from "../components/crm-center-tabs";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import "./pos-venda.css";
 import "./journey-detail.css";
 import "./evidence-upload.css";
 import PostSaleStagePanel from "./PostSaleStagePanel";
-import { deleteClientDocument, uploadClientDocument } from "@/lib/upload-client-document";
+import {
+  deleteClientDocument,
+  uploadClientDocument,
+} from "@/lib/upload-client-document";
 
 type Client = {
   clientId?: number;
@@ -167,20 +171,31 @@ export default function PosVenda() {
     if (response.ok) setDocuments(data);
   };
   useEffect(() => {
-    void loadClients();
+    const timer = window.setTimeout(() => void loadClients(), 0);
+    return () => window.clearTimeout(timer);
+    // Initial server-backed load.
   }, []);
   useEffect(() => {
-    void loadDocuments(selected.clientId);
+    const timer = window.setTimeout(
+      () => void loadDocuments(selected.clientId),
+      0,
+    );
+    return () => window.clearTimeout(timer);
+    // Reload documents for selected client.
   }, [selected.clientId]);
   useEffect(() => {
     const index = stages.indexOf(selected.stage);
     if (index >= 0) {
-      setCurrentStage(index);
+      const timer = window.setTimeout(() => setCurrentStage(index), 0);
+      return () => window.clearTimeout(timer);
     }
   }, [selected.stage, selected.next]);
   useEffect(() => {
-    setChecklist(selected.checklist || {});
-    setBirthDate(selected.birthDate || "");
+    const timer = window.setTimeout(() => {
+      setChecklist(selected.checklist || {});
+      setBirthDate(selected.birthDate || "");
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [selected.clientId, selected.checklist, selected.birthDate]);
   const attachments = useMemo(
     () => documents.map((item) => item.document_type),
@@ -222,7 +237,9 @@ export default function PosVenda() {
       await loadDocuments(selected.clientId);
       setStatus(`${name} anexado e disponível para visualização.`);
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Falha ao anexar documento.");
+      setStatus(
+        error instanceof Error ? error.message : "Falha ao anexar documento.",
+      );
     } finally {
       setUploading("");
     }
@@ -235,7 +252,9 @@ export default function PosVenda() {
       await loadDocuments(selected.clientId);
       setStatus(`${name} excluído. Uma nova versão pode ser anexada.`);
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Falha ao excluir anexo.");
+      setStatus(
+        error instanceof Error ? error.message : "Falha ao excluir anexo.",
+      );
     } finally {
       setUploading("");
     }
@@ -344,6 +363,7 @@ export default function PosVenda() {
           </div>
         </header>
         <div className="after-content">
+          <CrmCenterTabs />
           {status && <div className="post-status">{status}</div>}
           <section className="after-kpis">
             <article>
@@ -464,7 +484,11 @@ export default function PosVenda() {
                   </i>
                   <div>
                     <b>{client.name}</b>
-                    {client.isTest && <em className="test-badge">TESTE · não entra nos indicadores</em>}
+                    {client.isTest && (
+                      <em className="test-badge">
+                        TESTE · não entra nos indicadores
+                      </em>
+                    )}
                     <span>
                       {client.project} · {client.unit}
                     </span>
@@ -497,7 +521,11 @@ export default function PosVenda() {
                 </a>
                 <a
                   className={!selected.phone ? "disabled" : ""}
-                  href={selected.phone ? `https://wa.me/${selected.phone}` : undefined}
+                  href={
+                    selected.phone
+                      ? `https://wa.me/${selected.phone}`
+                      : undefined
+                  }
                   target="_blank"
                 >
                   <Image
@@ -583,8 +611,23 @@ export default function PosVenda() {
                     <em>
                       {documentFor(doc) ? (
                         <span className="evidence-actions">
-                          <a href={documentFor(doc)?.url || "#"} target="_blank" onClick={(event) => event.stopPropagation()}>VISUALIZAR</a>
-                          <button type="button" onClick={(event) => { event.preventDefault(); event.stopPropagation(); void removeFile(doc); }}>EXCLUIR</button>
+                          <a
+                            href={documentFor(doc)?.url || "#"}
+                            target="_blank"
+                            onClick={(event) => event.stopPropagation()}
+                          >
+                            VISUALIZAR
+                          </a>
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.preventDefault();
+                              event.stopPropagation();
+                              void removeFile(doc);
+                            }}
+                          >
+                            EXCLUIR
+                          </button>
                         </span>
                       ) : (
                         "SELECIONAR"
@@ -608,19 +651,43 @@ export default function PosVenda() {
             </header>
             <article>
               <span>Preparação</span>
-              {["Coffee break organizado", "Presente escolhido", "Unidade preparada"].map((item) => (
+              {[
+                "Coffee break organizado",
+                "Presente escolhido",
+                "Unidade preparada",
+              ].map((item) => (
                 <label key={item}>
-                  <input type="checkbox" checked={Boolean(checklist[item])} disabled={!selected.clientId} onChange={(event) => void saveChecklist(item, event.target.checked)} />
-                  <i />{item}
+                  <input
+                    type="checkbox"
+                    checked={Boolean(checklist[item])}
+                    disabled={!selected.clientId}
+                    onChange={(event) =>
+                      void saveChecklist(item, event.target.checked)
+                    }
+                  />
+                  <i />
+                  {item}
                 </label>
               ))}
             </article>
             <article>
               <span>Documentação</span>
-              {["Termo de entrega anexado", "Vistoria e correções registradas", "Garantias entregues ao cliente"].map((item) => (
+              {[
+                "Termo de entrega anexado",
+                "Vistoria e correções registradas",
+                "Garantias entregues ao cliente",
+              ].map((item) => (
                 <label key={item}>
-                  <input type="checkbox" checked={Boolean(checklist[item])} disabled={!selected.clientId} onChange={(event) => void saveChecklist(item, event.target.checked)} />
-                  <i />{item}
+                  <input
+                    type="checkbox"
+                    checked={Boolean(checklist[item])}
+                    disabled={!selected.clientId}
+                    onChange={(event) =>
+                      void saveChecklist(item, event.target.checked)
+                    }
+                  />
+                  <i />
+                  {item}
                 </label>
               ))}
             </article>
@@ -632,11 +699,13 @@ export default function PosVenda() {
                   checked={Boolean(checklist["Consentimento de imagem"])}
                   disabled={!selected.clientId}
                   onChange={(event) => {
-                    if (event.target.checked) void saveImageConsent("authorized");
+                    if (event.target.checked)
+                      void saveImageConsent("authorized");
                     else void saveChecklist("Consentimento de imagem", false);
                   }}
                 />
-                <i />Consentimento assinado
+                <i />
+                Consentimento assinado
               </label>
               <label className="consent-refused">
                 <input
@@ -645,20 +714,32 @@ export default function PosVenda() {
                   disabled={!selected.clientId}
                   onChange={(event) => {
                     if (event.target.checked) void saveImageConsent("refused");
-                    else void saveChecklist("Recusou autorização de imagem", false);
+                    else
+                      void saveChecklist(
+                        "Recusou autorização de imagem",
+                        false,
+                      );
                   }}
                 />
-                <i />Recusou autorização de imagem
+                <i />
+                Recusou autorização de imagem
               </label>
               {["Entrega gravada", "Depoimento produzido"].map((item) => (
                 <label key={item}>
                   <input
                     type="checkbox"
                     checked={Boolean(checklist[item])}
-                    disabled={!selected.clientId || !checklist["Consentimento de imagem"] || Boolean(checklist["Recusou autorização de imagem"])}
-                    onChange={(event) => void saveChecklist(item, event.target.checked)}
+                    disabled={
+                      !selected.clientId ||
+                      !checklist["Consentimento de imagem"] ||
+                      Boolean(checklist["Recusou autorização de imagem"])
+                    }
+                    onChange={(event) =>
+                      void saveChecklist(item, event.target.checked)
+                    }
                   />
-                  <i />{item}
+                  <i />
+                  {item}
                 </label>
               ))}
             </article>

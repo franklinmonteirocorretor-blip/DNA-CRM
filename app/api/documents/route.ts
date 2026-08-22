@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import crypto from "node:crypto";
 import { PDFDocument } from "pdf-lib";
 import { documentsBucket, supabaseAdmin } from "@/lib/supabase-admin";
+import { transitionClient } from "@/lib/client-journey";
 
 export const runtime = "nodejs";
 const allowed = ["application/pdf", "image/jpeg", "image/png"];
@@ -110,7 +111,10 @@ async function storeMergedDocument(
   const objectPath = `${clientId}/${Date.now()}-${safeFilePart(documentType)}.pdf`;
   const { error: uploadError } = await supabase.storage
     .from(documentsBucket())
-    .upload(objectPath, merged, { contentType: "application/pdf", upsert: false });
+    .upload(objectPath, merged, {
+      contentType: "application/pdf",
+      upsert: false,
+    });
   if (uploadError) throw uploadError;
   const { error: insertError } = await supabase.from("documents").insert({
     client_id: clientId,
@@ -123,6 +127,23 @@ async function storeMergedDocument(
   if (insertError) {
     await supabase.storage.from(documentsBucket()).remove([objectPath]);
     throw insertError;
+  }
+  const { data: client } = await supabase
+    .from("clients")
+    .select("finance_stage")
+    .eq("id", clientId)
+    .maybeSingle();
+  if (client?.finance_stage === "Aguardando documentação") {
+    await transitionClient({
+      clientId,
+      eventType: "DOCUMENTS_RECEIVED",
+      title: "Pasta recebida",
+      description: `${filesMerged} arquivo(s) recebido(s) em ${documentType}.`,
+      funnelStage: "Pasta recebida",
+      financeStage: "Documentação recebida",
+      nextAction: "Conferir pasta e iniciar análise",
+      metricKey: "folder_received",
+    });
   }
   const { data: signed } = await supabase.storage
     .from(documentsBucket())
@@ -148,7 +169,8 @@ async function downloadPreparedFiles(
       const { data: blob, error } = await supabase.storage
         .from(documentsBucket())
         .download(String(file.path));
-      if (error || !blob) throw error || new Error(`Falha ao abrir ${file.name}.`);
+      if (error || !blob)
+        throw error || new Error(`Falha ao abrir ${file.name}.`);
       return {
         bytes: new Uint8Array(await blob.arrayBuffer()),
         type: file.type,
@@ -163,31 +185,59 @@ async function handleDirectUpload(request: Request) {
   const documentType = String(body.documentType || "Documento");
   const files = Array.isArray(body.files) ? (body.files as PreparedFile[]) : [];
   if (!clientId || !files.length)
-    return NextResponse.json({ error: "Arquivo e cliente são obrigatórios" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Arquivo e cliente são obrigatórios" },
+      { status: 400 },
+    );
   if (files.length > maxFiles)
-    return NextResponse.json({ error: `Máximo de ${maxFiles} arquivos por documento` }, { status: 413 });
+    return NextResponse.json(
+      { error: `Máximo de ${maxFiles} arquivos por documento` },
+      { status: 413 },
+    );
   if (files.some((file) => !allowed.includes(file.type)))
-    return NextResponse.json({ error: "Envie somente PDF, JPG, JPEG ou PNG" }, { status: 415 });
+    return NextResponse.json(
+      { error: "Envie somente PDF, JPG, JPEG ou PNG" },
+      { status: 415 },
+    );
   if (files.some((file) => Number(file.size) > maxFileSize))
-    return NextResponse.json({ error: "Cada arquivo pode ter no máximo 20 MB." }, { status: 413 });
+    return NextResponse.json(
+      { error: "Cada arquivo pode ter no máximo 20 MB." },
+      { status: 413 },
+    );
 
   let supabase;
   try {
     supabase = await assertClient(clientId);
   } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : "Cliente não encontrado" }, { status: 404 });
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error ? error.message : "Cliente não encontrado",
+      },
+      { status: 404 },
+    );
   }
 
   if (body.action === "prepare") {
     const uploads = await Promise.all(
       files.map(async (file) => {
-        const extension = file.name.split(".").pop()?.replace(/[^a-z0-9]/gi, "") || "bin";
+        const extension =
+          file.name
+            .split(".")
+            .pop()
+            ?.replace(/[^a-z0-9]/gi, "") || "bin";
         const path = `${clientId}/temp/${Date.now()}-${crypto.randomUUID()}.${extension}`;
         const { data, error } = await supabase.storage
           .from(documentsBucket())
           .createSignedUploadUrl(path);
         if (error) throw error;
-        return { name: file.name, type: file.type, size: file.size, path, signedUrl: data.signedUrl };
+        return {
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          path,
+          signedUrl: data.signedUrl,
+        };
       }),
     );
     return NextResponse.json({ ok: true, uploads });
@@ -198,7 +248,10 @@ async function handleDirectUpload(request: Request) {
 
   const paths = files.map((file) => String(file.path || ""));
   if (paths.some((path) => !path.startsWith(`${clientId}/temp/`)))
-    return NextResponse.json({ error: "Arquivo temporário inválido." }, { status: 400 });
+    return NextResponse.json(
+      { error: "Arquivo temporário inválido." },
+      { status: 400 },
+    );
 
   try {
     const output = await PDFDocument.create();
@@ -206,13 +259,23 @@ async function handleDirectUpload(request: Request) {
     for (const file of downloaded) {
       await appendFile(output, file.bytes, file.type);
     }
-    const result = await storeMergedDocument(clientId, documentType, output, files.length);
+    const result = await storeMergedDocument(
+      clientId,
+      documentType,
+      output,
+      files.length,
+    );
     await supabase.storage.from(documentsBucket()).remove(paths);
     return NextResponse.json(result);
   } catch (error) {
     await supabase.storage.from(documentsBucket()).remove(paths);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Falha ao unificar os arquivos." },
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Falha ao unificar os arquivos.",
+      },
       { status: 422 },
     );
   }
@@ -270,15 +333,26 @@ export async function POST(request: Request) {
     }
   } catch {
     return NextResponse.json(
-      { error: "Um dos arquivos está corrompido ou não corresponde ao formato informado." },
+      {
+        error:
+          "Um dos arquivos está corrompido ou não corresponde ao formato informado.",
+      },
       { status: 422 },
     );
   }
 
   try {
-    return NextResponse.json(await storeMergedDocument(clientId, documentType, output, files.length));
+    return NextResponse.json(
+      await storeMergedDocument(clientId, documentType, output, files.length),
+    );
   } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : "Falha ao salvar documento." }, { status: 500 });
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error ? error.message : "Falha ao salvar documento.",
+      },
+      { status: 500 },
+    );
   }
 }
 
@@ -287,32 +361,49 @@ export async function DELETE(request: Request) {
   const clientId = Number(body.clientId);
   const documentType = String(body.documentType || "");
   if (!clientId || !documentType)
-    return NextResponse.json({ error: "Cliente e documento são obrigatórios." }, { status: 400 });
+    return NextResponse.json(
+      { error: "Cliente e documento são obrigatórios." },
+      { status: 400 },
+    );
 
   let supabase;
   try {
     supabase = await assertClient(clientId);
   } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : "Cliente não encontrado" }, { status: 404 });
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error ? error.message : "Cliente não encontrado",
+      },
+      { status: 404 },
+    );
   }
   const { data, error } = await supabase
     .from("documents")
     .select("id,storage_path")
     .eq("client_id", clientId)
     .eq("document_type", documentType);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error)
+    return NextResponse.json({ error: error.message }, { status: 500 });
   if (!data?.length) return NextResponse.json({ ok: true, deleted: 0 });
   const paths = data.map((item) => item.storage_path).filter(Boolean);
   if (paths.length) {
-    const { error: storageError } = await supabase.storage.from(documentsBucket()).remove(paths);
-    if (storageError) return NextResponse.json({ error: storageError.message }, { status: 500 });
+    const { error: storageError } = await supabase.storage
+      .from(documentsBucket())
+      .remove(paths);
+    if (storageError)
+      return NextResponse.json(
+        { error: storageError.message },
+        { status: 500 },
+      );
   }
   const { error: deleteError } = await supabase
     .from("documents")
     .delete()
     .eq("client_id", clientId)
     .eq("document_type", documentType);
-  if (deleteError) return NextResponse.json({ error: deleteError.message }, { status: 500 });
+  if (deleteError)
+    return NextResponse.json({ error: deleteError.message }, { status: 500 });
   return NextResponse.json({ ok: true, deleted: data.length });
 }
 
@@ -388,30 +479,26 @@ export async function PUT(request: Request) {
   if (uploadError)
     return NextResponse.json({ error: uploadError.message }, { status: 500 });
   const hash = crypto.createHash("sha256").update(merged).digest("hex");
-  const { error: insertError } = await supabase
-    .from("documents")
-    .insert({
-      client_id: clientId,
-      document_type: packageType,
-      file_name: `${stage === "full" ? "dossie-completo" : "pre-analise"}-consolidado.pdf`,
-      storage_path: objectPath,
-      mime_type: "application/pdf",
-      sha256: hash,
-    });
+  const { error: insertError } = await supabase.from("documents").insert({
+    client_id: clientId,
+    document_type: packageType,
+    file_name: `${stage === "full" ? "dossie-completo" : "pre-analise"}-consolidado.pdf`,
+    storage_path: objectPath,
+    mime_type: "application/pdf",
+    sha256: hash,
+  });
   if (insertError)
     return NextResponse.json({ error: insertError.message }, { status: 500 });
   const { data: signed } = await supabase.storage
     .from(documentsBucket())
     .createSignedUrl(objectPath, 60 * 60 * 24);
-  await supabase
-    .from("client_events")
-    .insert({
-      client_id: clientId,
-      event_type: "DOCUMENT_PACKAGE",
-      title: "PDF consolidado gerado",
-      description: `${documents.length} documentos unidos para ${stage === "full" ? "dossiê completo" : "pré-análise"}.`,
-      metric_key: "documents_package",
-    });
+  await supabase.from("client_events").insert({
+    client_id: clientId,
+    event_type: "DOCUMENT_PACKAGE",
+    title: "PDF consolidado gerado",
+    description: `${documents.length} documentos unidos para ${stage === "full" ? "dossiê completo" : "pré-análise"}.`,
+    metric_key: "documents_package",
+  });
   return NextResponse.json({
     ok: true,
     documentsMerged: documents.length,

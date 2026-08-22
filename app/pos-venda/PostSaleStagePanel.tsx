@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { deleteClientDocument, uploadClientDocument } from "@/lib/upload-client-document";
+import {
+  deleteClientDocument,
+  uploadClientDocument,
+} from "@/lib/upload-client-document";
 
 type DocumentItem = {
   id: number;
@@ -45,7 +48,12 @@ const rules: Record<string, StageRule> = {
   },
   "Laudo de engenharia": {
     question: "Qual é a situação do laudo de engenharia?",
-    options: ["Laudo aprovado", "Com pendências", "Aguardando vistoria", "Não se aplica"],
+    options: [
+      "Laudo aprovado",
+      "Com pendências",
+      "Aguardando vistoria",
+      "Não se aplica",
+    ],
     advances: ["Laudo aprovado", "Não se aplica"],
     document: "Laudo do engenheiro CAIXA",
   },
@@ -67,7 +75,8 @@ const rules: Record<string, StageRule> = {
     advances: ["Sim"],
   },
   "Vistoria técnica particular": {
-    question: "Qual foi o resultado da vistoria realizada pelo engenheiro particular?",
+    question:
+      "Qual foi o resultado da vistoria realizada pelo engenheiro particular?",
     options: [
       "Concluída sem falhas",
       "Concluída com reparos necessários",
@@ -76,10 +85,14 @@ const rules: Record<string, StageRule> = {
     ],
     advances: ["Concluída sem falhas", "Concluída com reparos necessários"],
     document: "Laudo da vistoria técnica particular",
-    documentRequiredFor: ["Concluída sem falhas", "Concluída com reparos necessários"],
+    documentRequiredFor: [
+      "Concluída sem falhas",
+      "Concluída com reparos necessários",
+    ],
   },
   "Validação dos reparos": {
-    question: "Os reparos indicados na vistoria particular foram executados pela construtora?",
+    question:
+      "Os reparos indicados na vistoria particular foram executados pela construtora?",
     options: [
       "Sim, todos validados",
       "Parcialmente executados",
@@ -140,21 +153,28 @@ export default function PostSaleStagePanel({
 
   const loadDocuments = async () => {
     if (!clientId) return setDocuments([]);
-    const response = await fetch(`/api/documents?clientId=${clientId}`, { cache: "no-store" });
+    const response = await fetch(`/api/documents?clientId=${clientId}`, {
+      cache: "no-store",
+    });
     const data = await response.json().catch(() => []);
     if (response.ok) setDocuments(data);
   };
 
   useEffect(() => {
-    setResult(rule.options[0]);
-    setNotes("");
-    setStartsAt("");
-    setManager("");
-    setAgency("");
-    setFiles([]);
-    setStatus("");
-    void loadDocuments();
-  }, [clientId, stage]);
+    const timer = window.setTimeout(() => {
+      setResult(rule.options[0]);
+      setNotes("");
+      setStartsAt("");
+      setManager("");
+      setAgency("");
+      setFiles([]);
+      setStatus("");
+      void loadDocuments();
+    }, 0);
+    return () => window.clearTimeout(timer);
+    // Stage change intentionally resets form and reloads documents.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clientId, stage, rule.options]);
 
   const save = async () => {
     if (!clientId) return;
@@ -163,19 +183,33 @@ export default function PostSaleStagePanel({
     let uploaded = attached;
     if (rule.document && files.length) {
       try {
-        const uploadData = await uploadClientDocument({ clientId, documentType, files });
+        const uploadData = await uploadClientDocument({
+          clientId,
+          documentType,
+          files,
+        });
         await loadDocuments();
-        uploaded = { id: 0, document_type: documentType, file_name: uploadData.fileName, url: uploadData.url };
+        uploaded = {
+          id: 0,
+          document_type: documentType,
+          file_name: uploadData.fileName,
+          url: uploadData.url,
+        };
       } catch (error) {
         setSaving(false);
-        setStatus(error instanceof Error ? error.message : "Falha ao anexar o documento.");
+        setStatus(
+          error instanceof Error
+            ? error.message
+            : "Falha ao anexar o documento.",
+        );
         return;
       }
     }
     const advances = rule.advances.includes(result);
     const requiresDocument = Boolean(
       rule.document &&
-        (!rule.documentRequiredFor || rule.documentRequiredFor.includes(result)),
+        (!rule.documentRequiredFor ||
+          rule.documentRequiredFor.includes(result)),
     );
     if (advances && requiresDocument && !uploaded) {
       setSaving(false);
@@ -203,7 +237,11 @@ export default function PostSaleStagePanel({
       setStatus(data.error || "Falha ao registrar a etapa.");
       return;
     }
-    setStatus(advances ? "Etapa concluída. Próxima etapa liberada." : "Resultado salvo. Etapa mantida para nova tentativa.");
+    setStatus(
+      advances
+        ? "Etapa concluída. Próxima etapa liberada."
+        : "Resultado salvo. Etapa mantida para nova tentativa.",
+    );
     setFiles([]);
     await onSaved();
   };
@@ -218,7 +256,9 @@ export default function PostSaleStagePanel({
       setFiles([]);
       setStatus("Anexo excluído. Você pode enviar uma nova versão.");
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Falha ao excluir o anexo.");
+      setStatus(
+        error instanceof Error ? error.message : "Falha ao excluir o anexo.",
+      );
     } finally {
       setSaving(false);
     }
@@ -231,40 +271,104 @@ export default function PostSaleStagePanel({
           <span>Registro da etapa ativa</span>
           <h3>{stage}</h3>
         </div>
-        <strong>{stages.indexOf(stage) + 1}/{stages.length}</strong>
+        <strong>
+          {stages.indexOf(stage) + 1}/{stages.length}
+        </strong>
       </header>
       <div className="stage-panel-grid">
         <label className="wide">
           <span>{rule.question}</span>
-          <select value={result} onChange={(event) => setResult(event.target.value)}>
-            {rule.options.map((option) => <option key={option}>{option}</option>)}
+          <select
+            value={result}
+            onChange={(event) => setResult(event.target.value)}
+          >
+            {rule.options.map((option) => (
+              <option key={option}>{option}</option>
+            ))}
           </select>
         </label>
         {rule.needsBank && (
           <>
-            <label><span>Gerente responsável</span><input value={manager} onChange={(event) => setManager(event.target.value)} placeholder="Nome do gerente" /></label>
-            <label><span>Agência</span><input value={agency} onChange={(event) => setAgency(event.target.value)} placeholder="Número ou identificação" /></label>
+            <label>
+              <span>Gerente responsável</span>
+              <input
+                value={manager}
+                onChange={(event) => setManager(event.target.value)}
+                placeholder="Nome do gerente"
+              />
+            </label>
+            <label>
+              <span>Agência</span>
+              <input
+                value={agency}
+                onChange={(event) => setAgency(event.target.value)}
+                placeholder="Número ou identificação"
+              />
+            </label>
           </>
         )}
-        <label><span>Data e horário</span><input type="datetime-local" value={startsAt} onChange={(event) => setStartsAt(event.target.value)} /></label>
-        <label className="wide"><span>Observação</span><textarea value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="Resultado, pendências, orientação recebida e próximo contato" /></label>
+        <label>
+          <span>Data e horário</span>
+          <input
+            type="datetime-local"
+            value={startsAt}
+            onChange={(event) => setStartsAt(event.target.value)}
+          />
+        </label>
+        <label className="wide">
+          <span>Observação</span>
+          <textarea
+            value={notes}
+            onChange={(event) => setNotes(event.target.value)}
+            placeholder="Resultado, pendências, orientação recebida e próximo contato"
+          />
+        </label>
         {rule.document && (
           <label className={`stage-upload wide ${attached ? "attached" : ""}`}>
             <span>{rule.document}</span>
-            <input type="file" accept=".pdf,.jpg,.jpeg,.png" multiple onChange={(event) => setFiles(Array.from(event.target.files || []))} />
-            <b>{files.length ? `${files.length} arquivo(s) selecionado(s)` : attached ? attached.file_name : "Selecionar PDF ou fotos"}</b>
+            <input
+              type="file"
+              accept=".pdf,.jpg,.jpeg,.png"
+              multiple
+              onChange={(event) =>
+                setFiles(Array.from(event.target.files || []))
+              }
+            />
+            <b>
+              {files.length
+                ? `${files.length} arquivo(s) selecionado(s)`
+                : attached
+                  ? attached.file_name
+                  : "Selecionar PDF ou fotos"}
+            </b>
             {attached?.url && (
               <span className="stage-upload-actions">
-                <a href={attached.url} target="_blank" rel="noreferrer">Visualizar anexo</a>
-                <button type="button" onClick={(event) => { event.preventDefault(); void removeAttachment(); }}>Excluir anexo</button>
+                <a href={attached.url} target="_blank" rel="noreferrer">
+                  Visualizar anexo
+                </a>
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    void removeAttachment();
+                  }}
+                >
+                  Excluir anexo
+                </button>
               </span>
             )}
           </label>
         )}
       </div>
       <footer>
-        <small>{rule.advances.includes(result) ? "Ao salvar, a próxima etapa será liberada." : "O registro será salvo sem avançar a jornada."}</small>
-        <button onClick={save} disabled={saving || !clientId}>{saving ? "Salvando..." : "Salvar registro da etapa"}</button>
+        <small>
+          {rule.advances.includes(result)
+            ? "Ao salvar, a próxima etapa será liberada."
+            : "O registro será salvo sem avançar a jornada."}
+        </small>
+        <button onClick={save} disabled={saving || !clientId}>
+          {saving ? "Salvando..." : "Salvar registro da etapa"}
+        </button>
       </footer>
       {status && <p className="stage-panel-status">{status}</p>}
     </section>

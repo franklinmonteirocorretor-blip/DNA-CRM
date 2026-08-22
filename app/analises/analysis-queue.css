@@ -1,1 +1,59 @@
-.analysis-kpis article.analysis-waiting{cursor:pointer;border-color:#35546d;background:linear-gradient(120deg,rgba(64,132,184,.12),#101010)}.analysis-kpis article.analysis-waiting strong{color:#6faedc}.process-dot.em-análise{background:#5d9ac8}.process-focus>header strong.em-análise{color:#72b1df;border-color:#355d79}.process-list>button:has(.process-dot.em-análise) aside b{color:#d46b64}.process-list>button:has(.process-dot.em-análise) em{color:#83aed0}
+.analysis-kpis article.analysis-waiting {
+  cursor: pointer;
+  border-color: #35546d;
+  background: linear-gradient(120deg, rgba(64, 132, 184, 0.12), #101010);
+}
+.analysis-kpis article.analysis-waiting strong {
+  color: #6faedc;
+}
+.process-dot.em-análise {
+  background: #5d9ac8;
+}
+.process-focus > header strong.em-análise {
+  color: #72b1df;
+  border-color: #355d79;
+}
+.process-list > button:has(.process-dot.em-análise) aside b {
+  color: #d46b64;
+}
+.process-list > button:has(.process-dot.em-análise) em {
+  color: #83aed0;
+}
+.analysis-result-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 7px;
+  padding: 12px;
+}
+.analysis-result-actions button {
+  height: 34px;
+  border: 1px solid #6a5019;
+  border-radius: 6px;
+  background: #090909;
+  color: #d9aa3d;
+  font-size: 8px;
+  font-weight: 800;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.analysis-result-actions button:hover,
+.analysis-result-actions button:focus-visible {
+  background: #d9aa3d;
+  color: #090909;
+}
+.analysis-result-actions button:first-child {
+  border-color: #7f3029;
+  color: #e36c61;
+}
+.analysis-result-actions button:first-child:hover {
+  background: #b94b40;
+  color: #fff;
+}
+.analysis-result-actions button:last-child {
+  border-color: #276344;
+  color: #55cf8a;
+}
+.analysis-result-actions button:last-child:hover {
+  background: #27764d;
+  color: #fff;
+}

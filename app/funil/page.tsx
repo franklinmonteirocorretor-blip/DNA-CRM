@@ -3,11 +3,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { CrmNavigation } from "../components/crm-navigation";
-import { useMemo, useState } from "react";
+import { CrmCenterTabs } from "../components/crm-center-tabs";
+import { useEffect, useMemo, useState } from "react";
 import "./funil.css";
 import "./funil-fixes.css";
 
 type Card = {
+  id?: number;
   name: string;
   phone: string;
   origin: string;
@@ -276,7 +278,78 @@ const financing: Stage[] = [
 
 // A produção inicia vazia; os cartões entram somente por eventos reais do CRM.
 commercial.forEach((stage) => stage.cards.splice(0));
-financing.forEach((stage) => { stage.cards.splice(0); stage.target = "0 clientes"; });
+financing.forEach((stage) => {
+  stage.cards.splice(0);
+  stage.target = "0 clientes";
+});
+
+type JourneyClient = {
+  id: number;
+  name: string;
+  phone: string;
+  origin_type: string | null;
+  origin_detail: string | null;
+  project_interest: string | null;
+  funnel_stage: string | null;
+  finance_stage: string | null;
+  post_sale_stage: string | null;
+  next_action: string | null;
+  next_action_at: string | null;
+};
+const cardFrom = (client: JourneyClient): Card => ({
+  id: client.id,
+  name: client.name,
+  phone: client.phone,
+  origin:
+    [client.origin_type, client.origin_detail].filter(Boolean).join(" · ") ||
+    "Origem não informada",
+  interest: client.project_interest || "Interesse não informado",
+  next: client.next_action || "Definir próxima ação",
+  due: client.next_action_at
+    ? new Date(client.next_action_at).toLocaleString("pt-BR")
+    : "Sem prazo",
+  risk: Boolean(
+    client.next_action_at && new Date(client.next_action_at) < new Date(),
+  ),
+});
+const commercialStage = (value: string) => {
+  const stage = value.toLocaleLowerCase("pt-BR");
+  if (stage.includes("agenda")) return "Agendamento";
+  if (stage.includes("visita")) return "Visita";
+  if (
+    stage.includes("document") ||
+    stage.includes("pasta") ||
+    stage.includes("qualific")
+  )
+    return "Pasta";
+  if (stage.includes("fecha") || stage.includes("negocia")) return "Fechamento";
+  if (stage.includes("vend") || stage === "fechado") return "Venda";
+  return "Prospecção";
+};
+const financeStage = (client: JourneyClient) => {
+  const stage = String(client.finance_stage || "").toLocaleLowerCase("pt-BR");
+  if (
+    stage.includes("document") ||
+    String(client.funnel_stage || "")
+      .toLocaleLowerCase("pt-BR")
+      .includes("document")
+  )
+    return "Aguardando docs";
+  if (stage.includes("análise") || stage.includes("analise"))
+    return "Em análise";
+  if (stage.includes("restri")) return "Restrição";
+  if (stage.includes("condicionado")) return "Condicionado";
+  if (stage.includes("aprovado")) return "Aprovado";
+  if (stage.includes("fechado")) return "Fechado";
+  if (
+    String(client.post_sale_stage || "")
+      .toLocaleLowerCase("pt-BR")
+      .includes("chaves")
+  )
+    return "Chaves";
+  if (client.post_sale_stage) return "Pós-venda";
+  return "Aguardando docs";
+};
 
 export default function FunilPage() {
   const [mode, setMode] = useState<"Comercial" | "Financiamento">("Comercial");
@@ -284,7 +357,31 @@ export default function FunilPage() {
   const [view, setView] = useState("Estoque atual");
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<Card | null>(null);
-  const stages = mode === "Comercial" ? commercial : financing;
+  const [clients, setClients] = useState<JourneyClient[]>([]);
+  useEffect(() => {
+    fetch("/api/funnel", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : []))
+      .then(setClients)
+      .catch(() => setClients([]));
+  }, []);
+  const stages = useMemo(() => {
+    const templates = mode === "Comercial" ? commercial : financing;
+    return templates.map((stage) => {
+      const cards = clients
+        .filter(
+          (client) =>
+            (mode === "Comercial"
+              ? commercialStage(String(client.funnel_stage || ""))
+              : financeStage(client)) === stage.name,
+        )
+        .map(cardFrom);
+      return {
+        ...stage,
+        cards,
+        target: `${cards.length} cliente${cards.length === 1 ? "" : "s"}`,
+      };
+    });
+  }, [mode, clients]);
   const visible = useMemo(
     () =>
       stages.map((stage) => ({
@@ -326,16 +423,25 @@ export default function FunilPage() {
             <span>Gestão da carteira ativa</span>
             <h1>Funil Operacional</h1>
           </div>
-          <div className="pipe-actions">
+        </header>
+        <div className="pipe-content">
+          <CrmCenterTabs />
+          <div className="crm-page-toolbar pipe-actions">
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Buscar cliente"
             />
-          <button onClick={()=>document.querySelector<HTMLSelectElement>("#filtros-funil select")?.focus({preventScroll:true})}>Filtros</button>
+            <button
+              onClick={() =>
+                document
+                  .querySelector<HTMLSelectElement>("#filtros-funil select")
+                  ?.focus({ preventScroll: true })
+              }
+            >
+              Filtros
+            </button>
           </div>
-        </header>
-        <div className="pipe-content">
           <section className="pipe-top">
             <div className="pipe-mode">
               <button
@@ -427,7 +533,12 @@ export default function FunilPage() {
                 ? "Priorize confirmação 24h e 2h antes do compromisso."
                 : "Cobrança objetiva com checklist individual hoje."}
             </p>
-            <Link className="bottleneck-action" href={mode==="Comercial"?"/agenda":"/analises"}>Atuar no gargalo</Link>
+            <Link
+              className="bottleneck-action"
+              href={mode === "Comercial" ? "/agenda" : "/analises"}
+            >
+              Atuar no gargalo
+            </Link>
           </section>
           <section
             className={`kanban ${mode === "Financiamento" ? "finance" : ""}`}
@@ -488,7 +599,12 @@ export default function FunilPage() {
                     </article>
                   ))}
                 </div>
-                <Link className="column-action" href={mode==="Comercial"?"/carteira":"/analises"}>Ver etapa completa</Link>
+                <Link
+                  className="column-action"
+                  href={mode === "Comercial" ? "/carteira" : "/analises"}
+                >
+                  Ver etapa completa
+                </Link>
               </div>
             ))}
           </section>
@@ -528,7 +644,10 @@ export default function FunilPage() {
                 WhatsApp
               </a>
             </div>
-            <Link className="drawer-primary" href="/clientes">
+            <Link
+              className="drawer-primary"
+              href={selected.id ? `/clientes/${selected.id}` : "/clientes"}
+            >
               Abrir ficha completa
             </Link>
           </aside>

@@ -1,13 +1,16 @@
 import "server-only";
-import {DatabaseSync} from "node:sqlite";
+import { DatabaseSync } from "node:sqlite";
 import fs from "node:fs";
 import path from "node:path";
 
-const dataDir=process.env.CRM_DATA_DIR||path.join(process.cwd(),"data");
-fs.mkdirSync(dataDir,{recursive:true});
-const dbPath=path.join(dataDir,"monteiro-crm.db");
-const globalDb=globalThis as typeof globalThis & {monteiroDb?:DatabaseSync};
-export const db=globalDb.monteiroDb||(globalDb.monteiroDb=new DatabaseSync(dbPath));
+const dataDir = process.env.CRM_DATA_DIR || path.join(process.cwd(), "data");
+fs.mkdirSync(dataDir, { recursive: true });
+const dbPath = path.join(dataDir, "monteiro-crm.db");
+const globalDb = globalThis as typeof globalThis & {
+  monteiroDb?: DatabaseSync;
+};
+export const db =
+  globalDb.monteiroDb || (globalDb.monteiroDb = new DatabaseSync(dbPath));
 
 db.exec(`
 PRAGMA busy_timeout=15000;
@@ -72,36 +75,161 @@ CREATE INDEX IF NOT EXISTS idx_appointments_date ON appointments(starts_at,statu
 CREATE INDEX IF NOT EXISTS idx_notifications_due ON notifications(read_at,due_at);
 `);
 
-for(const migration of [
- "ALTER TABLE clients ADD COLUMN project_interest TEXT",
- "ALTER TABLE clients ADD COLUMN data_quality TEXT NOT NULL DEFAULT 'validado'"
-]){try{db.exec(migration)}catch{}}
-
-{
- const insertBuilder=db.prepare("INSERT OR IGNORE INTO builders(name,category,contact_name,phone,regions) VALUES(?,?,?,?,?)");
- const insertProject=db.prepare("INSERT INTO projects(builder_id,name,kind,region,sale_price,commission_rate,available_units) VALUES(?,?,?,?,?,?,?)");
- insertBuilder.run("Canopus","Empreendimentos","Marcos Vinícius","86999412208","Timon,Teresina Sudeste");
- insertBuilder.run("MC Engenharia","Casas residenciais","Rafael Monteiro","86998723100","Teresina Leste,Teresina Norte");
- insertBuilder.run("Betacon","Mista","Fernanda Alves","86981127740","Teresina Sul,Altos,Demerval Lobão");
- const canopus=Number(db.prepare("SELECT id FROM builders WHERE name='Canopus'").get()?.id);
- const mc=Number(db.prepare("SELECT id FROM builders WHERE name='MC Engenharia'").get()?.id);
- const betacon=Number(db.prepare("SELECT id FROM builders WHERE name='Betacon'").get()?.id);
- const addProject=(...args:[number,string,string,string,number,number,number])=>{try{insertProject.run(...args)}catch{}}
- addProject(canopus,"Village dos Pássaros II","Condomínio de apartamentos","Timon",226500,6,34);
- addProject(canopus,"Village Natureza","Condomínio de casas","Timon",200500,6,21);
- addProject(canopus,"Village Garden II","Condomínio de apartamentos","Teresina Sudeste",214000,6,18);
- addProject(mc,"Residencial Monte Verde","Casas residenciais","Teresina Leste",240000,6,7);
- addProject(mc,"Residencial Vale Norte","Casas residenciais","Teresina Norte",218000,6,4);
- addProject(betacon,"Parque das Flores","Condomínio de casas","Teresina Sul",198000,4,12);
+for (const migration of [
+  "ALTER TABLE clients ADD COLUMN project_interest TEXT",
+  "ALTER TABLE clients ADD COLUMN data_quality TEXT NOT NULL DEFAULT 'validado'",
+]) {
+  try {
+    db.exec(migration);
+  } catch {}
 }
 
 {
- const add=db.prepare("INSERT OR IGNORE INTO clients(name,phone,email,sex,marital_status,profession,income,region_interest,origin_type,origin_detail,funnel_stage,finance_stage,next_action,next_action_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
- add.run("Nicolle Cristine","5586999964566","nicolle@email.com","Feminino","Casado civil","Autônoma",4900,"Timon","Lista fria","Canopus","Proposta","Aprovado","Apresentar proposta","2026-08-10T14:00:00");
+  const insertBuilder = db.prepare(
+    "INSERT OR IGNORE INTO builders(name,category,contact_name,phone,regions) VALUES(?,?,?,?,?)",
+  );
+  const insertProject = db.prepare(
+    "INSERT INTO projects(builder_id,name,kind,region,sale_price,commission_rate,available_units) VALUES(?,?,?,?,?,?,?)",
+  );
+  insertBuilder.run(
+    "Canopus",
+    "Empreendimentos",
+    "Marcos Vinícius",
+    "86999412208",
+    "Timon,Teresina Sudeste",
+  );
+  insertBuilder.run(
+    "MC Engenharia",
+    "Casas residenciais",
+    "Rafael Monteiro",
+    "86998723100",
+    "Teresina Leste,Teresina Norte",
+  );
+  insertBuilder.run(
+    "Betacon",
+    "Mista",
+    "Fernanda Alves",
+    "86981127740",
+    "Teresina Sul,Altos,Demerval Lobão",
+  );
+  const canopus = Number(
+    db.prepare("SELECT id FROM builders WHERE name='Canopus'").get()?.id,
+  );
+  const mc = Number(
+    db.prepare("SELECT id FROM builders WHERE name='MC Engenharia'").get()?.id,
+  );
+  const betacon = Number(
+    db.prepare("SELECT id FROM builders WHERE name='Betacon'").get()?.id,
+  );
+  const addProject = (
+    ...args: [number, string, string, string, number, number, number]
+  ) => {
+    try {
+      insertProject.run(...args);
+    } catch {}
+  };
+  addProject(
+    canopus,
+    "Village dos Pássaros II",
+    "Condomínio de apartamentos",
+    "Timon",
+    226500,
+    6,
+    34,
+  );
+  addProject(
+    canopus,
+    "Village Natureza",
+    "Condomínio de casas",
+    "Timon",
+    200500,
+    6,
+    21,
+  );
+  addProject(
+    canopus,
+    "Village Garden II",
+    "Condomínio de apartamentos",
+    "Teresina Sudeste",
+    214000,
+    6,
+    18,
+  );
+  addProject(
+    mc,
+    "Residencial Monte Verde",
+    "Casas residenciais",
+    "Teresina Leste",
+    240000,
+    6,
+    7,
+  );
+  addProject(
+    mc,
+    "Residencial Vale Norte",
+    "Casas residenciais",
+    "Teresina Norte",
+    218000,
+    6,
+    4,
+  );
+  addProject(
+    betacon,
+    "Parque das Flores",
+    "Condomínio de casas",
+    "Teresina Sul",
+    198000,
+    4,
+    12,
+  );
 }
 
-export function logClientEvent(clientId:number,eventType:string,title:string,description:string,newStage?:string,metricKey?:string){
- const client=db.prepare("SELECT funnel_stage FROM clients WHERE id=?").get(clientId);
- db.prepare("INSERT INTO client_events(client_id,event_type,title,description,old_stage,new_stage,metric_key) VALUES(?,?,?,?,?,?,?)").run(clientId,eventType,title,description,client?.funnel_stage||null,newStage||null,metricKey||null);
- if(newStage)db.prepare("UPDATE clients SET funnel_stage=?,updated_at=CURRENT_TIMESTAMP WHERE id=?").run(newStage,clientId);
+{
+  const add = db.prepare(
+    "INSERT OR IGNORE INTO clients(name,phone,email,sex,marital_status,profession,income,region_interest,origin_type,origin_detail,funnel_stage,finance_stage,next_action,next_action_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+  );
+  add.run(
+    "Nicolle Cristine",
+    "5586999964566",
+    "nicolle@email.com",
+    "Feminino",
+    "Casado civil",
+    "Autônoma",
+    4900,
+    "Timon",
+    "Lista fria",
+    "Canopus",
+    "Proposta",
+    "Aprovado",
+    "Apresentar proposta",
+    "2026-08-10T14:00:00",
+  );
+}
+
+export function logClientEvent(
+  clientId: number,
+  eventType: string,
+  title: string,
+  description: string,
+  newStage?: string,
+  metricKey?: string,
+) {
+  const client = db
+    .prepare("SELECT funnel_stage FROM clients WHERE id=?")
+    .get(clientId);
+  db.prepare(
+    "INSERT INTO client_events(client_id,event_type,title,description,old_stage,new_stage,metric_key) VALUES(?,?,?,?,?,?,?)",
+  ).run(
+    clientId,
+    eventType,
+    title,
+    description,
+    client?.funnel_stage || null,
+    newStage || null,
+    metricKey || null,
+  );
+  if (newStage)
+    db.prepare(
+      "UPDATE clients SET funnel_stage=?,updated_at=CURRENT_TIMESTAMP WHERE id=?",
+    ).run(newStage, clientId);
 }
