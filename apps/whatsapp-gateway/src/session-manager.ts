@@ -24,6 +24,15 @@ function providerTimestamp(value: unknown) {
   return seconds && seconds > 0 ? new Date(seconds * 1_000).toISOString() : new Date().toISOString();
 }
 
+function normalizedMediaType(mimeType: string | null | undefined, messageType: string) {
+  const baseType = mimeType?.split(";", 1)[0]?.trim().toLowerCase();
+  if (baseType) return baseType;
+  if (messageType === "audio") return "audio/ogg";
+  if (messageType === "image") return "image/jpeg";
+  if (messageType === "video") return "video/mp4";
+  return "application/octet-stream";
+}
+
 export class SessionManager {
   private readonly db: SupabaseClient;
   private readonly runtimes = new Map<string, Runtime>();
@@ -37,7 +46,8 @@ export class SessionManager {
     const buffer = await downloadMediaMessage(message, "buffer", {}, { logger: pino({ level: "silent" }), reuploadRequest: socket.updateMediaMessage });
     const safeName = (fileName || `${messageType}.bin`).replace(/[^a-zA-Z0-9._-]/g, "_").slice(-120);
     const storagePath = `${sessionId}/${providerMessageId}/${safeName}`;
-    const { error } = await this.db.storage.from(config.mediaBucket).upload(storagePath, buffer, { upsert: false, contentType: mimeType || "application/octet-stream" });
+    const contentType = normalizedMediaType(mimeType, messageType);
+    const { error } = await this.db.storage.from(config.mediaBucket).upload(storagePath, buffer, { upsert: false, contentType });
     if (error && !/already exists/i.test(error.message)) throw new Error(`Media upload falhou: ${error.message}`);
     return storagePath;
   }
