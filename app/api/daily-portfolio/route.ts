@@ -118,6 +118,34 @@ export async function GET() {
 
 export async function POST(request: Request) {
   const body = await request.json();
+  if (body.action === "add-selected") {
+    const clientIds = Array.isArray(body.clientIds)
+      ? [...new Set(body.clientIds.map(Number).filter((id: number) => Number.isSafeInteger(id) && id > 0))].slice(0, 50)
+      : [];
+    if (!clientIds.length) return NextResponse.json({ error: "Selecione ao menos um contato." }, { status: 400 });
+    const supabase = supabaseAdmin();
+    const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
+    const clients = await supabase.from("clients").select("id,name,data_quality").in("id", clientIds).eq("data_quality", "validado").neq("name", "CLIENTE TESTE - MONTEIRO CRM");
+    if (clients.error) return NextResponse.json({ error: clients.error.message }, { status: 500 });
+    const validIds = (clients.data || []).map((client) => Number(client.id));
+    if (!validIds.length) return NextResponse.json({ error: "Nenhum contato validado pode entrar na fila." }, { status: 400 });
+    const existing = await supabase.from("daily_portfolios").select("client_id").eq("assigned_date", today).in("client_id", validIds);
+    if (existing.error) return NextResponse.json({ error: existing.error.message }, { status: 500 });
+    const existingIds = new Set((existing.data || []).map((row) => Number(row.client_id)));
+    const newIds = validIds.filter((id) => !existingIds.has(id));
+    if (newIds.length) {
+      const inserted = await supabase.from("daily_portfolios").insert(newIds.map((clientId) => ({ client_id: clientId, assigned_date: today, status: "Pendente" })));
+      if (inserted.error) return NextResponse.json({ error: inserted.error.message }, { status: 500 });
+      const events = await supabase.from("client_events").insert(newIds.map((clientId) => ({
+        client_id: clientId,
+        event_type: "DAILY_QUEUE_ADDED",
+        title: "Adicionado à fila de atendimento",
+        description: "Contato selecionado manualmente para atendimento na Carteira do Dia, sem disparo automático.",
+      })));
+      if (events.error) return NextResponse.json({ error: events.error.message, added: newIds.length }, { status: 500 });
+    }
+    return NextResponse.json({ added: newIds.length, alreadyQueued: validIds.length - newIds.length, rejected: clientIds.length - validIds.length });
+  }
   if (body.action === "start-client") {
     const clientId = Number(body.clientId);
     if (!clientId)

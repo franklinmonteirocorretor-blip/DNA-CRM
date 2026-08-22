@@ -307,6 +307,12 @@
   cursor: pointer;
 }
 
+.swd-audience-actions {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
 .swd-client-list {
   max-height: 190px;
   margin-top: 10px;

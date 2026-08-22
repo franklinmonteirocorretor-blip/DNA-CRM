@@ -350,6 +350,17 @@ export function SmartWhatsAppDispatcher() {
     finally { setPending(null); }
   };
 
+  const addToManualQueue = async () => {
+    if (!config.selectedClientIds.length) { setError("Selecione contatos para a fila."); return; }
+    setPending("queue"); setError(""); setNotice("");
+    try {
+      const response = await fetch("/api/daily-portfolio", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "add-selected", clientIds: config.selectedClientIds }) });
+      const data = await readResponse(response) as { added?: number; alreadyQueued?: number; rejected?: number };
+      setNotice(`${data.added || 0} contatos adicionados à Carteira do Dia. ${data.alreadyQueued || 0} já estavam na fila. Nenhum disparo criado.`);
+    } catch (reason) { setError(reason instanceof Error ? reason.message : "Falha ao montar fila manual."); }
+    finally { setPending(null); }
+  };
+
   const post = async (payload: Record<string, unknown>) => {
     const response = await fetch("/api/whatsapp-dispatcher", {
       method: "POST",
@@ -752,7 +763,10 @@ export function SmartWhatsAppDispatcher() {
           <section className="swd-audience" aria-label="Público selecionado">
             <header><strong>Público-alvo</strong><span>{config.selectedClientIds.length} contatos selecionados</span></header>
             <p>Fonte canônica: {config.source === "DAILY_WALLET" ? "Carteira do Dia" : "Base de clientes"}. Filtros seguem Construtora &gt; Empreendimento.</p>
-            <button type="button" className="secondary" onClick={loadAudience} disabled={audienceLoading}>{audienceLoading ? "Carregando..." : "Carregar contatos"}</button>
+            <div className="swd-audience-actions">
+              <button type="button" className="secondary" onClick={loadAudience} disabled={audienceLoading}>{audienceLoading ? "Carregando..." : "Carregar contatos"}</button>
+              <button type="button" onClick={addToManualQueue} disabled={!config.selectedClientIds.length || pending === "queue"}>{pending === "queue" ? "Adicionando..." : "Adicionar à fila sem disparar"}</button>
+            </div>
             {audience.length ? <div className="swd-client-list">{audience.map((client) => <label key={client.id}><input type="checkbox" checked={config.selectedClientIds.includes(client.id)} onChange={() => updateConfig("selectedClientIds", config.selectedClientIds.includes(client.id) ? config.selectedClientIds.filter((id) => id !== client.id) : [...config.selectedClientIds, client.id])}/><span>{client.name}<small>{client.project_interest || "Empreendimento não informado"}</small></span></label>)}</div> : null}
           </section>
 
