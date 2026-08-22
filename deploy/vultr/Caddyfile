@@ -1,0 +1,4 @@
+{$GATEWAY_DOMAIN} {
+  reverse_proxy whatsapp-gateway:10000
+  encode zstd gzip
+}
