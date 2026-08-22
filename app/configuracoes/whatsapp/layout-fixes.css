@@ -1,0 +1,26 @@
+@media (max-width: 900px) {
+  .wa-sidebar {
+    display: flex !important;
+  }
+  .wa-header {
+    width: 100%;
+    flex-direction: column;
+  }
+  .wa-status {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 650px) {
+  .wa-shell { display: block; }
+  .wa-sidebar {
+    position: static;
+    width: 100% !important;
+    height: auto;
+    padding: 12px;
+  }
+  .wa-brand,
+  .wa-user { display: none !important; }
+  .wa-main { margin-left: 0; }
+}

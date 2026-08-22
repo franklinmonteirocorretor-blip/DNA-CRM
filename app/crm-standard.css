@@ -97,7 +97,9 @@ select:disabled {
 
 .crm-navigation .crm-logout {
   width: calc(100% - 10px) !important;
+  height: 38px !important;
   min-height: 38px !important;
+  max-height: 38px !important;
   margin: 12px 5px 0 !important;
   padding: 0 14px !important;
   border: 1px solid #7f601b !important;
@@ -122,6 +124,17 @@ select:disabled {
 }
 .crm-navigation .crm-logout i {
   width: 16px !important;
+  min-width: 16px !important;
+  height: 16px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: currentColor !important;
+  display: grid !important;
+  place-items: center !important;
+  flex: 0 0 16px !important;
   font: normal 15px/1 Arial, Helvetica, sans-serif !important;
 }
 
@@ -134,17 +147,18 @@ select:disabled {
 .crm-navigation .crm-nav-group-title {
   min-height: 37px;
   padding: 0 13px;
-  border: 1px solid #493817;
+  border: 1px solid #292929;
   border-radius: 8px;
-  background: linear-gradient(
-    100deg,
-    rgba(217, 170, 61, 0.13),
-    rgba(217, 170, 61, 0.025)
-  );
-  color: #e8bd55;
+  background: transparent;
+  color: #bdbdbd;
   display: flex;
   align-items: center;
   gap: 12px;
+}
+.crm-navigation .crm-nav-group-title.active {
+  border-color: #493817;
+  background: linear-gradient(100deg, rgba(217, 170, 61, 0.13), rgba(217, 170, 61, 0.025));
+  color: #e8bd55;
 }
 .crm-navigation .crm-nav-group-title i {
   width: 18px;

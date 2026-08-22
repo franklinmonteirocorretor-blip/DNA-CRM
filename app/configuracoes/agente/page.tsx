@@ -1,7 +1,9 @@
 "use client";
+import Image from "next/image";
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import { CrmNavigation } from "@/app/components/crm-navigation";
 import "./agent.css";
+import "./agent-layout.css";
 
 type Provider={id:string;provider:string;model:string;api_key_ref:string;base_url:string|null;enabled:boolean;priority:number};
 type Version={version:number;file_name:string;status:string};
@@ -29,7 +31,7 @@ export default function AgentSettingsPage(){
  const outboundKillSwitch=control?.outboundKillSwitch??config?.control.outbound_kill_switch;
  const killSwitch=control?.killSwitch??config?.control.kill_switch;
  const outboundBlocked=simulationMode===true||outboundKillSwitch===true||killSwitch===true;
- return <main className="agent-settings"><CrmNavigation/><section className="agent-content"><header><span>Configurações / Agente</span><h1>Cérebro Comercial</h1><p>Controles, conhecimento e comportamento do Agente Monteiro.</p></header>
+ return <main className="agent-settings"><aside className="agent-sidebar"><div className="agent-brand"><Image src="/monteiro-logo.png" alt="Monteiro CRM" width={58} height={64}/><b>MONTEIRO</b><span>CRM</span></div><CrmNavigation/><div className="agent-user"><i>FM</i><div><b>Franklin Monteiro</b><span>Corretor + Gestor</span></div></div></aside><section className="agent-content"><header><span>Configurações / Agente</span><h1>Cérebro Comercial</h1><p>Controles, conhecimento e comportamento do Agente Monteiro.</p></header>
  <div className="agent-safety"><b className={simulationMode===true?"safe":simulationMode===false?"blocked":""}>SIMULATION MODE {simulationMode===undefined?"INDETERMINADO":simulationMode?"ON":"OFF"}</b><b className={outboundBlocked?"blocked":""}>OUTBOUND REAL {outboundBlocked?"OFF":"INDETERMINADO"}</b><b>OUTBOUND KILL SWITCH {outboundKillSwitch===undefined?"INDETERMINADO":outboundKillSwitch?"ATIVO":"INATIVO"}</b><b>KILL SWITCH GLOBAL {killSwitch===undefined?"INDETERMINADO":killSwitch?"ATIVO":"INATIVO"}</b></div>
  {loading&&<p className="notice">Carregando configurações...</p>}{error&&<p className="notice error" role="alert">{error} <button className="link" onClick={load}>Tentar novamente</button></p>}{message&&<p className="notice success">{message}</p>}
  {config&&<section className="panel"><div className="heading"><div><h2>Persona</h2><p>Ajuste tom e intensidade comercial.</p></div><button onClick={persona} disabled={busy==="persona"}>{busy==="persona"?"Salvando...":"Salvar persona"}</button></div><label>Nome da persona<input value={config.persona.persona_name} onChange={e=>setConfig({...config,persona:{...config.persona,persona_name:e.target.value}})}/></label><div className="grid">{[...Object.entries(config.persona.tone).map(([k,v])=>["tone",k,v] as const),...Object.entries(config.persona.sales).map(([k,v])=>["sales",k,v] as const)].map(([g,k,v])=><label className="scale" key={g+k}><span>{names[k]||k}<output>{v}</output></span><input type="range" min="0" max="10" value={v} onChange={e=>scale(g,k,Number(e.target.value))}/></label>)}</div></section>}

@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { CrmNavigation } from "../../components/crm-navigation";
 import "./whatsapp.css";
+import "./settings-links.css";
+import "./layout-fixes.css";
 
 type Session = {
   id: string;
@@ -112,9 +114,10 @@ export default function WhatsAppSettingsPage() {
             <span>Configurações / WhatsApp</span>
             <h1>Conexão do Agente Comercial</h1>
             <p>Gateway durável, sessão protegida e outbound real bloqueado.</p>
-            <Link href="/configuracoes/whatsapp/abordagens">
-              Configurar abordagens, modelos e cadências
-            </Link>
+            <nav className="wa-settings-links" aria-label="Configurações do agente comercial">
+              <Link href="/configuracoes/agente">Cérebro Comercial</Link>
+              <Link href="/configuracoes/whatsapp/abordagens">Abordagens e cadências</Link>
+            </nav>
           </div>
           <div className={`wa-status ${session?.status || "offline"}`}>
             <small>Estado atual</small>

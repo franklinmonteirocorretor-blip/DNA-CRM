@@ -1,0 +1,27 @@
+.wa-settings-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 11px;
+}
+
+.wa-settings-links a {
+  min-height: 30px;
+  padding: 0 11px;
+  border: 1px solid #5f491a;
+  border-radius: 6px;
+  background: #100d08;
+  color: #e5b642;
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-decoration: none;
+}
+
+.wa-settings-links a:hover {
+  border-color: #d9aa3d;
+  background: #191308;
+  color: #f0c75b;
+}

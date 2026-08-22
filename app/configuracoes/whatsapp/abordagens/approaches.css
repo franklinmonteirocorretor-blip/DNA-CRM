@@ -1,0 +1,73 @@
+.wa-library > section {
+  margin-bottom: 16px !important;
+  padding: 20px !important;
+  border: 1px solid #332b1d !important;
+  border-radius: 11px;
+  background: linear-gradient(145deg, #100e09, #0b0b0b) !important;
+}
+
+.wa-library h2 {
+  margin: 0 0 14px;
+  color: #f1eee7;
+  font-size: 17px;
+}
+
+.wa-library form,
+.wa-library article > div {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)) !important;
+  gap: 10px !important;
+  align-items: center;
+}
+
+.wa-library input,
+.wa-library select,
+.wa-library textarea {
+  width: 100% !important;
+  min-height: 38px;
+  padding: 10px !important;
+  border: 1px solid #4d4025 !important;
+  border-radius: 7px;
+  background: #080808 !important;
+  color: #fff !important;
+  outline: none;
+}
+
+.wa-library textarea {
+  resize: vertical;
+}
+
+.wa-library input:focus,
+.wa-library select:focus,
+.wa-library textarea:focus {
+  border-color: #d9aa3d !important;
+  box-shadow: 0 0 0 2px rgba(217, 170, 61, 0.12);
+}
+
+.wa-library button {
+  min-height: 38px;
+  padding: 0 15px !important;
+  border: 1px solid #8b681d !important;
+  border-radius: 7px;
+  background: linear-gradient(135deg, #efc75b, #c9901c) !important;
+  color: #080808 !important;
+  font-weight: 800 !important;
+}
+
+.wa-library button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #f5d06d, #d8a32f) !important;
+}
+
+.wa-library button:disabled {
+  opacity: 0.45;
+}
+
+.wa-library article {
+  border-top: 1px solid #2c261b !important;
+  border-radius: 0 !important;
+}
+
+.wa-library article p,
+.wa-library article small {
+  color: #8b8b8b !important;
+}

@@ -1,0 +1,63 @@
+.agent-settings {
+  display: block;
+}
+
+.agent-sidebar {
+  position: fixed;
+  top: 0;
+  height: 100vh;
+  padding: 22px 12px;
+  border-right: 1px solid #292929;
+  background: #050505;
+  display: flex;
+  flex-direction: column;
+}
+
+.agent-brand {
+  margin-bottom: 18px;
+  color: #e2b342;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  letter-spacing: 0.18em;
+}
+
+.agent-brand b { font: 19px Georgia, serif; }
+.agent-brand span { font-size: 9px; }
+
+.agent-user {
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid #262626;
+  display: flex;
+  gap: 9px;
+  align-items: center;
+}
+
+.agent-user i {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #555;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-style: normal;
+}
+
+.agent-user div { display: flex; flex-direction: column; }
+.agent-user b { font-size: 11px; }
+.agent-user span { color: #777; font-size: 9px; }
+
+@media (max-width: 800px) {
+  .agent-sidebar { width: 74px; }
+}
+
+@media (max-width: 650px) {
+  .agent-sidebar {
+    position: static;
+    width: 100%;
+    height: auto;
+  }
+  .agent-brand,
+  .agent-user { display: none; }
+}
