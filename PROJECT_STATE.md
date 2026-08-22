@@ -1,6 +1,6 @@
 # Monteiro CRM - estado do projeto
 
-Atualizado em: 14/08/2026
+Atualizado em: 22/08/2026
 
 ## Objetivo
 
@@ -109,7 +109,7 @@ As rotas em `app/api/` cobrem: autenticacao, clientes, eventos, bases/importacao
 - Producao usa dados reais; fixtures nao entram nos KPIs.
 - `CLIENTE TESTE - MONTEIRO CRM` existe apenas para auditoria e deve ser excluido das metricas.
 - Segredos ficam apenas em ambientes protegidos e arquivos locais ignorados pelo Git.
-- Nao expor `SUPABASE_SERVICE_ROLE_KEY` no cliente.
+- Nao expor `SUPABASE_SECRET_KEY` no cliente.
 - Nao versionar banco local, storage de clientes, exportacoes, cookies ou credenciais.
 
 ## Comandos
@@ -179,3 +179,30 @@ Uma tarefa/thread por feature. Exemplos:
 Prompt inicial obrigatorio de cada tarefa:
 
 > Leia AGENTS.md + PROJECT_STATE.md e trabalhe somente na tarefa X.
+
+## Estado técnico verificado em 15/08/2026
+
+- Produção: `https://monteiro-crm.vercel.app`, deployment `dpl_3GrAdpVsqihLV6S5jNngMrN1C8JT`.
+- `npm run lint`: aprovado sem erros ou avisos.
+- `npm run build`: aprovado, incluindo TypeScript e 39 rotas.
+- `npm test`: 2 testes críticos da mesa aprovados (bônus, entrada, saldo mensal e VGV bruto).
+- `npm run verify:production`: login e catálogo reais aprovados; 3 construtoras e 6 empreendimentos.
+- Verificação visual: 14 rotas críticas sem erros de console ou estouro horizontal em desktop.
+- Responsividade: Dashboard, Agenda, Fechamento, Clientes, Construtoras e CCAs testados em 390x844; sem estouro horizontal após correção da Central de Clientes.
+- Hierarquia comercial persistida e aplicada: Cidade → Construtora → Empreendimento.
+- Central de Clientes agora pesquisa e filtra também por cidade, preservando construtora e empreendimento dependentes.
+- Chave administrativa de produção migrada para `sb_secret_...` e sincronizada em Production, Preview e Development. A chave temporária local foi removida.
+- Bloqueio externo: o painel Supabase ainda responde HTTP 400 ao comando “Disable JWT-based API keys”; a aplicação já não depende da chave `service_role` antiga, mas a desativação definitiva permanece pendente no provedor.
+
+## Estado técnico verificado em 22/08/2026
+
+- Worktree legado classificado e consolidado em commits auditáveis por domínio, sem reset ou descarte.
+- CRM: lint, TypeScript, 10 testes e build de 44 rotas aprovados.
+- Gateway: build e 3 testes aprovados; dependency audit sem vulnerabilidades.
+- Gateway Render online e sessão de teste conectada; outbound real geral permanece desligado.
+- Nova sessão de teste `dde0e967-d932-484d-ac71-827f41d49448` conectada por QR em 22/08/2026; Supabase confirmou auth state novo, heartbeat ativo, zero tentativas de reconnect, circuito fechado e nenhuma falha.
+- Inbound real de texto, áudio, documento e vídeo persistido com identidade, mídia, eventos e auditoria.
+- Human Takeover e retorno para `AUTO` observados.
+- Disconnect/reconnect controlado passou; falha simulada de Storage preservou mensagem, evento e auditoria sem duplicação.
+- Sprint B.2 permanece `NO-GO` para número comercial até validar imagem real, perda física de rede, outbound allowlisted, runtime sem sleep e soak de 24 horas.
+- Sprint C não foi iniciada.
