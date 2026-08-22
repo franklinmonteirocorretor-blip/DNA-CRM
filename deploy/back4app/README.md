@@ -6,7 +6,7 @@ Este perfil executa o mesmo container do Monteiro WhatsApp Gateway. Não existe 
 
 - Repositório: `DNA-CRM`
 - Branch: `master`
-- Root directory: `monteiro-crm/apps/whatsapp-gateway`
+- Root directory: `apps/whatsapp-gateway`
 - Dockerfile: `Dockerfile`
 - Health check: `/health`
 - Plano: Free, 0.25 CPU, 256 MB RAM, região USA
