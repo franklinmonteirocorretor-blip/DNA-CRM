@@ -128,6 +128,10 @@ export class SessionManager {
       await this.update(id, "connected", { last_activity_at: new Date().toISOString() });
       if (!config.crmInboundUrl) return;
       for (const message of messages) if (message.key.id && message.key.remoteJid) {
+        const phoneJid = message.key.remoteJidAlt
+          || message.key.participantAlt
+          || (message.key.remoteJid.endsWith("@s.whatsapp.net") ? message.key.remoteJid : undefined);
+        const phone = phoneJid?.split("@")[0]?.split(":")[0]?.replace(/\D/g, "");
         const audio = message.message?.audioMessage;
         const document = message.message?.documentMessage;
         const image = message.message?.imageMessage;
@@ -153,6 +157,7 @@ export class SessionManager {
               sessionId: id,
               providerMessageId: message.key.id,
               providerConversationId: message.key.remoteJid,
+              phone,
               fromMe: Boolean(message.key.fromMe),
               manual: Boolean(message.key.fromMe) && !gatewayOrigin,
               text: message.message?.conversation || message.message?.extendedTextMessage?.text || document?.caption || image?.caption || video?.caption,

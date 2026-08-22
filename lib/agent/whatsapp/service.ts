@@ -1,6 +1,9 @@
 import { randomUUID } from "node:crypto";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { loadAgentControl } from "@/lib/agent/store";
+import { evaluateConfidence } from "@/lib/agent/confidence-gate";
+import { evaluatePolicy } from "@/lib/agent/policy-engine";
+import type { StructuredDecision } from "@/lib/agent/types";
 import { normalizePhoneE164, resolveOutboundIdentity } from "./identity-resolver";
 import type { ConversationControlMode } from "./types";
 
@@ -18,12 +21,91 @@ async function resolveInboundClient(phone: string | undefined) {
   return { clientId: data[0]!.id as number, status: "matched" as const, phoneE164: normalized };
 }
 
+async function ensureTestInboundClient(identity: Awaited<ReturnType<typeof resolveInboundClient>>) {
+  if (identity.status !== "not_found" || !identity.phoneE164) return identity;
+  const phone = identity.phoneE164.slice(1);
+  const suffix = phone.slice(-4);
+  const db = supabaseAdmin();
+  const { error } = await db.from("clients").upsert({
+    name: `CLIENTE TESTE - WHATSAPP ${suffix}`,
+    phone,
+    origin_type: "WhatsApp",
+    origin_detail: "Validação controlada do agente",
+    funnel_stage: "Novo lead",
+    finance_stage: "Não iniciado",
+    data_quality: "teste",
+    updated_at: new Date().toISOString(),
+  }, { onConflict: "phone", ignoreDuplicates: true });
+  if (error) throw error;
+  const { data, error: selectError } = await db.from("clients").select("id").eq("phone", phone).single();
+  if (selectError) throw selectError;
+  return { clientId: data.id as number, status: "created" as const, phoneE164: identity.phoneE164 };
+}
+
+function interpretInbound(text: string | undefined) {
+  const normalized = (text || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  if (/humano|corretor|atendente|pessoa/.test(normalized)) return { action: "request_human_review" as const, confidence: 0.99, intent: "human_handoff", reason: "Cliente solicitou atendimento humano.", proposedResponse: null };
+  if (/minha renda|meu financiamento|quanto aprova|condicao financeira|parcela para mim/.test(normalized)) return { action: "request_human_review" as const, confidence: 0.95, intent: "individual_finance", reason: "Condição financeira individual exige análise humana.", proposedResponse: null };
+  if (/imovel|casa|apartamento|empreendimento/.test(normalized)) return { action: "send_whatsapp" as const, confidence: 0.88, intent: "property_interest", reason: "Interesse imobiliário identificado.", proposedResponse: "Olá! Posso ajudar. Você procura casa ou apartamento, em qual cidade e faixa de valor?" };
+  return { action: "request_human_review" as const, confidence: 0.5, intent: "ambiguous", reason: "Mensagem ambígua; contexto insuficiente para resposta segura.", proposedResponse: null };
+}
+
+async function registerAgentDecision(input: { providerMessageId: string; conversationId: string; clientId: number; controlMode: string; text?: string }) {
+  const db = supabaseAdmin();
+  const idempotencyKey = `whatsapp:${input.providerMessageId}:agent-decision`;
+  const { data: existing } = await db.from("agent_events").select("id").eq("idempotency_key", idempotencyKey).maybeSingle();
+  if (existing) return;
+  const interpretation = interpretInbound(input.text);
+  const control = await loadAgentControl();
+  const decision: StructuredDecision = {
+    clientId: input.clientId,
+    action: interpretation.action,
+    capability: interpretation.action === "send_whatsapp" ? "whatsapp_outbound" : "human_escalation",
+    reason: interpretation.reason,
+    confidence: interpretation.confidence,
+    idempotencyKey,
+    payload: { conversationId: input.conversationId, intent: interpretation.intent, proposedResponse: interpretation.proposedResponse },
+    proposedAt: new Date().toISOString(),
+  };
+  const policy = input.controlMode === "auto"
+    ? evaluatePolicy(decision, control, interpretation.action === "send_whatsapp" ? { canContact: true, doNotContact: false, optedOutAt: null, localHour: Number(new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", hour: "2-digit", hour12: false }).format(new Date())), allowedStartHour: 8, allowedEndHour: 20 } : undefined)
+    : { allowed: false, requiresApproval: false, simulation: false, reason: "Controle humano da conversa bloqueou resposta do agente." };
+  const gate = evaluateConfidence(decision, control, policy);
+  const status = gate.allowed ? (gate.requiresApproval ? "approval_required" : gate.simulation ? "simulated" : "allowed") : "blocked";
+  const correlationId = randomUUID();
+  const payload = { intent: interpretation.intent, confidence: interpretation.confidence, proposedResponse: interpretation.proposedResponse, status, reason: gate.reason, outboundSent: false, simulationMode: control.simulationMode, controlMode: input.controlMode };
+  const { error: eventError } = await db.from("agent_events").insert({ client_id: input.clientId, entity_type: "whatsapp_conversation", entity_id: input.conversationId, event_type: "AGENT_DECISION_PROPOSED", actor_type: "agent", correlation_id: correlationId, idempotency_key: idempotencyKey, payload });
+  if (eventError && eventError.code !== "23505") throw eventError;
+  const { error: auditError } = await db.from("agent_audit_logs").insert({ client_id: input.clientId, correlation_id: correlationId, idempotency_key: `${idempotencyKey}:audit`, phase: "decision", action_type: decision.action, status, input: decision, output: payload });
+  if (auditError && auditError.code !== "23505") throw auditError;
+}
+
 export async function processProviderMessage(input: { sessionId: string; providerMessageId: string; providerConversationId: string; phone?: string; text?: string; occurredAt: string; fromMe?: boolean; manual?: boolean; messageType?: "text" | "audio" | "image" | "document" | "video"; mediaMetadata?: MediaMetadata | null }) {
   const db = supabaseAdmin();
-  const { data: existing } = await db.from("whatsapp_messages").select("id").eq("provider_message_id", input.providerMessageId).maybeSingle();
-  if (existing) return { duplicate: true };
+  const { data: existing } = await db.from("whatsapp_messages").select("id,conversation_id,client_id,body,direction").eq("provider_message_id", input.providerMessageId).maybeSingle();
+  if (existing) {
+    let existingClientId = existing.client_id as number | null;
+    if (!input.fromMe && !existingClientId) {
+      const existingPhone = input.phone || input.providerConversationId.split("@")[0]?.split(":")[0];
+      const reconciledIdentity = await ensureTestInboundClient(await resolveInboundClient(existingPhone));
+      existingClientId = reconciledIdentity.clientId;
+      if (existingClientId) {
+        await Promise.all([
+          db.from("whatsapp_messages").update({ client_id: existingClientId, updated_at: new Date().toISOString() }).eq("id", existing.id),
+          db.from("whatsapp_conversations").update({ client_id: existingClientId, phone_e164: reconciledIdentity.phoneE164 || existingPhone, updated_at: new Date().toISOString() }).eq("id", existing.conversation_id),
+        ]);
+        await db.from("client_events").insert({ client_id: existingClientId, event_type: "WhatsApp", title: "Mensagem recebida pelo WhatsApp", description: `Mensagem ${input.messageType || "text"} recebida e vinculada à conversa.` });
+      }
+    }
+    if (!input.fromMe && existingClientId) {
+      const { data: conversation } = await db.from("whatsapp_conversations").select("control_mode").eq("id", existing.conversation_id).single();
+      await registerAgentDecision({ providerMessageId: input.providerMessageId, conversationId: existing.conversation_id, clientId: existingClientId, controlMode: conversation?.control_mode || "auto", text: existing.body || input.text });
+    }
+    return { duplicate: true };
+  }
   const phone = input.phone || input.providerConversationId.split("@")[0]?.split(":")[0];
-  const identity = await resolveInboundClient(phone);
+  const resolvedIdentity = await resolveInboundClient(phone);
+  const identity = input.fromMe ? resolvedIdentity : await ensureTestInboundClient(resolvedIdentity);
   const correlationId = randomUUID();
   const activityColumn = input.fromMe ? { last_outbound_at: input.occurredAt } : { last_inbound_at: input.occurredAt };
   const { data: currentConversation } = await db.from("whatsapp_conversations").select("id,client_id,control_mode").eq("session_id", input.sessionId).eq("provider_conversation_id", input.providerConversationId).maybeSingle();
@@ -41,6 +123,10 @@ export async function processProviderMessage(input: { sessionId: string; provide
   if (eventError && eventError.code !== "23505") throw eventError;
   const { error: auditError } = await db.from("agent_audit_logs").insert({ client_id: conversation.client_id, correlation_id: correlationId, idempotency_key: `whatsapp:${input.providerMessageId}:inbound`, phase: "execution", action_type: "process_provider_message", status: "persisted", input: { providerMessageId: input.providerMessageId, providerConversationId: input.providerConversationId, messageType: input.messageType || "text", fromMe: Boolean(input.fromMe) }, output: { conversationId: conversation.id, clientId: conversation.client_id, controlMode: mode, identityResolution: identity.status, priority: input.fromMe ? null : "P0", mediaMetadata: input.mediaMetadata || null } });
   if (auditError && auditError.code !== "23505") throw auditError;
+  if (!input.fromMe && conversation.client_id) {
+    await db.from("client_events").insert({ client_id: conversation.client_id, event_type: "WhatsApp", title: "Mensagem recebida pelo WhatsApp", description: `Mensagem ${input.messageType || "text"} recebida e vinculada à conversa.` });
+    await registerAgentDecision({ providerMessageId: input.providerMessageId, conversationId: conversation.id, clientId: conversation.client_id, controlMode: mode, text: input.text });
+  }
   return { duplicate: false, conversationId: conversation.id, clientId: conversation.client_id, identityResolution: identity.status, mode };
 }
 
