@@ -20,3 +20,4 @@ tmp/
 .tmp-*/
 .tmp-cookie
 backups/
+supabase/.temp/
