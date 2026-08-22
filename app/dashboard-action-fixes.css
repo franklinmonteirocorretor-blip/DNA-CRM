@@ -1,1 +1,29 @@
-.dashboard-action-link{display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;cursor:pointer}.agenda-add.dashboard-action-link{color:#090909!important;background:linear-gradient(110deg,#e1b44b,#b77d16)!important;border:1px solid #e1b44b!important;font-weight:800}.execute-queue{min-height:38px;padding:0 16px;border:1px solid #e1b44b;border-radius:7px;background:linear-gradient(110deg,#e1b44b,#b77d16);color:#090909!important;font-size:9px;font-weight:800;text-transform:uppercase}.execute-queue:hover,.agenda-add.dashboard-action-link:hover{filter:brightness(1.08)}
+.dashboard-action-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+  cursor: pointer;
+}
+.agenda-add.dashboard-action-link {
+  color: #090909 !important;
+  background: linear-gradient(110deg, #e1b44b, #b77d16) !important;
+  border: 1px solid #e1b44b !important;
+  font-weight: 800;
+}
+.execute-queue {
+  min-height: 38px;
+  padding: 0 16px;
+  border: 1px solid #e1b44b;
+  border-radius: 7px;
+  background: linear-gradient(110deg, #e1b44b, #b77d16);
+  color: #090909 !important;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.execute-queue:hover,
+.agenda-add.dashboard-action-link:hover {
+  filter: brightness(1.08);
+}

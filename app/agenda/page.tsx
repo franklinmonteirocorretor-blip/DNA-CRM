@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { CrmNavigation } from "../components/crm-navigation";
+import { DailyMissionTabs } from "../components/daily-mission-tabs";
 import { useEffect, useMemo, useState } from "react";
 import "./agenda.css";
 import "./agenda-history.css";
@@ -286,11 +287,21 @@ export default function AgendaPage() {
   const [filter, setFilter] = useState<(typeof kinds)[number]>("Todos");
   const [selected, setSelected] = useState<Event>(emptyEvent);
   const [formOpen, setFormOpen] = useState(false);
-  const [clients, setClients] = useState<Array<{id:number;name:string}>>([]);
+  const [clients, setClients] = useState<Array<{ id: number; name: string }>>(
+    [],
+  );
   const [editingId, setEditingId] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
-  const [form, setForm] = useState({kind:"Visita ao imóvel",clientId:"",startsAt:"",place:"",objective:"",nextAction:"",nextActionAt:""});
+  const [form, setForm] = useState({
+    kind: "Visita ao imóvel",
+    clientId: "",
+    startsAt: "",
+    place: "",
+    objective: "",
+    nextAction: "",
+    nextActionAt: "",
+  });
   const [day, setDay] = useState("10");
   const [view, setView] = useState<keyof typeof periodData>("Semana");
   const [search, setSearch] = useState("");
@@ -304,7 +315,12 @@ export default function AgendaPage() {
   );
   const [nextDate, setNextDate] = useState("2026-08-11T09:00");
   const [attendanceSaved, setAttendanceSaved] = useState(false);
-  useEffect(() => { fetch("/api/clients?limit=5000").then(r=>r.ok?r.json():[]).then(setClients).catch(()=>{}); }, []);
+  useEffect(() => {
+    fetch("/api/clients?limit=5000")
+      .then((r) => (r.ok ? r.json() : []))
+      .then(setClients)
+      .catch(() => {});
+  }, []);
   const loadAppointments = () => {
     fetch("/api/appointments")
       .then((response) => (response.ok ? response.json() : []))
@@ -337,23 +353,136 @@ export default function AgendaPage() {
               ? String(row.project_interest)
               : undefined,
             stage: "Pós-venda",
-            place: String(row.notes || "").match(/Local: ([^|]+)/)?.[1]?.trim() || "A confirmar",
-            objective: String(row.notes || "").match(/Objetivo: (.+)$/)?.[1]?.trim() || String(row.kind),
+            place:
+              String(row.notes || "")
+                .match(/Local: ([^|]+)/)?.[1]
+                ?.trim() || "A confirmar",
+            objective:
+              String(row.notes || "")
+                .match(/Objetivo: (.+)$/)?.[1]
+                ?.trim() || String(row.kind),
             next: String(row.next_action || "Registrar resultado"),
             color: "gold",
           } as Event;
         });
         setEvents(synced);
-        if (synced.length) setSelected((current) => synced.find((item) => item.dbId === current.dbId) || synced[0]);
+        if (synced.length)
+          setSelected(
+            (current) =>
+              synced.find((item) => item.dbId === current.dbId) || synced[0],
+          );
       })
       .catch(() => {});
   };
-  useEffect(() => { loadAppointments(); }, []);
-  const setField=(key:keyof typeof form,value:string)=>setForm(current=>({...current,[key]:value}));
-  const selectClient=async(value:string)=>{setField("clientId",value);if(!value)return;const response=await fetch(`/api/appointments?cadenceClientId=${value}`);if(!response.ok)return;const recommendation=await response.json();setForm(current=>({...current,clientId:value,nextAction:recommendation.label,nextActionAt:String(recommendation.at).slice(0,16)}))};
-  const openNew=()=>{const d=new Date(Date.now()+3600000);d.setMinutes(0,0,0);setEditingId(null);setFormError("");setForm({kind:"Visita ao imóvel",clientId:"",startsAt:new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16),place:"",objective:"",nextAction:"",nextActionAt:""});setFormOpen(true)};
-  const openEdit=()=>{if(!selected.id)return;setEditingId(selected.dbId||null);setFormError("");const start=selected.startsAt?new Date(selected.startsAt):new Date();const next=selected.nextAt?new Date(selected.nextAt):null;const local=(d:Date)=>new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);setForm({kind:selected.kind,clientId:selected.clientId?String(selected.clientId):"",startsAt:local(start),place:selected.place==="A confirmar"?"":selected.place,objective:selected.objective,nextAction:selected.next,nextActionAt:next?local(next):""});setFormOpen(true);setTimeout(()=>document.querySelector(".quick-create")?.scrollIntoView({behavior:"smooth",block:"center"}),0)};
-  const saveAppointment=async()=>{if(!form.kind||!form.startsAt||!form.objective.trim()){setFormError("Preencha tipo, data, horário e objetivo.");return}setSaving(true);setFormError("");const response=await fetch("/api/appointments",{method:editingId?"PATCH":"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:editingId,...form})});const result=await response.json();setSaving(false);if(!response.ok){setFormError(result.error||"Não foi possível salvar o compromisso.");return}setFormOpen(false);setEditingId(null);loadAppointments()};
+  useEffect(() => {
+    loadAppointments();
+  }, []);
+  const setField = (key: keyof typeof form, value: string) =>
+    setForm((current) => ({ ...current, [key]: value }));
+  const selectClient = async (value: string) => {
+    setField("clientId", value);
+    if (!value) return;
+    const response = await fetch(`/api/appointments?cadenceClientId=${value}`);
+    if (!response.ok) return;
+    const recommendation = await response.json();
+    setForm((current) => ({
+      ...current,
+      clientId: value,
+      nextAction: recommendation.label,
+      nextActionAt: String(recommendation.at).slice(0, 16),
+    }));
+  };
+  const openNew = () => {
+    const d = new Date(Date.now() + 3600000);
+    d.setMinutes(0, 0, 0);
+    setEditingId(null);
+    setFormError("");
+    setForm({
+      kind: "Visita ao imóvel",
+      clientId: "",
+      startsAt: new Date(d.getTime() - d.getTimezoneOffset() * 60000)
+        .toISOString()
+        .slice(0, 16),
+      place: "",
+      objective: "",
+      nextAction: "",
+      nextActionAt: "",
+    });
+    setFormOpen(true);
+  };
+  const openEdit = () => {
+    if (!selected.id) return;
+    setEditingId(selected.dbId || null);
+    setFormError("");
+    const start = selected.startsAt ? new Date(selected.startsAt) : new Date();
+    const next = selected.nextAt ? new Date(selected.nextAt) : null;
+    const local = (d: Date) =>
+      new Date(d.getTime() - d.getTimezoneOffset() * 60000)
+        .toISOString()
+        .slice(0, 16);
+    setForm({
+      kind: selected.kind,
+      clientId: selected.clientId ? String(selected.clientId) : "",
+      startsAt: local(start),
+      place: selected.place === "A confirmar" ? "" : selected.place,
+      objective: selected.objective,
+      nextAction: selected.next,
+      nextActionAt: next ? local(next) : "",
+    });
+    setFormOpen(true);
+    setTimeout(
+      () =>
+        document
+          .querySelector(".quick-create")
+          ?.scrollIntoView({ behavior: "smooth", block: "center" }),
+      0,
+    );
+  };
+  const saveAppointment = async () => {
+    if (!form.kind || !form.startsAt || !form.objective.trim()) {
+      setFormError("Preencha tipo, data, horário e objetivo.");
+      return;
+    }
+    setSaving(true);
+    setFormError("");
+    const response = await fetch("/api/appointments", {
+      method: editingId ? "PATCH" : "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: editingId, ...form }),
+    });
+    const result = await response.json();
+    setSaving(false);
+    if (!response.ok) {
+      setFormError(result.error || "Não foi possível salvar o compromisso.");
+      return;
+    }
+    setFormOpen(false);
+    setEditingId(null);
+    loadAppointments();
+  };
+  const deleteAppointment = async () => {
+    if (!selected.dbId) return;
+    if (
+      !window.confirm(
+        `Excluir o agendamento “${selected.title}”? Esta ação remove o compromisso da agenda e registra a exclusão na ficha do cliente.`,
+      )
+    )
+      return;
+    setSaving(true);
+    const response = await fetch("/api/appointments", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: selected.dbId }),
+    });
+    const result = await response.json();
+    setSaving(false);
+    if (!response.ok) {
+      window.alert(result.error || "Não foi possível excluir o agendamento.");
+      return;
+    }
+    setSelected(emptyEvent);
+    loadAppointments();
+  };
   const visible = useMemo(
     () =>
       events.filter(
@@ -426,11 +555,12 @@ export default function AgendaPage() {
               a próxima ação.
             </p>
           </div>
-          <button onClick={openNew}>
-            ＋ Novo compromisso
-          </button>
         </header>
         <div className="agenda-content">
+          <DailyMissionTabs />
+          <div className="crm-page-toolbar">
+            <button onClick={openNew}>＋ Novo compromisso</button>
+          </div>
           <section className="agenda-kpis">
             <article>
               <span>Visitas e atendimentos</span>
@@ -454,7 +584,9 @@ export default function AgendaPage() {
               <strong>
                 {attended} <i>/ 10</i>
               </strong>
-              <small>Faltam {Math.max(0, 10 - attended)} para a meta semanal</small>
+              <small>
+                Faltam {Math.max(0, 10 - attended)} para a meta semanal
+              </small>
             </article>
             <article className="danger">
               <span>Não compareceu</span>
@@ -637,14 +769,19 @@ export default function AgendaPage() {
               <header>
                 <div>
                   <span>Novo registro</span>
-                  <h2>{editingId ? "Editar compromisso" : "Agendar compromisso"}</h2>
+                  <h2>
+                    {editingId ? "Editar compromisso" : "Agendar compromisso"}
+                  </h2>
                 </div>
                 <button onClick={() => setFormOpen(false)}>×</button>
               </header>
               <div>
                 <label>
                   <span>Tipo</span>
-                  <select value={form.kind} onChange={(e)=>setField("kind",e.target.value)}>
+                  <select
+                    value={form.kind}
+                    onChange={(e) => setField("kind", e.target.value)}
+                  >
                     <option>Visita ao imóvel</option>
                     <option>Atendimento presencial</option>
                     <option>Apresentação de proposta</option>
@@ -655,9 +792,16 @@ export default function AgendaPage() {
                 </label>
                 <label>
                   <span>Cliente</span>
-                  <select value={form.clientId} onChange={(e)=>selectClient(e.target.value)}>
+                  <select
+                    value={form.clientId}
+                    onChange={(e) => selectClient(e.target.value)}
+                  >
                     <option value="">Sem cliente vinculado</option>
-                    {clients.map(client=><option key={client.id} value={client.id}>{client.name}</option>)}
+                    {clients.map((client) => (
+                      <option key={client.id} value={client.id}>
+                        {client.name}
+                      </option>
+                    ))}
                   </select>
                 </label>
                 <label>
@@ -665,24 +809,40 @@ export default function AgendaPage() {
                   <input
                     type="datetime-local"
                     value={form.startsAt}
-                    onChange={(e)=>setField("startsAt",e.target.value)}
+                    onChange={(e) => setField("startsAt", e.target.value)}
                   />
                 </label>
                 <label>
                   <span>Local / empreendimento</span>
-                  <input value={form.place} onChange={(e)=>setField("place",e.target.value)} placeholder="Stand, escritório ou endereço" />
+                  <input
+                    value={form.place}
+                    onChange={(e) => setField("place", e.target.value)}
+                    placeholder="Stand, escritório ou endereço"
+                  />
                 </label>
                 <label className="wide">
                   <span>Objetivo obrigatório</span>
-                  <input value={form.objective} onChange={(e)=>setField("objective",e.target.value)} placeholder="Qual avanço este compromisso deve produzir?" />
+                  <input
+                    value={form.objective}
+                    onChange={(e) => setField("objective", e.target.value)}
+                    placeholder="Qual avanço este compromisso deve produzir?"
+                  />
                 </label>
                 <label>
                   <span>Próxima ação sugerida pelo CRM</span>
-                  <input value={form.nextAction} onChange={(e)=>setField("nextAction",e.target.value)} placeholder="Selecione um cliente para calcular" />
+                  <input
+                    value={form.nextAction}
+                    onChange={(e) => setField("nextAction", e.target.value)}
+                    placeholder="Selecione um cliente para calcular"
+                  />
                 </label>
                 <label>
                   <span>Data da próxima ação</span>
-                  <input type="datetime-local" value={form.nextActionAt} onChange={(e)=>setField("nextActionAt",e.target.value)} />
+                  <input
+                    type="datetime-local"
+                    value={form.nextActionAt}
+                    onChange={(e) => setField("nextActionAt", e.target.value)}
+                  />
                 </label>
               </div>
               <footer>
@@ -692,7 +852,11 @@ export default function AgendaPage() {
                 </small>
                 <span className="form-error">{formError}</span>
                 <button disabled={saving} onClick={saveAppointment}>
-                  {saving ? "Salvando..." : editingId ? "Salvar alterações" : "Salvar compromisso"}
+                  {saving
+                    ? "Salvando..."
+                    : editingId
+                      ? "Salvar alterações"
+                      : "Salvar compromisso"}
                 </button>
               </footer>
             </section>
@@ -935,8 +1099,17 @@ export default function AgendaPage() {
               )}
               <footer>
                 <button onClick={openEdit}>Editar compromisso</button>
+                {selected.dbId && (
+                  <button
+                    className="delete-appointment"
+                    onClick={deleteAppointment}
+                    disabled={saving}
+                  >
+                    Excluir agendamento
+                  </button>
+                )}
                 {selected.client && (
-<Link href="/clientes">Abrir ficha do cliente →</Link>
+                  <Link href="/clientes">Abrir ficha do cliente →</Link>
                 )}
               </footer>
             </aside>
@@ -950,9 +1123,25 @@ export default function AgendaPage() {
               <small>Agosto 2026</small>
             </header>
             {[
-              { n: commercial.length, label: "Agendamentos", rate: commercial.length ? "100%" : "0%" },
-              { n: confirmed, label: "Confirmados", rate: commercial.length ? `${((confirmed / commercial.length) * 100).toFixed(1).replace(".", ",")}%` : "0%" },
-              { n: attended, label: "Comparecimentos", rate: confirmed ? `${((attended / confirmed) * 100).toFixed(1).replace(".", ",")}%` : "0%" },
+              {
+                n: commercial.length,
+                label: "Agendamentos",
+                rate: commercial.length ? "100%" : "0%",
+              },
+              {
+                n: confirmed,
+                label: "Confirmados",
+                rate: commercial.length
+                  ? `${((confirmed / commercial.length) * 100).toFixed(1).replace(".", ",")}%`
+                  : "0%",
+              },
+              {
+                n: attended,
+                label: "Comparecimentos",
+                rate: confirmed
+                  ? `${((attended / confirmed) * 100).toFixed(1).replace(".", ",")}%`
+                  : "0%",
+              },
               { n: 0, label: "Propostas", rate: "0%" },
               { n: 0, label: "Vendas", rate: "0%" },
             ].map((item, index) => (

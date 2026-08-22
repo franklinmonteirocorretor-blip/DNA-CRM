@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { CrmNavigation } from "./components/crm-navigation";
+import { DailyMissionTabs } from "./components/daily-mission-tabs";
 import { useEffect, useState } from "react";
 import "./dashboard-nav.css";
 import "./dashboard-funnel.css";
@@ -166,9 +167,20 @@ const dailyKpis = [
   },
 ];
 
-const priorities: Array<{name:string;reason:string;age:string;phone:string;channel:IconName}> = [];
+const priorities: Array<{
+  name: string;
+  reason: string;
+  age: string;
+  phone: string;
+  channel: IconName;
+}> = [];
 
-const appointments: Array<{time:string;name:string;type:string;place:string}> = [];
+const appointments: Array<{
+  time: string;
+  name: string;
+  type: string;
+  place: string;
+}> = [];
 
 const commercialFunnel = [
   { label: "Prospecção", reference: 100, current: 0, color: "#53d4d8" },
@@ -193,39 +205,67 @@ const financingStages = [
 const followupStages = [
   {
     label: "Não atendeu",
-    count: 0, overdue: 0, client: "", phone: "", timing: "Sem clientes nesta etapa",
+    count: 0,
+    overdue: 0,
+    client: "",
+    phone: "",
+    timing: "Sem clientes nesta etapa",
   },
   {
     label: "Parou de responder",
-    count: 0, overdue: 0, client: "", phone: "", timing: "Sem clientes nesta etapa",
+    count: 0,
+    overdue: 0,
+    client: "",
+    phone: "",
+    timing: "Sem clientes nesta etapa",
   },
   {
     label: "Aguardando documentação",
-    count: 0, overdue: 0, client: "", phone: "", timing: "Sem clientes nesta etapa",
+    count: 0,
+    overdue: 0,
+    client: "",
+    phone: "",
+    timing: "Sem clientes nesta etapa",
   },
   {
     label: "Não enviou documentos",
-    count: 0, overdue: 0, client: "", phone: "", timing: "Sem clientes nesta etapa",
+    count: 0,
+    overdue: 0,
+    client: "",
+    phone: "",
+    timing: "Sem clientes nesta etapa",
   },
   {
     label: "Aprovado sem compra",
-    count: 0, overdue: 0, client: "", phone: "", timing: "Sem clientes nesta etapa",
+    count: 0,
+    overdue: 0,
+    client: "",
+    phone: "",
+    timing: "Sem clientes nesta etapa",
   },
   {
     label: "Restrição · longo prazo",
     count: 0,
     overdue: 0,
-    client: "", phone: "", timing: "Sem clientes nesta etapa",
+    client: "",
+    phone: "",
+    timing: "Sem clientes nesta etapa",
   },
   {
     label: "Condicionado",
-    count: 0, overdue: 0, client: "", phone: "", timing: "Sem clientes nesta etapa",
+    count: 0,
+    overdue: 0,
+    client: "",
+    phone: "",
+    timing: "Sem clientes nesta etapa",
   },
   {
     label: "Desistiu · reativação",
     count: 0,
     overdue: 0,
-    client: "", phone: "", timing: "Sem clientes nesta etapa",
+    client: "",
+    phone: "",
+    timing: "Sem clientes nesta etapa",
   },
 ];
 
@@ -320,19 +360,42 @@ export default function Home() {
     ];
     const updateClock = () => {
       const now = new Date();
-      setDate(new Intl.DateTimeFormat("pt-BR", {
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
+      setDate(
+        new Intl.DateTimeFormat("pt-BR", {
+          day: "2-digit",
+          month: "long",
+          year: "numeric",
+          timeZone: "America/Fortaleza",
+        }).format(now),
+      );
+      const parts = new Intl.DateTimeFormat("pt-BR", {
+        hour: "2-digit",
+        hour12: false,
+        weekday: "long",
         timeZone: "America/Fortaleza",
-      }).format(now));
-      const parts = new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", hour12: false, weekday: "long", timeZone: "America/Fortaleza" }).formatToParts(now);
-      const hour = Number(parts.find((part) => part.type === "hour")?.value || 0);
-      const weekday = parts.find((part) => part.type === "weekday")?.value || "Hoje";
-      setGreeting(hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite");
-      setMonthLabel(new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric", timeZone: "America/Fortaleza" }).format(now));
+      }).formatToParts(now);
+      const hour = Number(
+        parts.find((part) => part.type === "hour")?.value || 0,
+      );
+      const weekday =
+        parts.find((part) => part.type === "weekday")?.value || "Hoje";
+      setGreeting(
+        hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite",
+      );
+      setMonthLabel(
+        new Intl.DateTimeFormat("pt-BR", {
+          month: "long",
+          year: "numeric",
+          timeZone: "America/Fortaleza",
+        }).format(now),
+      );
       setOperationLabel(`${weekday} · operação comercial`);
-      const dayKey = Number(new Intl.DateTimeFormat("en", { day: "numeric", timeZone: "America/Fortaleza" }).format(now));
+      const dayKey = Number(
+        new Intl.DateTimeFormat("en", {
+          day: "numeric",
+          timeZone: "America/Fortaleza",
+        }).format(now),
+      );
       setDailyQuote(quotes[dayKey % quotes.length]);
     };
     updateClock();
@@ -363,7 +426,12 @@ export default function Home() {
           <span>CRM</span>
         </div>
         <CrmNavigation />
-        <div className="profile" role="button" tabIndex={0} title="Alterar foto do perfil">
+        <div
+          className="profile"
+          role="button"
+          tabIndex={0}
+          title="Alterar foto do perfil"
+        >
           <div className="avatar">FM</div>
           <div>
             <b>Franklin Monteiro</b>
@@ -390,7 +458,13 @@ export default function Home() {
                 height={38}
               />
             </span>
+            <span className="crm-header-eyebrow">
+              Missão diária · visão operacional
+            </span>
             <h1>Dashboard</h1>
+            <p className="crm-header-description">
+              Prioridades, metas e andamento comercial do dia.
+            </p>
           </div>
           <div className="header-tools">
             <span className="date">
@@ -405,11 +479,38 @@ export default function Home() {
               <Icon name="bell" size={21} />
               {notice > 0 && <i>{notice}</i>}
             </button>
-            {notificationsOpen && <section className="notifications-panel"><header><b>Notificações</b><button onClick={() => setNotice(0)}>Marcar todas como lidas</button></header>{notice ? <><Link href="/follow-ups"><strong>Follow-ups pendentes</strong><span>Abrir fila de próximas ações.</span></Link><Link href="/agenda"><strong>Agenda operacional</strong><span>Conferir compromissos e atendimentos.</span></Link><Link href="/analises"><strong>Processos de análise</strong><span>Verificar retornos e prazos dos CCAs.</span></Link></> : <p>Nenhuma notificação não lida.</p>}</section>}
+            {notificationsOpen && (
+              <section className="notifications-panel">
+                <header>
+                  <b>Notificações</b>
+                  <button onClick={() => setNotice(0)}>
+                    Marcar todas como lidas
+                  </button>
+                </header>
+                {notice ? (
+                  <>
+                    <Link href="/follow-ups">
+                      <strong>Follow-ups pendentes</strong>
+                      <span>Abrir fila de próximas ações.</span>
+                    </Link>
+                    <Link href="/agenda">
+                      <strong>Agenda operacional</strong>
+                      <span>Conferir compromissos e atendimentos.</span>
+                    </Link>
+                    <Link href="/analises">
+                      <strong>Processos de análise</strong>
+                      <span>Verificar retornos e prazos dos CCAs.</span>
+                    </Link>
+                  </>
+                ) : (
+                  <p>Nenhuma notificação não lida.</p>
+                )}
+              </section>
+            )}
           </div>
         </header>
-
         <div className="workspace">
+          <DailyMissionTabs />
           <section className="hero">
             <div>
               <p className="kicker">{operationLabel}</p>
@@ -435,9 +536,7 @@ export default function Home() {
               </span>
               <div>
                 <b>Distribuição aguardando dia útil</b>
-                <p>
-                  Prospecção automática somente de segunda a sexta-feira
-                </p>
+                <p>Prospecção automática somente de segunda a sexta-feira</p>
               </div>
             </div>
             <div className="distribution-stats">
@@ -459,7 +558,9 @@ export default function Home() {
                 <span className="section-index">01</span>
                 <h3>Meu dia · o que falta para bater a meta</h3>
               </div>
-              <Link href="/carteira"><button>Registrar produção</button></Link>
+              <Link href="/carteira">
+                <button>Registrar produção</button>
+              </Link>
             </div>
             <div className="kpi-grid">
               {dailyKpis.map((item) => (
@@ -474,7 +575,9 @@ export default function Home() {
                 <span className="section-index">MÊS</span>
                 <h3>Plano estratégico · {monthLabel}</h3>
               </div>
-              <Link href="/indicadores"><button>Ver metodologia completa</button></Link>
+              <Link href="/indicadores">
+                <button>Ver metodologia completa</button>
+              </Link>
             </div>
             <div className="strategy-body">
               <article className="monthly-call-goal">
@@ -547,10 +650,17 @@ export default function Home() {
                   <span className="section-index">02</span>
                   <h3>Carteira do dia · próximos contatos</h3>
                 </div>
-                <Link href="/carteira"><button>Ver carteira</button></Link>
+                <Link href="/carteira">
+                  <button>Ver carteira</button>
+                </Link>
               </div>
               <div className="priority-list">
-                {!priorities.length && <p>Nenhum contato trabalhado. A carteira abre no próximo dia útil.</p>}
+                {!priorities.length && (
+                  <p>
+                    Nenhum contato trabalhado. A carteira abre no próximo dia
+                    útil.
+                  </p>
+                )}
                 {priorities.map((client) => (
                   <article key={client.name}>
                     <span className="client-signal">
@@ -587,7 +697,9 @@ export default function Home() {
                   <span className="section-index">03</span>
                   <h3>Agenda de hoje</h3>
                 </div>
-                <Link href="/agenda"><button>Ver agenda</button></Link>
+                <Link href="/agenda">
+                  <button>Ver agenda</button>
+                </Link>
               </div>
               <div className="agenda-list">
                 {!appointments.length && <p>Nenhum compromisso registrado.</p>}
@@ -616,7 +728,9 @@ export default function Home() {
                 <span className="section-index">04</span>
                 <h3>Central de follow-ups · carteira em tratamento</h3>
               </div>
-              <Link href="/follow-ups"><button>Ver todos os clientes</button></Link>
+              <Link href="/follow-ups">
+                <button>Ver todos os clientes</button>
+              </Link>
             </div>
             <div className="followup-summary">
               <div>
@@ -627,7 +741,10 @@ export default function Home() {
                 Nenhum cliente é perdido. Cada contato permanece em uma cadência
                 até avançar, pausar ou reativar.
               </p>
-              <Link href="/follow-ups" className="dashboard-action-link execute-queue">
+              <Link
+                href="/follow-ups"
+                className="dashboard-action-link execute-queue"
+              >
                 <Icon name="check" size={15} />
                 Executar fila de hoje
               </Link>
@@ -639,24 +756,28 @@ export default function Home() {
                     <span>{stage.label}</span>
                     <strong>{stage.count}</strong>
                   </div>
-                  {stage.count > 0 && <div className="followup-client">
-                    <b>{stage.client}</b>
-                    <small>{stage.timing}</small>
-                  </div>}
+                  {stage.count > 0 && (
+                    <div className="followup-client">
+                      <b>{stage.client}</b>
+                      <small>{stage.timing}</small>
+                    </div>
+                  )}
                   <div className="followup-actions">
                     {stage.overdue > 0 ? (
                       <span>{stage.overdue} atrasados</span>
                     ) : (
                       <span className="scheduled">programados</span>
                     )}
-                    {stage.count > 0 && <a
-                      href={`https://wa.me/${stage.phone}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      aria-label={`WhatsApp para ${stage.client}`}
-                    >
-                      <Icon name="whatsapp" size={18} />
-                    </a>}
+                    {stage.count > 0 && (
+                      <a
+                        href={`https://wa.me/${stage.phone}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label={`WhatsApp para ${stage.client}`}
+                      >
+                        <Icon name="whatsapp" size={18} />
+                      </a>
+                    )}
                   </div>
                 </article>
               ))}
@@ -669,7 +790,9 @@ export default function Home() {
                 <span className="section-index">05</span>
                 <h3>Funil comercial Monteiro · método de alta conversão</h3>
               </div>
-              <Link href="/funil"><button>Ver análise completa</button></Link>
+              <Link href="/funil">
+                <button>Ver análise completa</button>
+              </Link>
             </div>
             <div className="executive-funnel">
               <div className="funnel-core">

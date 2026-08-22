@@ -3,8 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { CrmNavigation } from "../components/crm-navigation";
-import { useEffect, useMemo, useState } from "react";
+import { DailyMissionTabs } from "../components/daily-mission-tabs";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { PhoneIcon } from "../components/phone-icon";
+import { CATALOG_CITIES, normalizeCatalogCity } from "@/lib/catalog-hierarchy";
 import "./carteira.css";
 import "./carteira-fixes.css";
 
@@ -90,15 +92,29 @@ const initialContacts: Contact[] = [
   },
 ];
 initialContacts.splice(0);
-const emptyContact: Contact = { clientId:0, id: 0, name: "Nenhum contato distribuído", phone: "", email: "", origin: "—", interest: "—", status: "Pendente", attempts: 0, last: "Aguardando próximo dia útil" };
+const emptyContact: Contact = {
+  clientId: 0,
+  id: 0,
+  name: "Nenhum contato distribuído",
+  phone: "",
+  email: "",
+  origin: "—",
+  interest: "—",
+  status: "Pendente",
+  attempts: 0,
+  last: "Aguardando próximo dia útil",
+};
 
 const outcomes = [
   "Não atendeu",
   "Não respondeu",
   "Em atendimento",
   "Qualificado",
+  "Pasta recebida",
   "Sem interesse",
   "Número inválido",
+  "Cliente desistiu",
+  "Cliente bloqueou o corretor",
 ];
 
 function Wpp({ size = 18 }: { size?: number }) {
@@ -118,22 +134,48 @@ export default function CarteiraPage() {
   const [clientSex, setClientSex] = useState<"Feminino" | "Masculino" | "">("");
   const [selfEmployedActivity, setSelfEmployedActivity] = useState("");
   const [selfEmployedSince, setSelfEmployedSince] = useState("");
-  const [today, setToday] = useState("");
+  const [today] = useState(() =>
+    new Intl.DateTimeFormat("pt-BR", {
+      dateStyle: "long",
+      timeZone: "America/Fortaleza",
+    }).format(new Date()),
+  );
   const [page, setPage] = useState(0);
-  const [metrics, setMetrics] = useState({ appointments: 0, appearances: 0, folders: 0 });
+  const [metrics, setMetrics] = useState({
+    appointments: 0,
+    appearances: 0,
+    folders: 0,
+  });
   const [basePanel, setBasePanel] = useState(false);
-  const [catalog, setCatalog] = useState<{projects:Array<{name:string;builders:{name:string}|Array<{name:string}>}>}>({projects:[]});
+  const [catalog, setCatalog] = useState<{
+    projects: Array<{
+      name: string;
+      city: string;
+      region?: string;
+      builders: { name: string } | Array<{ name: string }>;
+    }>;
+  }>({ projects: [] });
+  const [city, setCity] = useState("all");
   const [builder, setBuilder] = useState("all");
   const [project, setProject] = useState("all");
   const [stage, setStage] = useState("all");
   const [baseNotice, setBaseNotice] = useState("");
+  const [journeyStage, setJourneyStage] = useState("Aguardando documentação");
+  const [nextContactDate, setNextContactDate] = useState("");
+  const [nextContactTime, setNextContactTime] = useState("");
+  const [serviceNotes, setServiceNotes] = useState("");
+  const nextContactDateRef = useRef<HTMLInputElement>(null);
+  const nextContactTimeRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
-    setToday(new Intl.DateTimeFormat("pt-BR", { dateStyle: "long", timeZone: "America/Fortaleza" }).format(new Date()));
     fetch("/api/daily-portfolio")
       .then((response) => (response.ok ? response.json() : null))
       .then((data) => {
         setProspectingDay(Boolean(data?.prospectingDay));
-        if (!data?.rows?.length) { setContacts([]); setSelected(emptyContact); return; }
+        if (!data?.rows?.length) {
+          setContacts([]);
+          setSelected(emptyContact);
+          return;
+        }
         const loaded: Contact[] = data.rows.map(
           (row: Record<string, unknown>) => ({
             id: Number(row.assignment_id),
@@ -149,24 +191,58 @@ export default function CarteiraPage() {
           }),
         );
         setContacts(loaded);
-        const requestedClient = Number(new URLSearchParams(window.location.search).get("clientId"));
-        setSelected(loaded.find((item) => item.clientId === requestedClient) || loaded[0]);
+        const requestedClient = Number(
+          new URLSearchParams(window.location.search).get("clientId"),
+        );
+        setSelected(
+          loaded.find((item) => item.clientId === requestedClient) || loaded[0],
+        );
       })
       .catch(() => {});
-    fetch("/api/metrics").then(r=>r.ok?r.json():null).then(data=>{
-      const events=data?.eventCounts||{}; const appointments=data?.appointmentCounts||{};
-      const appointmentTotal=Object.values(appointments as Record<string,number>).reduce<number>((sum,value)=>sum+Number(value||0),0);
-      const appearanceTotal=Object.entries(appointments as Record<string,number>).reduce<number>((sum,[status,value])=>/compareceu|conclu/i.test(status)?sum+Number(value||0):sum,0);
-      setMetrics({appointments:Number(events.appointment||0)+appointmentTotal,appearances:Number(events.appearance||0)+appearanceTotal,folders:Number(events.folder_sent||0)});
-    }).catch(()=>{});
-    fetch("/api/bases").then(r=>r.ok?r.json():null).then(data=>data&&setCatalog({projects:data.projects||[]})).catch(()=>{});
+    fetch("/api/metrics")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        const events = data?.eventCounts || {};
+        const appointments = data?.appointmentCounts || {};
+        const appointmentTotal = Object.values(
+          appointments as Record<string, number>,
+        ).reduce<number>((sum, value) => sum + Number(value || 0), 0);
+        const appearanceTotal = Object.entries(
+          appointments as Record<string, number>,
+        ).reduce<number>(
+          (sum, [status, value]) =>
+            /compareceu|conclu/i.test(status) ? sum + Number(value || 0) : sum,
+          0,
+        );
+        setMetrics({
+          appointments: Number(events.appointment || 0) + appointmentTotal,
+          appearances: Number(events.appearance || 0) + appearanceTotal,
+          folders: Number(events.folder_sent || 0),
+        });
+      })
+      .catch(() => {});
+    fetch("/api/bases")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => data && setCatalog({ projects: data.projects || [] }))
+      .catch(() => {});
   }, []);
   const worked = contacts.filter((contact) => contact.attempts > 0).length;
-  const pendingCount = contacts.filter((contact) => contact.status === "Pendente").length;
-  const qualified = contacts.filter((contact) => contact.last.includes("Qualificado")).length;
-  const attempts = contacts.reduce((total, contact) => total + contact.attempts, 0);
-  const leads = contacts.filter((contact) => contact.origin.toLowerCase().includes("lead")).length;
-  const coldLists = contacts.filter((contact) => contact.origin.toLowerCase().includes("lista")).length;
+  const pendingCount = contacts.filter(
+    (contact) => contact.status === "Pendente",
+  ).length;
+  const qualified = contacts.filter((contact) =>
+    contact.last.includes("Qualificado"),
+  ).length;
+  const attempts = contacts.reduce(
+    (total, contact) => total + contact.attempts,
+    0,
+  );
+  const leads = contacts.filter((contact) =>
+    contact.origin.toLowerCase().includes("lead"),
+  ).length;
+  const coldLists = contacts.filter((contact) =>
+    contact.origin.toLowerCase().includes("lista"),
+  ).length;
   const filtered = useMemo(
     () =>
       filter === "Todos"
@@ -174,24 +250,113 @@ export default function CarteiraPage() {
         : contacts.filter((c) => c.status === filter),
     [filter, contacts],
   );
-  const pageCount=Math.max(1,Math.ceil(filtered.length/10));
-  const visibleContacts=filtered.slice(page*10,page*10+10);
-  useEffect(()=>{ if(page>=pageCount)setPage(pageCount-1); },[page,pageCount]);
-  const builders=useMemo(()=>[...new Set(catalog.projects.flatMap(p=>Array.isArray(p.builders)?p.builders.map(b=>b.name):[p.builders?.name]).filter(Boolean))] as string[],[catalog]);
-  const projects=useMemo(()=>catalog.projects.filter(p=>builder==="all"||(Array.isArray(p.builders)?p.builders.some(b=>b.name===builder):p.builders?.name===builder)),[catalog,builder]);
-  const receiveBase=async()=>{setBaseNotice("Distribuindo contatos...");const response=await fetch("/api/bases",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"distribute",builder,project,stage,quantity:50,broker:"Franklin Monteiro",assignedDate:new Date().toLocaleDateString("en-CA",{timeZone:"America/Fortaleza"})})});const data=await response.json();setBaseNotice(response.ok?`${data.assigned} contatos recebidos na carteira.`:(data.error||"Falha ao receber base."));if(response.ok)setTimeout(()=>location.reload(),700)};
+  const pageCount = Math.max(1, Math.ceil(filtered.length / 10));
+  const safePage = Math.min(page, pageCount - 1);
+  const visibleContacts = filtered.slice(safePage * 10, safePage * 10 + 10);
+  const cityProjects = useMemo(
+    () =>
+      catalog.projects.filter(
+        (p) =>
+          city === "all" || normalizeCatalogCity(p.city, p.region) === city,
+      ),
+    [catalog, city],
+  );
+  const builders = useMemo(
+    () =>
+      [
+        ...new Set(
+          cityProjects
+            .flatMap((p) =>
+              Array.isArray(p.builders)
+                ? p.builders.map((b) => b.name)
+                : [p.builders?.name],
+            )
+            .filter(Boolean),
+        ),
+      ] as string[],
+    [cityProjects],
+  );
+  const projects = useMemo(
+    () =>
+      cityProjects.filter(
+        (p) =>
+          builder === "all" ||
+          (Array.isArray(p.builders)
+            ? p.builders.some((b) => b.name === builder)
+            : p.builders?.name === builder),
+      ),
+    [cityProjects, builder],
+  );
+  const receiveBase = async () => {
+    setBaseNotice("Distribuindo contatos...");
+    const response = await fetch("/api/bases", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "distribute",
+        city,
+        builder,
+        project,
+        stage,
+        quantity: 50,
+        broker: "Franklin Monteiro",
+        assignedDate: new Date().toLocaleDateString("en-CA", {
+          timeZone: "America/Fortaleza",
+        }),
+      }),
+    });
+    const data = await response.json();
+    setBaseNotice(
+      response.ok
+        ? `${data.assigned} contatos recebidos na carteira.`
+        : data.error || "Falha ao receber base.",
+    );
+    if (response.ok) setTimeout(() => location.reload(), 700);
+  };
   const saveCurrent = async () => {
     if (!outcome) return;
+    const savedDate = nextContactDateRef.current?.value || nextContactDate;
+    const savedTime =
+      nextContactTimeRef.current?.value || nextContactTime || "09:00";
+    const nextActionAt = savedDate ? `${savedDate}T${savedTime}` : null;
     const response = await fetch("/api/daily-portfolio", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ assignmentId: selected.id, result: outcome }),
+      body: JSON.stringify({
+        assignmentId: selected.id,
+        result: outcome,
+        journeyStage:
+          outcome === "Pasta recebida"
+            ? "Pasta recebida"
+            : outcome === "Cliente desistiu"
+              ? "Desistiu"
+              : outcome === "Cliente bloqueou o corretor"
+                ? "Contato bloqueado"
+                : journeyStage,
+        nextAction:
+          outcome === "Pasta recebida"
+            ? "Conferir pasta e iniciar análise"
+            : journeyStage === "Aguardando documentação"
+              ? "Receber e conferir documentação"
+              : `Dar continuidade: ${journeyStage}`,
+        nextActionAt,
+        notes: serviceNotes,
+        qualification: {
+          sex: clientSex,
+          incomeType,
+          selfEmployedActivity,
+          selfEmployedSince,
+        },
+      }),
     });
     if (!response.ok) return;
     const nextStatus: Contact["status"] = [
       "Qualificado",
+      "Pasta recebida",
       "Sem interesse",
       "Número inválido",
+      "Cliente desistiu",
+      "Cliente bloqueou o corretor",
     ].includes(outcome)
       ? "Concluído"
       : "Em atendimento";
@@ -245,15 +410,24 @@ export default function CarteiraPage() {
             <Link href="/">‹ Voltar</Link>
             <span>Operação diária</span>
             <h1>Carteira do Dia</h1>
+            <p>
+              Contatos distribuídos para prospecção, qualificação e avanço da
+              jornada.
+            </p>
           </div>
           <div className="wallet-date">{today}</div>
         </header>
         <div className="wallet-content">
+          <DailyMissionTabs />
           <section className="wallet-overview">
             <div>
               <span>Distribuição automática</span>
               <h2>{contacts.length} contatos únicos</h2>
-              <p>{prospectingDay ? "Distribuição real do dia útil." : "Sábado e domingo: prospecção suspensa; use a Agenda."}</p>
+              <p>
+                {prospectingDay
+                  ? "Distribuição real do dia útil."
+                  : "Sábado e domingo: prospecção suspensa; use a Agenda."}
+              </p>
               <div className="origin-mix">
                 <i>{leads} Leads</i>
                 <i>{coldLists} Listas frias</i>
@@ -273,15 +447,83 @@ export default function CarteiraPage() {
                 <span>qualificados</span>
               </div>
               <i>
-                <span style={{ width: `${contacts.length ? (worked / contacts.length) * 100 : 0}%` }} />
+                <span
+                  style={{
+                    width: `${contacts.length ? (worked / contacts.length) * 100 : 0}%`,
+                  }}
+                />
               </i>
             </div>
           </section>
 
           <section className="daily-base-control">
-            <button onClick={()=>setBasePanel(v=>!v)}>Receber base do dia</button>
-            {basePanel&&<div className="daily-base-fields"><label>Construtora<select value={builder} onChange={e=>{setBuilder(e.target.value);setProject("all")}}><option value="all">Todas</option>{builders.map(item=><option key={item}>{item}</option>)}</select></label><label>Empreendimento<select value={project} onChange={e=>setProject(e.target.value)}><option value="all">Todos</option>{projects.map(item=><option key={item.name}>{item.name}</option>)}</select></label><label>Tipo da carteira<select value={stage} onChange={e=>setStage(e.target.value)}><option value="all">Prospecção geral</option><option value="approved-not-closed">Aprovados sem fechamento</option><option>Restrição</option><option>Condicionado</option><option>Em análise</option></select></label><button onClick={receiveBase}>Confirmar 50 contatos</button></div>}
-            {baseNotice&&<span>{baseNotice}</span>}
+            <button onClick={() => setBasePanel((v) => !v)}>
+              Receber base do dia
+            </button>
+            {basePanel && (
+              <div className="daily-base-fields">
+                <label>
+                  Cidade
+                  <select
+                    value={city}
+                    onChange={(e) => {
+                      setCity(e.target.value);
+                      setBuilder("all");
+                      setProject("all");
+                    }}
+                  >
+                    <option value="all">Todas</option>
+                    {CATALOG_CITIES.map((item) => (
+                      <option key={item}>{item}</option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Construtora
+                  <select
+                    value={builder}
+                    onChange={(e) => {
+                      setBuilder(e.target.value);
+                      setProject("all");
+                    }}
+                  >
+                    <option value="all">Todas</option>
+                    {builders.map((item) => (
+                      <option key={item}>{item}</option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Empreendimento
+                  <select
+                    value={project}
+                    onChange={(e) => setProject(e.target.value)}
+                  >
+                    <option value="all">Todos</option>
+                    {projects.map((item) => (
+                      <option key={item.name}>{item.name}</option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Tipo da carteira
+                  <select
+                    value={stage}
+                    onChange={(e) => setStage(e.target.value)}
+                  >
+                    <option value="all">Prospecção geral</option>
+                    <option value="approved-not-closed">
+                      Aprovados sem fechamento
+                    </option>
+                    <option>Restrição</option>
+                    <option>Condicionado</option>
+                    <option>Em análise</option>
+                  </select>
+                </label>
+                <button onClick={receiveBase}>Confirmar 50 contatos</button>
+              </div>
+            )}
+            {baseNotice && <span>{baseNotice}</span>}
           </section>
 
           <section className="wallet-targets">
@@ -306,7 +548,11 @@ export default function CarteiraPage() {
               <article>
                 <span>Contatos efetivos</span>
                 <strong>{worked}</strong>
-                <small>{attempts ? `${((worked / attempts) * 100).toFixed(1)}% das tentativas` : "Nenhum contato registrado"}</small>
+                <small>
+                  {attempts
+                    ? `${((worked / attempts) * 100).toFixed(1)}% das tentativas`
+                    : "Nenhum contato registrado"}
+                </small>
               </article>
               <article>
                 <span>Conversas qualificadas</span>
@@ -314,17 +560,34 @@ export default function CarteiraPage() {
                   {qualified} <i>/15</i>
                 </strong>
                 <b>
-                  <i style={{ width: `${Math.min(100, (qualified / 15) * 100)}%` }} />
+                  <i
+                    style={{
+                      width: `${Math.min(100, (qualified / 15) * 100)}%`,
+                    }}
+                  />
                 </b>
-                <small>{qualified ? "Produção real registrada" : "Nenhuma qualificação registrada"}</small>
+                <small>
+                  {qualified
+                    ? "Produção real registrada"
+                    : "Nenhuma qualificação registrada"}
+                </small>
               </article>
               <article>
                 <span>Novos follow-ups</span>
                 <strong>
-                  {contacts.filter((contact) => contact.status === "Em atendimento").length} <i>/10</i>
+                  {
+                    contacts.filter(
+                      (contact) => contact.status === "Em atendimento",
+                    ).length
+                  }{" "}
+                  <i>/10</i>
                 </strong>
                 <b>
-                  <i style={{ width: `${Math.min(100, contacts.filter((contact) => contact.status === "Em atendimento").length * 10)}%` }} />
+                  <i
+                    style={{
+                      width: `${Math.min(100, contacts.filter((contact) => contact.status === "Em atendimento").length * 10)}%`,
+                    }}
+                  />
                 </b>
                 <small>Somente registros reais</small>
               </article>
@@ -343,9 +606,21 @@ export default function CarteiraPage() {
                 <strong>0</strong>
                 <small>Meta: permanecer zerado</small>
               </article>
-              <article><span>Agendamentos</span><strong>{metrics.appointments}</strong><small>Compromissos registrados</small></article>
-              <article><span>Comparecimentos</span><strong>{metrics.appearances}</strong><small>Atendimentos realizados</small></article>
-              <article><span>Pastas enviadas</span><strong>{metrics.folders}</strong><small>Enviadas para análise</small></article>
+              <article>
+                <span>Agendamentos</span>
+                <strong>{metrics.appointments}</strong>
+                <small>Compromissos registrados</small>
+              </article>
+              <article>
+                <span>Comparecimentos</span>
+                <strong>{metrics.appearances}</strong>
+                <small>Atendimentos realizados</small>
+              </article>
+              <article>
+                <span>Pastas enviadas</span>
+                <strong>{metrics.folders}</strong>
+                <small>Enviadas para análise</small>
+              </article>
             </div>
           </section>
 
@@ -361,7 +636,10 @@ export default function CarteiraPage() {
                     (item) => (
                       <button
                         className={filter === item ? "active" : ""}
-                        onClick={() => {setFilter(item);setPage(0)}}
+                        onClick={() => {
+                          setFilter(item);
+                          setPage(0);
+                        }}
                         key={item}
                       >
                         {item}
@@ -373,7 +651,9 @@ export default function CarteiraPage() {
               <div className="queue-list">
                 {!filtered.length && (
                   <div className="wallet-empty">
-                    {prospectingDay ? "Nenhum contato distribuído ainda." : "Fim de semana sem fila de prospecção. Use Agenda para visitas, feirões e atendimentos."}
+                    {prospectingDay
+                      ? "Nenhum contato distribuído ainda."
+                      : "Fim de semana sem fila de prospecção. Use Agenda para visitas, feirões e atendimentos."}
                   </div>
                 )}
                 {visibleContacts.map((contact, index) => (
@@ -387,7 +667,7 @@ export default function CarteiraPage() {
                     key={contact.id}
                   >
                     <span className="queue-position">
-                      {String(page*10+index + 1).padStart(2, "0")}
+                      {String(page * 10 + index + 1).padStart(2, "0")}
                     </span>
                     <div className="queue-person">
                       <b>{contact.name}</b>
@@ -411,13 +691,41 @@ export default function CarteiraPage() {
                   </button>
                 ))}
               </div>
-              {filtered.length>10&&<nav className="queue-pages" aria-label="Páginas da fila"><button disabled={page===0} onClick={()=>setPage(p=>p-1)}>Anterior</button>{Array.from({length:pageCount},(_,i)=><button className={page===i?"active":""} onClick={()=>setPage(i)} key={i}>{i+1}</button>)}<button disabled={page===pageCount-1} onClick={()=>setPage(p=>p+1)}>Próxima</button></nav>}
+              {filtered.length > 10 && (
+                <nav className="queue-pages" aria-label="Páginas da fila">
+                  <button
+                    disabled={page === 0}
+                    onClick={() => setPage((p) => p - 1)}
+                  >
+                    Anterior
+                  </button>
+                  {Array.from({ length: pageCount }, (_, i) => (
+                    <button
+                      className={page === i ? "active" : ""}
+                      onClick={() => setPage(i)}
+                      key={i}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                  <button
+                    disabled={page === pageCount - 1}
+                    onClick={() => setPage((p) => p + 1)}
+                  >
+                    Próxima
+                  </button>
+                </nav>
+              )}
             </section>
 
             <aside className="service-panel">
               <div className="service-title">
                 <span>Atendimento atual</span>
-                <strong>{selected.id ? `#${String(selected.id).padStart(2, "0")}` : "—"}</strong>
+                <strong>
+                  {selected.id
+                    ? `#${String(selected.id).padStart(2, "0")}`
+                    : "—"}
+                </strong>
               </div>
               <div className="client-profile">
                 <i>
@@ -435,20 +743,24 @@ export default function CarteiraPage() {
                   <em>{selected.origin}</em>
                 </div>
               </div>
-              {selected.id > 0 && <div className="contact-buttons">
-                <a href={`tel:+${selected.phone}`}>
-                  <PhoneIcon/> <span>Ligar agora</span>
-                </a>
-                <a
-                  href={`https://wa.me/${selected.phone}`}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  <Wpp />
-                  <span>Abrir WhatsApp</span>
-                </a>
-                <Link href={`/clientes/${selected.clientId}`}>Abrir ficha completa</Link>
-              </div>}
+              {selected.id > 0 && (
+                <div className="contact-buttons">
+                  <a href={`tel:+${selected.phone}`}>
+                    <PhoneIcon /> <span>Ligar agora</span>
+                  </a>
+                  <a
+                    href={`https://wa.me/${selected.phone}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <Wpp />
+                    <span>Abrir WhatsApp</span>
+                  </a>
+                  <Link href={`/clientes/${selected.clientId}`}>
+                    Abrir ficha completa
+                  </Link>
+                </div>
+              )}
               <div className="service-form">
                 <label>Resultado do contato</label>
                 <div className="outcome-grid">
@@ -573,10 +885,10 @@ export default function CarteiraPage() {
                     <option>Altos</option>
                     <option>Demerval Lobão</option>
                   </select>
-                  <select defaultValue="">
-                    <option value="" disabled>
-                      Etapa seguinte
-                    </option>
+                  <select
+                    value={journeyStage}
+                    onChange={(e) => setJourneyStage(e.target.value)}
+                  >
                     <option>Aguardando documentação</option>
                     <option>Agendamento</option>
                     <option>Follow-up</option>
@@ -585,18 +897,31 @@ export default function CarteiraPage() {
                 <div className="form-row">
                   <div className="dated-field">
                     <span>Próximo contato</span>
-                    <input type="date" aria-label="Data do próximo contato" />
+                    <input
+                      ref={nextContactDateRef}
+                      type="date"
+                      aria-label="Data do próximo contato"
+                      value={nextContactDate}
+                      onChange={(e) => setNextContactDate(e.target.value)}
+                    />
                   </div>
                   <div className="dated-field">
                     <span>Horário</span>
                     <input
                       type="time"
                       aria-label="Horário do próximo contato"
+                      ref={nextContactTimeRef}
+                      value={nextContactTime}
+                      onChange={(e) => setNextContactTime(e.target.value)}
                     />
                   </div>
                 </div>
                 <label>Observação</label>
-                <textarea placeholder="Registre somente informação útil para próxima ação" />
+                <textarea
+                  value={serviceNotes}
+                  onChange={(e) => setServiceNotes(e.target.value)}
+                  placeholder="Registre somente informação útil para próxima ação"
+                />
                 <button
                   className="save-service"
                   disabled={!outcome}
