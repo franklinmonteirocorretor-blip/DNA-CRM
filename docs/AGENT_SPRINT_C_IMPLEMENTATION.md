@@ -2,7 +2,7 @@
 
 Atualizado em: 22/08/2026
 
-Status: **implementado e validado localmente; migration remota pendente**.
+Status: **Sprint C-B implementada e validada localmente e contra o Supabase remoto**.
 
 ## Arquitetura
 
@@ -62,20 +62,32 @@ Fundação inclui bucket privado, playbook, versões, status de análise e princ
 
 `/api/agent/brain/simulate` monta contexto real e retorna decisão, avaliação e efeitos simulados. `outboundReal=false`. O pipeline cognitivo não chama gateway nem altera jornada.
 
-## Testes
+## Validação Sprint C-B
 
-- 23/23 testes aprovados.
+- As cinco migrations Sprint C foram aplicadas e confirmadas no ledger remoto; a corretiva remota consta como `20260822204113_harden_agent_brain_runtime_contracts`.
+- RLS ativo; tabelas sensíveis sem acesso `anon`/`authenticated` e com acesso `service_role`.
+- Memória e resumo usam RPC transacional com lock; falha intermediária forçada confirmou rollback integral.
+- Resumos são isolados por conversa; origem de mensagem divergente é rejeitada.
+- Upload TXT, MD e PDF e limpeza passaram no runtime. Ativação de arquivo cru agora retorna `409`: exige análise concluída, princípios presentes e revisão humana. DOCX não é formato permitido.
+- Configuração parcial preserva campos omitidos e rejeita campos desconhecidos/fora de faixa.
+- Providers persistem apenas referência de variável de ambiente; segredo em texto puro é rejeitado.
+- Modos `AUTO`, `HUMAN_TAKEOVER`, `OBSERVE_ONLY` e `PAUSED` preservam extração; somente `AUTO` pode propor mensagem.
+- CRM permaneceu operacional com agente global desabilitado: clientes, agenda, documentos, análises, financeiro, catálogo e CCA responderam `200`.
+- Tela `/configuracoes/agente` validada visualmente e sem erros de console.
+- 28/28 testes aprovados.
 - Fixtures cobrem financiamento, parcela, subsídio, renda, visita, objeções, decisão com cônjuge, documento e pedido humano.
 - Lint aprovado.
 - TypeScript aprovado.
-- Build aprovado, 48 rotas.
+- Build aprovado, 49 rotas.
 
-## Limitações e próximo passo
+## Pesquisa de provider e STT
 
-- Migration `20260822194555_agent_brain_sprint_c.sql` criada, não aplicada remotamente: checkout sem `SUPABASE_ACCESS_TOKEN`, senha Postgres ou vínculo CLI. APIs dependentes do novo schema não podem ser validadas contra banco remoto antes da aplicação.
-- Nenhum provider gratuito real foi configurado; fallback determinístico permanece ativo.
-- STT concreto, análise de playbooks, negociação financeira autônoma, aprendizado avançado e ranking de imóveis ficam fora da Sprint C-A.
-- Aplicar a migration nova, validar schema/RLS/bucket, executar simulação com cliente teste e verificar visualmente `/configuracoes/agente`.
+- **Recomendação de protótipo:** Groq Free, inicialmente somente com fixtures anonimizadas. O endpoint é OpenAI-compatible; `openai/gpt-oss-120b` oferece no plano Free 30 RPM/1.000 RPD, e Whisper oferece 20 RPM/2.000 RPD.
+- **STT:** `whisper-large-v3-turbo` é multilíngue, aceita até 25 MB no Free e custa menos no plano pago. Integração concreta ainda não foi iniciada.
+- **Gemini Free:** rejeitado para dados reais de cliente nesta fase; a página oficial informa que conteúdo do Free pode ser usado para melhorar produtos.
+- **OpenRouter Free:** adequado a experimento, não runtime principal; limite padrão de 50 requisições/dia e disponibilidade reduzida.
+- Nenhum provider real foi configurado. Fallback determinístico permanece ativo.
+- Privacidade, retenção, contrato e teste PT-BR precisam ser aprovados antes de enviar PII. Sprint C-C não foi iniciada.
 
 ## Segurança operacional
 

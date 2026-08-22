@@ -211,7 +211,7 @@ Prompt inicial obrigatorio de cada tarefa:
 - O subdomínio `b4a.run` está vinculado ao Container App e permaneceu igual após novo deploy, portanto não é URL específica de uma versão. Porém o plano Free marca seu acesso como `Temporary URL Active`, válido por 60 minutos, e exige upgrade para URL permanentemente ativa. A string é canônica do app; a disponibilidade não é permanente.
 - Redeploy controlado `8ca428e3-c134-4291-80f7-540c78bd0095` preservou o mesmo subdomínio e restaurou a sessão sem QR. Houve conflito transitório durante a troca de instâncias; cerca de 104 segundos após o início, a sessão voltou a `connected`, circuito fechado, zero reconnects e `lastError` nulo.
 - Sprint B.2 permanece `NO-GO` para número comercial até validar perda física de rede, outbound allowlisted, URL/runtime permanente sem sleep e soak de 24 horas.
-- Sprint C não foi iniciada.
+- Sprint C foi iniciada em branch isolada; Sprint B.2 e seu `NO-GO` permanecem inalterados.
 
 ## Sprint C-A — cérebro comercial iniciado em 22/08/2026
 
@@ -221,7 +221,11 @@ Prompt inicial obrigatorio de cada tarefa:
 - Implementados Context Builder real, memória `FACT/INFERENCE/UNKNOWN`, resumo incremental, intenções, extração factual, estratégia, Next Best Action, resposta, follow-up, catálogo read-only, STT abstrato e Simulation Pipeline.
 - Implementadas fundações persistentes de providers, memória e playbooks na migration nova `20260822194555_agent_brain_sprint_c.sql`.
 - Implementadas API/tela de configuração e APIs de simulação/playbooks.
-- Segurança financeira e pedido humano possuem testes específicos; 23/23 testes aprovados.
-- Lint, TypeScript e build aprovados; build gera 48 rotas.
-- Migration nova ainda não foi aplicada remotamente por ausência de autenticação CLI/senha Postgres. Banco/API/UI dependentes dela permanecem pendentes de validação runtime.
+- Segurança financeira, pedido humano, catálogo real/inexistente, retorno de lead e objetivo conhecido possuem testes específicos; 28/28 testes aprovados.
+- Lint, TypeScript e build aprovados; build gera 49 rotas.
+- Schema Sprint C aplicado remotamente e endurecido por cinco migrations: base, índices, transação de memória, ativação atômica e contrato corretivo `harden_agent_brain_runtime_contracts`.
+- Read-back remoto confirmou RLS, grants apenas `service_role`, bucket privado `agent-playbooks`, rollback atômico de falha e isolamento de resumo por conversa.
+- APIs de configuração parcial, providers por referência de ambiente, playbooks e simulação foram validadas contra Supabase real. Tela `/configuracoes/agente` foi validada sem erros de console.
+- Advisor de segurança mantém avisos `rls_enabled_no_policy` esperados para tabelas deliberadamente service-only; não há grant `anon`/`authenticated` nessas tabelas.
+- Pesquisa técnica seleciona Groq Free apenas para testes anonimizados: API OpenAI-compatible e STT Whisper atendem protótipo, mas privacidade/retenção precisa aprovação antes de qualquer dado real. Gemini Free não é aceitável para PII porque seus termos informam uso do conteúdo para melhoria de produtos.
 - Número comercial continua `NO-GO`; outbound real continua `OFF`; Simulation Mode continua `ON`; Sprint B.2 permanece inalterada.
