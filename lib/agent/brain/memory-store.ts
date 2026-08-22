@@ -12,9 +12,18 @@ export async function persistExtractedFacts(clientId: number, facts: ExtractedFa
 
 export async function persistConversationSummary(input: { clientId: number; conversationId?: string; summary: string; lastMessageId?: number }) {
   const db = supabaseAdmin();
-  const query = db.from("agent_conversation_summaries").select("version").eq("client_id", input.clientId).order("version", { ascending: false }).limit(1);
-  const { data, error } = await query;
+  const { error } = await db.rpc("append_agent_conversation_summary", { p_client_id: input.clientId, p_conversation_id: input.conversationId || null, p_summary: input.summary, p_last_message_id: input.lastMessageId || null });
   if (error) throw error;
-  const { error: insertError } = await db.from("agent_conversation_summaries").insert({ client_id: input.clientId, conversation_id: input.conversationId || null, summary: input.summary, last_message_id: input.lastMessageId || null, version: (data?.[0]?.version || 0) + 1 });
-  if (insertError) throw insertError;
+}
+
+export async function commitAgentMemory(input: { clientId: number; conversationId?: string; summary: string; lastMessageId?: number; facts: ExtractedFact[] }) {
+  const { data, error } = await supabaseAdmin().rpc("commit_agent_memory", {
+    p_client_id: input.clientId,
+    p_conversation_id: input.conversationId || null,
+    p_summary: input.summary,
+    p_last_message_id: input.lastMessageId || null,
+    p_facts: input.facts,
+  });
+  if (error) throw error;
+  return data;
 }
