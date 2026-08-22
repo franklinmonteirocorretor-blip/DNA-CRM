@@ -2,11 +2,17 @@
 import Image from "next/image";
 import Link from "next/link";
 import { CrmNavigation } from "../components/crm-navigation";
-import { useEffect, useMemo, useState } from "react";
+import { CrmCenterTabs } from "../components/crm-center-tabs";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import "./indicadores.css";
 import "./funnel-premium.css";
 import "./funnel-layout-fix.css";
+
+const brl = new Intl.NumberFormat("pt-BR", {
+  style: "currency",
+  currency: "BRL",
+});
 
 const periods = ["Hoje", "Semana", "Mês", "Trimestre", "Ano"];
 type Metrics = {
@@ -31,8 +37,11 @@ export default function Indicadores() {
       .then((data) => setMetrics({ ...emptyMetrics, ...data }))
       .catch(() => {});
   }, [period]);
-  const stageCount = (name: string) =>
-    metrics.stages.find((item) => item.stage === name)?.total || 0;
+  const stageCount = useCallback(
+    (name: string) =>
+      metrics.stages.find((item) => item.stage === name)?.total || 0,
+    [metrics.stages],
+  );
   const attempts = metrics.eventCounts.contact_attempt || 0,
     effective = metrics.eventCounts.effective_contact || 0,
     qualified = metrics.eventCounts.qualified_conversation || 0,
@@ -46,10 +55,6 @@ export default function Indicadores() {
     approvals = stageCount("Aprovado") + stageCount("Aprovado sem fechamento"),
     proposals = metrics.eventCounts.proposal || 0,
     sales = metrics.sales.sales || 0;
-  const brl = new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  });
   const kpis = useMemo(
     () => [
       [
@@ -188,22 +193,228 @@ export default function Indicadores() {
       attended,
       proposals,
       sales,
-      metrics.stages,
+      stageCount,
     ],
   );
   async function generatePdf() {
     const doc = await PDFDocument.create();
     const font = await doc.embedFont(StandardFonts.Helvetica);
     const bold = await doc.embedFont(StandardFonts.HelveticaBold);
-    const gold = rgb(.86,.64,.18), white = rgb(.96,.96,.94), muted = rgb(.58,.58,.58), panel = rgb(.075,.075,.075), bg = rgb(.025,.025,.025);
-    const addPage = (title:string, subtitle:string) => { const page=doc.addPage([842,595]); page.drawRectangle({x:0,y:0,width:842,height:595,color:bg}); page.drawRectangle({x:0,y:548,width:842,height:47,color:rgb(.06,.05,.025)}); page.drawText("MONTEIRO CRM",{x:38,y:568,size:16,font:bold,color:gold}); page.drawText(title,{x:38,y:522,size:23,font:bold,color:white}); page.drawText(subtitle,{x:38,y:502,size:9,font,color:muted}); page.drawText(`Relatório executivo · ${period} · ${new Date().toLocaleString("pt-BR")}`,{x:585,y:568,size:7,font,color:muted}); return page; };
-    let page=addPage("Visão executiva", "Metas, produtividade e resultado financeiro em uma leitura.");
-    kpis.slice(0,12).forEach((k,index)=>{const col=index%4,row=Math.floor(index/4),x=38+col*195,y=450-row*112;page.drawRectangle({x,y,width:180,height:88,color:panel,borderColor:rgb(.18,.16,.1),borderWidth:1});page.drawText(String(k[0]).toUpperCase(),{x:x+12,y:y+66,size:7,font:bold,color:muted});page.drawText(String(k[1]),{x:x+12,y:y+37,size:21,font:bold,color:white});page.drawText(`META ${k[2]}`,{x:x+12,y:y+15,size:7,font:bold,color:gold});});
-    page.drawRectangle({x:38,y:70,width:766,height:46,color:rgb(.12,.09,.025),borderColor:gold,borderWidth:1});page.drawText(`${sales} vendas · ${brl.format(metrics.sales.vgv)} de VGV · ${brl.format(metrics.sales.commission)} recebidos`,{x:58,y:88,size:15,font:bold,color:gold});
-    page=addPage("Funil comercial", "Conversão ponta a ponta e identificação visual de gargalos.");
-    const widths=[700,620,545,470,395,320,245,170]; funnel.forEach(([label,value,rate],index)=>{const width=widths[index],x=(842-width)/2,y=445-index*49;page.drawRectangle({x,y,width,height:40,color:index===7?rgb(.25,.17,.035):rgb(.11,.09,.055),borderColor:gold,borderWidth:.7});page.drawText(`${String(index+1).padStart(2,"0")}  ${label.toUpperCase()}`,{x:x+18,y:y+16,size:10,font:bold,color:white});page.drawText(String(value),{x:x+width-82,y:y+14,size:15,font:bold,color:gold});page.drawText(`${Number(rate).toFixed(1)}%`,{x:x+width-38,y:y+16,size:7,font,color:muted});});
-    page=addPage("Diagnóstico e plano de ação", "Leitura gerencial para decidir o que corrigir no próximo ciclo.");
-    const diagnoses=[{title:"Volume de prospecção",value:attempts,goal:1100,action:"Executar carteira somente em dias úteis e registrar 100% das tentativas."},{title:"Qualificação",value:qualified,goal:220,action:"Aumentar contatos efetivos e manter próxima ação obrigatória."},{title:"Pastas para análise",value:folders,goal:22,action:"Cobrar documentos e reduzir abandono antes do envio ao CCA."},{title:"Aprovações",value:approvals,goal:10,action:"Acompanhar SLA do CCA e trabalhar restrições e condicionados."},{title:"Vendas",value:sales,goal:5,action:"Levar aprovados à Mesa de Fechamento e registrar o desfecho."}];diagnoses.forEach((item,index)=>{const y=438-index*78,rate=Math.min(1,item.value/item.goal);page.drawText(item.title,{x:46,y:y+32,size:12,font:bold,color:white});page.drawText(`${item.value} / ${item.goal}`,{x:705,y:y+32,size:12,font:bold,color:gold});page.drawRectangle({x:46,y:y+14,width:700,height:7,color:rgb(.16,.16,.16)});page.drawRectangle({x:46,y:y+14,width:700*rate,height:7,color:gold});page.drawText(item.action,{x:46,y:y-3,size:8,font,color:muted});});page.drawRectangle({x:46,y:52,width:750,height:48,color:rgb(.1,.08,.025),borderColor:gold,borderWidth:1});page.drawText("REGRA DE GESTÃO: números só aumentam por registros reais do CRM.",{x:63,y:72,size:11,font:bold,color:gold});
+    const gold = rgb(0.86, 0.64, 0.18),
+      white = rgb(0.96, 0.96, 0.94),
+      muted = rgb(0.58, 0.58, 0.58),
+      panel = rgb(0.075, 0.075, 0.075),
+      bg = rgb(0.025, 0.025, 0.025);
+    const addPage = (title: string, subtitle: string) => {
+      const page = doc.addPage([842, 595]);
+      page.drawRectangle({ x: 0, y: 0, width: 842, height: 595, color: bg });
+      page.drawRectangle({
+        x: 0,
+        y: 548,
+        width: 842,
+        height: 47,
+        color: rgb(0.06, 0.05, 0.025),
+      });
+      page.drawText("MONTEIRO CRM", {
+        x: 38,
+        y: 568,
+        size: 16,
+        font: bold,
+        color: gold,
+      });
+      page.drawText(title, {
+        x: 38,
+        y: 522,
+        size: 23,
+        font: bold,
+        color: white,
+      });
+      page.drawText(subtitle, { x: 38, y: 502, size: 9, font, color: muted });
+      page.drawText(
+        `Relatório executivo · ${period} · ${new Date().toLocaleString("pt-BR")}`,
+        { x: 585, y: 568, size: 7, font, color: muted },
+      );
+      return page;
+    };
+    let page = addPage(
+      "Visão executiva",
+      "Metas, produtividade e resultado financeiro em uma leitura.",
+    );
+    kpis.slice(0, 12).forEach((k, index) => {
+      const col = index % 4,
+        row = Math.floor(index / 4),
+        x = 38 + col * 195,
+        y = 450 - row * 112;
+      page.drawRectangle({
+        x,
+        y,
+        width: 180,
+        height: 88,
+        color: panel,
+        borderColor: rgb(0.18, 0.16, 0.1),
+        borderWidth: 1,
+      });
+      page.drawText(String(k[0]).toUpperCase(), {
+        x: x + 12,
+        y: y + 66,
+        size: 7,
+        font: bold,
+        color: muted,
+      });
+      page.drawText(String(k[1]), {
+        x: x + 12,
+        y: y + 37,
+        size: 21,
+        font: bold,
+        color: white,
+      });
+      page.drawText(`META ${k[2]}`, {
+        x: x + 12,
+        y: y + 15,
+        size: 7,
+        font: bold,
+        color: gold,
+      });
+    });
+    page.drawRectangle({
+      x: 38,
+      y: 70,
+      width: 766,
+      height: 46,
+      color: rgb(0.12, 0.09, 0.025),
+      borderColor: gold,
+      borderWidth: 1,
+    });
+    page.drawText(
+      `${sales} vendas · ${brl.format(metrics.sales.vgv)} de VGV · ${brl.format(metrics.sales.commission)} recebidos`,
+      { x: 58, y: 88, size: 15, font: bold, color: gold },
+    );
+    page = addPage(
+      "Funil comercial",
+      "Conversão ponta a ponta e identificação visual de gargalos.",
+    );
+    const widths = [700, 620, 545, 470, 395, 320, 245, 170];
+    funnel.forEach(([label, value, rate], index) => {
+      const width = widths[index],
+        x = (842 - width) / 2,
+        y = 445 - index * 49;
+      page.drawRectangle({
+        x,
+        y,
+        width,
+        height: 40,
+        color: index === 7 ? rgb(0.25, 0.17, 0.035) : rgb(0.11, 0.09, 0.055),
+        borderColor: gold,
+        borderWidth: 0.7,
+      });
+      page.drawText(
+        `${String(index + 1).padStart(2, "0")}  ${label.toUpperCase()}`,
+        { x: x + 18, y: y + 16, size: 10, font: bold, color: white },
+      );
+      page.drawText(String(value), {
+        x: x + width - 82,
+        y: y + 14,
+        size: 15,
+        font: bold,
+        color: gold,
+      });
+      page.drawText(`${Number(rate).toFixed(1)}%`, {
+        x: x + width - 38,
+        y: y + 16,
+        size: 7,
+        font,
+        color: muted,
+      });
+    });
+    page = addPage(
+      "Diagnóstico e plano de ação",
+      "Leitura gerencial para decidir o que corrigir no próximo ciclo.",
+    );
+    const diagnoses = [
+      {
+        title: "Volume de prospecção",
+        value: attempts,
+        goal: 1100,
+        action:
+          "Executar carteira somente em dias úteis e registrar 100% das tentativas.",
+      },
+      {
+        title: "Qualificação",
+        value: qualified,
+        goal: 220,
+        action: "Aumentar contatos efetivos e manter próxima ação obrigatória.",
+      },
+      {
+        title: "Pastas para análise",
+        value: folders,
+        goal: 22,
+        action: "Cobrar documentos e reduzir abandono antes do envio ao CCA.",
+      },
+      {
+        title: "Aprovações",
+        value: approvals,
+        goal: 10,
+        action: "Acompanhar SLA do CCA e trabalhar restrições e condicionados.",
+      },
+      {
+        title: "Vendas",
+        value: sales,
+        goal: 5,
+        action: "Levar aprovados à Mesa de Fechamento e registrar o desfecho.",
+      },
+    ];
+    diagnoses.forEach((item, index) => {
+      const y = 438 - index * 78,
+        rate = Math.min(1, item.value / item.goal);
+      page.drawText(item.title, {
+        x: 46,
+        y: y + 32,
+        size: 12,
+        font: bold,
+        color: white,
+      });
+      page.drawText(`${item.value} / ${item.goal}`, {
+        x: 705,
+        y: y + 32,
+        size: 12,
+        font: bold,
+        color: gold,
+      });
+      page.drawRectangle({
+        x: 46,
+        y: y + 14,
+        width: 700,
+        height: 7,
+        color: rgb(0.16, 0.16, 0.16),
+      });
+      page.drawRectangle({
+        x: 46,
+        y: y + 14,
+        width: 700 * rate,
+        height: 7,
+        color: gold,
+      });
+      page.drawText(item.action, {
+        x: 46,
+        y: y - 3,
+        size: 8,
+        font,
+        color: muted,
+      });
+    });
+    page.drawRectangle({
+      x: 46,
+      y: 52,
+      width: 750,
+      height: 48,
+      color: rgb(0.1, 0.08, 0.025),
+      borderColor: gold,
+      borderWidth: 1,
+    });
+    page.drawText(
+      "REGRA DE GESTÃO: números só aumentam por registros reais do CRM.",
+      { x: 63, y: 72, size: 11, font: bold, color: gold },
+    );
     const bytes = await doc.save();
     const blob = new Blob([new Uint8Array(bytes)], { type: "application/pdf" });
     const url = URL.createObjectURL(blob);
@@ -244,14 +455,15 @@ export default function Indicadores() {
               Produtividade, conversão, receita e gargalos em um único comando.
             </p>
           </div>
-          <div className="export-actions">
+        </header>
+        <div className="ind-content">
+          <CrmCenterTabs />
+          <div className="crm-page-toolbar export-actions">
             <button onClick={generatePdf}>Apresentação / PDF</button>
             <a href="/api/metrics/export?format=csv">Exportar BI · CSV</a>
             <a href="/api/metrics/export?format=json">JSON</a>
             <button className="gold">Definir metas</button>
           </div>
-        </header>
-        <div className="ind-content">
           <section className="ind-filters">
             <div>
               {periods.map((p) => (

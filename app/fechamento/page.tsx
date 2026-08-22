@@ -3,7 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { CrmNavigation } from "../components/crm-navigation";
+import { CrmCenterTabs } from "../components/crm-center-tabs";
 import { useEffect, useMemo, useState } from "react";
+import { CATALOG_CITIES, normalizeCatalogCity } from "@/lib/catalog-hierarchy";
+import { calculateClosingValues } from "@/lib/closing-math";
 import "./fechamento.css";
 import "./property-media.css";
 
@@ -13,9 +16,29 @@ const money = new Intl.NumberFormat("pt-BR", {
 });
 type Sex = "Feminino" | "Masculino";
 type CatalogMedia = { id: number; name: string; type: string; url: string };
-type CatalogProject = { id: number; name: string; price: number; commission: number; media: CatalogMedia[] };
+type CatalogProject = {
+  id: number;
+  name: string;
+  city: string;
+  region?: string;
+  price: number;
+  commission: number;
+  media: CatalogMedia[];
+};
 type CatalogBuilder = { id: number; name: string; projects: CatalogProject[] };
-type ClosingClient = { id: number; name: string; phone: string; email?: string; sex?: Sex; marital_status?: string; profession?: string; income?: number; finance_stage?: string };
+type ClosingClient = {
+  id: number;
+  name: string;
+  phone: string;
+  email?: string;
+  sex?: Sex;
+  marital_status?: string;
+  profession?: string;
+  income?: number;
+  finance_stage?: string;
+  project_interest?: string;
+  next_action_at?: string;
+};
 
 function genderLanguage(sex: Sex) {
   return sex === "Feminino"
@@ -50,6 +73,7 @@ export default function FechamentoPage() {
   const [clients, setClients] = useState<ClosingClient[]>([]);
   const [selectedClientId, setSelectedClientId] = useState(0);
   const [catalog, setCatalog] = useState<CatalogBuilder[]>([]);
+  const [selectedCity, setSelectedCity] = useState("Teresina");
   const [selectedBuilderId, setSelectedBuilderId] = useState(0);
   const [selectedProjectId, setSelectedProjectId] = useState(0);
   const [mediaOrder, setMediaOrder] = useState<CatalogMedia[]>([]);
@@ -58,15 +82,27 @@ export default function FechamentoPage() {
   const [feedback, setFeedback] = useState("");
   const [nextActionAt, setNextActionAt] = useState("");
   const [unit, setUnit] = useState("");
-  const selectedClient = clients.find((client) => client.id === selectedClientId);
-  const selectedBuilderData = catalog.find((builder) => builder.id === selectedBuilderId);
-  const selectedProjectData = selectedBuilderData?.projects.find((project) => project.id === selectedProjectId);
+  const selectedClient = clients.find(
+    (client) => client.id === selectedClientId,
+  );
+  const cityCatalog = catalog.filter((builder) =>
+    builder.projects.some(
+      (project) =>
+        normalizeCatalogCity(project.city, project.region) === selectedCity,
+    ),
+  );
+  const selectedBuilderData =
+    cityCatalog.find((builder) => builder.id === selectedBuilderId) ||
+    cityCatalog[0];
+  const selectedProjectData = selectedBuilderData?.projects.find(
+    (project) => project.id === selectedProjectId,
+  );
   const clientProfile = {
     maritalStatus: selectedClient?.marital_status || "Solteiro",
     marriageCertificateStatus: "Pendente",
     holder: {
       name: selectedClient?.name || "Cliente não selecionado",
-      sex: selectedClient?.sex || "Feminino" as Sex,
+      sex: selectedClient?.sex || ("Feminino" as Sex),
       cpf: "—",
       birth: "—",
       income: Number(selectedClient?.income || 0),
@@ -83,19 +119,30 @@ export default function FechamentoPage() {
   };
   const clientLanguage = genderLanguage(clientProfile.holder.sex);
   const [propertyValue, setPropertyValue] = useState(0);
+  const [negotiatedPropertyValue, setNegotiatedPropertyValue] = useState(0);
   const [financing, setFinancing] = useState(0);
   const [subsidy, setSubsidy] = useState(0);
-  const [bonus, setBonus] = useState(0);
+  const bonus = calculateClosingValues({
+    listedPrice: propertyValue,
+    negotiatedPrice: negotiatedPropertyValue,
+    financing,
+    subsidy,
+  }).bonus;
   const [signal, setSignal] = useState(0);
-  const [monthlyQty, setMonthlyQty] = useState(0);
-  const [monthlyTotal, setMonthlyTotal] = useState(0);
+  const [signalQty, setSignalQty] = useState(1);
+  const [monthlyQty, setMonthlyQty] = useState(1);
   const [fgts, setFgts] = useState(0);
   const [intermediate1, setIntermediate1] = useState(0);
+  const [intermediate1Qty, setIntermediate1Qty] = useState(1);
   const [intermediate2, setIntermediate2] = useState(0);
+  const [intermediate2Qty, setIntermediate2Qty] = useState(1);
   const [intermediate3, setIntermediate3] = useState(0);
+  const [intermediate3Qty, setIntermediate3Qty] = useState(1);
+  const [fgtsQty, setFgtsQty] = useState(1);
   const [postKeyTotal, setPostKeyTotal] = useState(0);
   const [postKeyTerms, setPostKeyTerms] = useState(0);
   const [otherEntry, setOtherEntry] = useState(0);
+  const [otherEntryQty, setOtherEntryQty] = useState(1);
   const [signalTiming, setSignalTiming] = useState("Pré-chave");
   const [monthlyTiming, setMonthlyTiming] = useState("Pré-chave");
   const [inter1Timing, setInter1Timing] = useState("Pré-chave");
@@ -134,34 +181,93 @@ export default function FechamentoPage() {
   const [pdfPreview, setPdfPreview] = useState(false);
   const [contractPreview, setContractPreview] = useState(false);
 
+  const fixedEntryDistribution =
+    signal +
+    fgts +
+    intermediate1 +
+    intermediate2 +
+    intermediate3 +
+    postKeyTotal +
+    otherEntry;
+  const closingValues = calculateClosingValues({
+    listedPrice: propertyValue,
+    negotiatedPrice: negotiatedPropertyValue,
+    financing,
+    subsidy,
+    fixedEntryItems: [
+      signal,
+      fgts,
+      intermediate1,
+      intermediate2,
+      intermediate3,
+      postKeyTotal,
+      otherEntry,
+    ],
+  });
+  const { netPropertyValue, entryRequired, monthlyTotal } = closingValues;
+
   useEffect(() => {
     Promise.all([
       fetch("/api/closing").then((response) => response.json()),
       fetch("/api/catalog").then((response) => response.json()),
-    ]).then(([clientData, catalogData]) => {
-      if (Array.isArray(clientData)) {
-        setClients(clientData);
-        if (clientData[0]) setSelectedClientId(clientData[0].id);
-      }
-      if (Array.isArray(catalogData)) {
-        setCatalog(catalogData);
-        const builder = catalogData.find((item: CatalogBuilder) => item.projects?.length) || catalogData[0];
-        if (builder) {
-          setSelectedBuilderId(builder.id);
-          setSelectedProjectId(builder.projects?.[0]?.id || 0);
+    ])
+      .then(([clientData, catalogData]) => {
+        if (Array.isArray(clientData)) {
+          setClients(clientData);
+          if (clientData[0]) setSelectedClientId(clientData[0].id);
         }
-      }
-    }).catch(() => setFeedback("Não foi possível carregar os dados reais."));
+        if (Array.isArray(catalogData)) {
+          setCatalog(catalogData);
+          const firstCity =
+            CATALOG_CITIES.find((city) =>
+              catalogData.some((item: CatalogBuilder) =>
+                item.projects?.some(
+                  (project) =>
+                    normalizeCatalogCity(project.city, project.region) === city,
+                ),
+              ),
+            ) || "Teresina";
+          setSelectedCity(firstCity);
+          const builder =
+            catalogData.find((item: CatalogBuilder) =>
+              item.projects?.some(
+                (project: CatalogProject) =>
+                  normalizeCatalogCity(project.city, project.region) ===
+                  firstCity,
+              ),
+            ) || catalogData[0];
+          if (builder) {
+            setSelectedBuilderId(builder.id);
+            setSelectedProjectId(
+              builder.projects?.find(
+                (project: CatalogProject) =>
+                  normalizeCatalogCity(project.city, project.region) ===
+                  firstCity,
+              )?.id || 0,
+            );
+          }
+        }
+      })
+      .catch(() => setFeedback("Não foi possível carregar os dados reais."));
   }, []);
 
   useEffect(() => {
-    setMediaOrder(selectedProjectData?.media || []);
-    if (selectedProjectData?.price) setPropertyValue(Number(selectedProjectData.price));
-  }, [selectedProjectData?.id]);
+    const timer = window.setTimeout(() => {
+      setMediaOrder(selectedProjectData?.media || []);
+      if (selectedProjectData?.price) {
+        setPropertyValue(Number(selectedProjectData.price));
+        setNegotiatedPropertyValue(Number(selectedProjectData.price));
+      }
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [
+    selectedProjectData?.id,
+    selectedProjectData?.media,
+    selectedProjectData?.price,
+  ]);
 
   const calc = useMemo(() => {
-    const netPropertyValue = Math.max(0, propertyValue - bonus);
-    const entry = Math.max(0, netPropertyValue - financing - subsidy);
+    const entry = entryRequired;
     const distributed =
       signal +
       monthlyTotal +
@@ -232,10 +338,8 @@ export default function FechamentoPage() {
       monthlyDuringWork,
     };
   }, [
-    propertyValue,
-    bonus,
-    financing,
-    subsidy,
+    netPropertyValue,
+    entryRequired,
     signal,
     monthlyTotal,
     fgts,
@@ -272,11 +376,16 @@ export default function FechamentoPage() {
     try {
       const form = new FormData();
       form.append("file", file);
-      const response = await fetch("/api/closing/simulation", { method: "POST", body: form });
+      const response = await fetch("/api/closing/simulation", {
+        method: "POST",
+        body: form,
+      });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Falha ao analisar a simulação.");
+      if (!response.ok)
+        throw new Error(data.error || "Falha ao analisar a simulação.");
       setImportedFile(file.name);
       setPropertyValue(Number(data.propertyValue || 0));
+      setNegotiatedPropertyValue(Number(data.propertyValue || 0));
       setFinancing(Number(data.financing || 0));
       setSubsidy(Number(data.subsidy || 0));
       setCaixaPayment(Number(data.installment || 0));
@@ -284,14 +393,98 @@ export default function FechamentoPage() {
       if (data.system) setSystem(data.system);
       if (data.modality) setPropertyMode(data.modality);
       setSignal(0);
-      setMonthlyTotal(Number(data.entry || 0));
-      setFeedback(`Simulação analisada: financiamento ${money.format(data.financing)}, subsídio ${money.format(data.subsidy)} e menor prestação ${money.format(data.installment)}.`);
+      setFeedback(
+        `Simulação analisada: financiamento ${money.format(data.financing)}, subsídio ${money.format(data.subsidy)} e menor prestação ${money.format(data.installment)}.`,
+      );
     } catch (error) {
       setImportedFile("");
-      setFeedback(error instanceof Error ? error.message : "Falha ao analisar a simulação.");
+      setFeedback(
+        error instanceof Error
+          ? error.message
+          : "Falha ao analisar a simulação.",
+      );
     } finally {
       setLoadingPdf(false);
     }
+  }
+
+  function openWhatsAppSummary() {
+    if (!selectedClient?.phone) {
+      setFeedback("O cliente selecionado não possui telefone cadastrado.");
+      return;
+    }
+    const firstName = selectedClient.name.trim().split(/\s+/)[0] || "Olá";
+    const entryLines = [
+      signal > 0 ? `- Sinal: *${money.format(signal)}*` : "",
+      monthlyTotal > 0
+        ? `- Parcelas: *${monthlyQty}x de ${money.format(calc.monthlyEntry)}*`
+        : "",
+      intermediate1 > 0
+        ? `- Intercaladas 1: *${intermediate1Qty}x de ${money.format(intermediate1 / Math.max(1, intermediate1Qty))}*`
+        : "",
+      intermediate2 > 0
+        ? `- Intercaladas 2: *${intermediate2Qty}x de ${money.format(intermediate2 / Math.max(1, intermediate2Qty))}*`
+        : "",
+      intermediate3 > 0
+        ? `- Intercaladas 3: *${intermediate3Qty}x de ${money.format(intermediate3 / Math.max(1, intermediate3Qty))}*`
+        : "",
+      fgts > 0 ? `- FGTS: *${money.format(fgts)}*` : "",
+      postKeyTotal > 0
+        ? `- Pós-chaves: *${postKeyTerms}x de ${money.format(postKeyTotal / Math.max(1, postKeyTerms))}*`
+        : "",
+      otherEntry > 0 ? `- Outros: *${money.format(otherEntry)}*` : "",
+    ].filter(Boolean);
+    const feeLines = [
+      itbi > 0 && !itbiBonus
+        ? `📄 *ITBI + Cartório*\n- *${Math.max(1, itbiTerms)}x de ${money.format(itbi / Math.max(1, itbiTerms))}*`
+        : "",
+      tac > 0 && !tacBonus
+        ? `📄 *TAC*\n- *${Math.max(1, tacTerms)}x de ${money.format(tac / Math.max(1, tacTerms))}*`
+        : "",
+    ].filter(Boolean);
+    const beforeAmount = calc.monthlyDuringWork;
+    const afterAmount =
+      caixaPayment +
+      calc.feeMonthlyAfter +
+      postKeyTotal / Math.max(1, postKeyTerms);
+    const constructionNote =
+      propertyMode === "Imóvel novo" ? "" : " + juros de obra";
+    const message = [
+      `${firstName}, segue o resumo da sua proposta 🏡`,
+      "",
+      `🏠 *${selectedProjectData?.name || "Imóvel selecionado"}*`,
+      `Construtora: *${selectedBuilderData?.name || "A definir"}*`,
+      `Cidade: *${selectedCity}*`,
+      unit ? `Unidade: *${unit}*` : "",
+      `Valor do imóvel: *${money.format(propertyValue)}*`,
+      bonus > 0 ? `🎁 Bônus da construtora: *${money.format(bonus)}*` : "",
+      "",
+      `🏦 Financiamento CAIXA: *${money.format(financing)}*`,
+      subsidy > 0 ? `🎁 Subsídio: *${money.format(subsidy)}*` : "",
+      "",
+      "🔑 *Entrada*",
+      ...entryLines,
+      "",
+      ...feeLines,
+      feeLines.length ? "" : "",
+      "🏦 *Financiamento*",
+      `- Prazo: *${term} meses*`,
+      `- Parcela estimada: *${money.format(caixaPayment)}*`,
+      "",
+      "📌 *Na prática:*",
+      `Antes das chaves → *${money.format(beforeAmount)}/mês${constructionNote}*`,
+      `Após as chaves → *${money.format(afterAmount)}/mês*`,
+      `Depois das parcelas temporárias → *${money.format(caixaPayment)}/mês*`,
+      "",
+      "Assim você visualiza com clareza quanto paga em cada etapa. Se quiser, eu explico qualquer ponto por aqui.",
+    ]
+      .filter((line, index, lines) => line !== "" || lines[index - 1] !== "")
+      .join("\n");
+    const rawPhone = selectedClient.phone.replace(/\D/g, "");
+    const phone = rawPhone.length <= 11 ? `55${rawPhone}` : rawPhone;
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+    const whatsappWindow = window.open(url, "_blank", "noopener,noreferrer");
+    if (!whatsappWindow) window.location.assign(url);
   }
 
   async function saveOutcome() {
@@ -299,12 +492,65 @@ export default function FechamentoPage() {
     const response = await fetch("/api/closing", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ clientId: selectedClientId, projectId: selectedProjectId, result, reason, notes: outcomeNotes, nextActionAt, vgv: calc.netPropertyValue }),
+      body: JSON.stringify({
+        clientId: selectedClientId,
+        projectId: selectedProjectId,
+        result,
+        reason,
+        notes: outcomeNotes,
+        nextActionAt,
+        vgv: propertyValue,
+        proposal: {
+          builderId: selectedBuilderId,
+          projectId: selectedProjectId,
+          unit,
+          listedPrice: propertyValue,
+          negotiatedPrice: negotiatedPropertyValue,
+          bonus,
+          financing,
+          subsidy,
+          entry: calc.entry,
+          signal,
+          signalQty,
+          monthlyQty,
+          monthlyTotal,
+          fgts,
+          fgtsQty,
+          intermediate1,
+          intermediate1Qty,
+          intermediate2,
+          intermediate2Qty,
+          intermediate3,
+          intermediate3Qty,
+          postKeyTotal,
+          postKeyTerms,
+          otherEntry,
+          otherEntryQty,
+          propertyMode,
+          system,
+          term,
+          caixaPayment,
+          itbi,
+          tac,
+          tacTerms,
+          tacTiming,
+          tao,
+          engineering,
+          generatedAt: new Date().toISOString(),
+        },
+      }),
     });
     const data = await response.json();
-    if (!response.ok) return setFeedback(data.error || "Não foi possível registrar o resultado.");
+    if (!response.ok)
+      return setFeedback(
+        data.error || "Não foi possível registrar o resultado.",
+      );
     setSaved(true);
-    setFeedback(result === "Fechado" ? "Fechamento confirmado e VGV enviado à central financeira." : "Resultado e próxima ação registrados na ficha do cliente.");
+    setFeedback(
+      result === "Fechado"
+        ? "Fechamento confirmado e VGV enviado à central financeira."
+        : "Resultado e próxima ação registrados na ficha do cliente.",
+    );
   }
   const applicableFees = [
     {
@@ -371,20 +617,25 @@ export default function FechamentoPage() {
             <h1>Mesa de Fechamento</h1>
             <p>Franklin Monteiro · CRECI 3812 · (86) 99906-7923</p>
           </div>
-          <div className="header-actions">
+        </header>
+
+        <div className="closing-content">
+          <CrmCenterTabs />
+          <div className="crm-page-toolbar header-actions">
             <button>Salvar rascunho</button>
             <button className="gold" onClick={() => setPdfPreview(true)}>
               Gerar proposta em PDF
             </button>
           </div>
-        </header>
-
-        <div className="closing-content">
           <section className="client-ribbon">
             <div>
               <span>Cliente selecionado</span>
               <h2>{selectedClient?.name || "Cliente não selecionado"}</h2>
-              <p>{selectedClient ? `${selectedClient.finance_stage || "Aprovado"} · ${selectedClient.phone}` : "Selecione um cliente aprovado."}</p>
+              <p>
+                {selectedClient
+                  ? `${selectedClient.finance_stage || "Aprovado"} · ${selectedClient.phone}`
+                  : "Selecione um cliente aprovado."}
+              </p>
             </div>
             <article>
               <span>Crédito aprovado</span>
@@ -396,12 +647,53 @@ export default function FechamentoPage() {
             </article>
             <article>
               <span>Sistema · prazo</span>
-              <b>{system || "Sistema não identificado"} · {term} meses</b>
+              <b>
+                {system || "Sistema não identificado"} · {term} meses
+              </b>
             </article>
-            <select className="client-selector" value={selectedClientId} onChange={(event) => setSelectedClientId(Number(event.target.value))}>
+            <select
+              className="client-selector"
+              value={selectedClientId}
+              onChange={(event) =>
+                setSelectedClientId(Number(event.target.value))
+              }
+            >
               <option value={0}>Selecionar cliente</option>
-              {clients.map((client) => <option key={client.id} value={client.id}>{client.name}</option>)}
+              {clients.map((client) => (
+                <option key={client.id} value={client.id}>
+                  {client.name} ·{" "}
+                  {client.project_interest || "Imóvel a definir"}
+                </option>
+              ))}
             </select>
+          </section>
+          <section className="approved-client-queue">
+            <header>
+              <div>
+                <span>Fila de crédito aprovado</span>
+                <b>{clients.length} cliente(s) disponível(is) para proposta</b>
+              </div>
+              <small>
+                A aprovação libera a negociação, mas não contabiliza venda ou
+                VGV.
+              </small>
+            </header>
+            <div>
+              {clients.map((client) => (
+                <button
+                  type="button"
+                  key={client.id}
+                  className={selectedClientId === client.id ? "active" : ""}
+                  onClick={() => setSelectedClientId(client.id)}
+                >
+                  <b>{client.name}</b>
+                  <span>
+                    {client.project_interest || "Imóvel ainda não definido"}
+                  </span>
+                  <small>{client.phone}</small>
+                </button>
+              ))}
+            </div>
           </section>
 
           <section className="pdf-import">
@@ -420,7 +712,11 @@ export default function FechamentoPage() {
                 accept="application/pdf"
                 onChange={(e) => importSimulation(e.target.files?.[0])}
               />
-              {loadingPdf ? "Analisando..." : importedFile ? "Trocar documento" : "Selecionar PDF"}
+              {loadingPdf
+                ? "Analisando..."
+                : importedFile
+                  ? "Trocar documento"
+                  : "Selecionar PDF"}
             </label>
             {importedFile && (
               <aside>
@@ -486,17 +782,62 @@ export default function FechamentoPage() {
               </header>
               <div className="form-grid">
                 <label>
+                  <span>Cidade</span>
+                  <select
+                    value={selectedCity}
+                    onChange={(e) => {
+                      const city = e.target.value;
+                      setSelectedCity(city);
+                      const nextBuilder = catalog.find((builder) =>
+                        builder.projects.some(
+                          (project) =>
+                            normalizeCatalogCity(
+                              project.city,
+                              project.region,
+                            ) === city,
+                        ),
+                      );
+                      setSelectedBuilderId(nextBuilder?.id || 0);
+                      setSelectedProjectId(
+                        nextBuilder?.projects.find(
+                          (project) =>
+                            normalizeCatalogCity(
+                              project.city,
+                              project.region,
+                            ) === city,
+                        )?.id || 0,
+                      );
+                    }}
+                  >
+                    {CATALOG_CITIES.map((city) => (
+                      <option key={city}>{city}</option>
+                    ))}
+                  </select>
+                </label>
+                <label>
                   <span>Construtora parceira</span>
                   <select
                     value={selectedBuilderId}
                     onChange={(e) => {
                       const next = Number(e.target.value);
                       setSelectedBuilderId(next);
-                      setSelectedProjectId(catalog.find((builder) => builder.id === next)?.projects?.[0]?.id || 0);
+                      setSelectedProjectId(
+                        catalog
+                          .find((builder) => builder.id === next)
+                          ?.projects?.find(
+                            (project) =>
+                              normalizeCatalogCity(
+                                project.city,
+                                project.region,
+                              ) === selectedCity,
+                          )?.id || 0,
+                      );
                     }}
                   >
-                    {catalog.map((builder) => (
-                      <option key={builder.id} value={builder.id}>{builder.name}</option>
+                    {cityCatalog.map((builder) => (
+                      <option key={builder.id} value={builder.id}>
+                        {builder.name}
+                      </option>
                     ))}
                   </select>
                 </label>
@@ -504,21 +845,40 @@ export default function FechamentoPage() {
                   <span>Empreendimento</span>
                   <select
                     value={selectedProjectId}
-                    onChange={(e) => setSelectedProjectId(Number(e.target.value))}
+                    onChange={(e) =>
+                      setSelectedProjectId(Number(e.target.value))
+                    }
                   >
-                    {(selectedBuilderData?.projects || []).map((project) => (
-                      <option key={project.id} value={project.id}>{project.name}</option>
-                    ))}
+                    {(selectedBuilderData?.projects || [])
+                      .filter(
+                        (project) =>
+                          normalizeCatalogCity(project.city, project.region) ===
+                          selectedCity,
+                      )
+                      .map((project) => (
+                        <option key={project.id} value={project.id}>
+                          {project.name}
+                        </option>
+                      ))}
                   </select>
                 </label>
                 <label>
                   <span>Unidade</span>
-                  <input value={unit} onChange={(event) => setUnit(event.target.value)} placeholder="Informe a unidade escolhida" />
+                  <input
+                    value={unit}
+                    onChange={(event) => setUnit(event.target.value)}
+                    placeholder="Informe a unidade escolhida"
+                  />
                 </label>
                 <MoneyInput
                   label="Valor do imóvel"
                   value={propertyValue}
                   onChange={setPropertyValue}
+                />
+                <MoneyInput
+                  label="Preço negociado"
+                  value={negotiatedPropertyValue}
+                  onChange={setNegotiatedPropertyValue}
                 />
                 <MoneyInput
                   label="Financiamento CAIXA"
@@ -530,11 +890,14 @@ export default function FechamentoPage() {
                   value={subsidy}
                   onChange={setSubsidy}
                 />
-                <MoneyInput
-                  label="Bônus construtora"
-                  value={bonus}
-                  onChange={setBonus}
-                />
+                <label>
+                  <span>Bônus/desconto calculado</span>
+                  <b>{money.format(bonus)}</b>
+                  <small>
+                    Diferença entre o valor cadastrado/importado e o preço
+                    negociado.
+                  </small>
+                </label>
               </div>
               <section className="closing-media">
                 <header>
@@ -543,37 +906,72 @@ export default function FechamentoPage() {
                     <h3>Galeria carregada do cadastro da construtora</h3>
                   </div>
                   <aside>
-                    <b>{selectedProjectData?.name || "Selecione o empreendimento"}</b>
+                    <b>
+                      {selectedProjectData?.name ||
+                        "Selecione o empreendimento"}
+                    </b>
                     <small>
-                      {selectedBuilderData?.name || "Construtora"} · arraste para ordenar
+                      {selectedBuilderData?.name || "Construtora"} · arraste
+                      para ordenar
                     </small>
                   </aside>
                 </header>
                 <div>
                   {mediaOrder.map((item, index) => (
-                    <button key={item.id} draggable onDragStart={() => setDraggedMediaId(item.id)} onDragOver={(event) => event.preventDefault()} onDrop={() => {
-                      if (draggedMediaId === null || draggedMediaId === item.id) return;
-                      const from = mediaOrder.findIndex((media) => media.id === draggedMediaId);
-                      const to = mediaOrder.findIndex((media) => media.id === item.id);
-                      const next = [...mediaOrder];
-                      const [moved] = next.splice(from, 1);
-                      next.splice(to, 0, moved);
-                      setMediaOrder(next);
-                    }} onClick={() => item.url && window.open(item.url, "_blank", "noopener,noreferrer") }>
+                    <button
+                      key={item.id}
+                      draggable
+                      onDragStart={() => setDraggedMediaId(item.id)}
+                      onDragOver={(event) => event.preventDefault()}
+                      onDrop={() => {
+                        if (
+                          draggedMediaId === null ||
+                          draggedMediaId === item.id
+                        )
+                          return;
+                        const from = mediaOrder.findIndex(
+                          (media) => media.id === draggedMediaId,
+                        );
+                        const to = mediaOrder.findIndex(
+                          (media) => media.id === item.id,
+                        );
+                        const next = [...mediaOrder];
+                        const [moved] = next.splice(from, 1);
+                        next.splice(to, 0, moved);
+                        setMediaOrder(next);
+                      }}
+                      onClick={() =>
+                        item.url &&
+                        window.open(item.url, "_blank", "noopener,noreferrer")
+                      }
+                    >
                       <i>{String(index + 1).padStart(2, "0")}</i>
                       <span>
                         <b>{item.name}</b>
-                        <small>{item.type.startsWith("video/") ? "Vídeo cadastrado" : "Foto cadastrada"}</small>
+                        <small>
+                          {item.type.startsWith("video/")
+                            ? "Vídeo cadastrado"
+                            : "Foto cadastrada"}
+                        </small>
                       </span>
                       <em>{index === 0 ? "APRESENTANDO" : "ABRIR"}</em>
                     </button>
                   ))}
                 </div>
                 <footer>
-                  <button onClick={() => mediaOrder[0]?.url && window.open(mediaOrder[0].url, "_blank", "noopener,noreferrer")}>▶ Iniciar apresentação imersiva</button>
-                  <small>
-                    Ordem manual usada na apresentação ao cliente.
-                  </small>
+                  <button
+                    onClick={() =>
+                      mediaOrder[0]?.url &&
+                      window.open(
+                        mediaOrder[0].url,
+                        "_blank",
+                        "noopener,noreferrer",
+                      )
+                    }
+                  >
+                    ▶ Iniciar apresentação imersiva
+                  </button>
+                  <small>Ordem manual usada na apresentação ao cliente.</small>
                 </footer>
               </section>
               <section className="deal-price">
@@ -634,9 +1032,9 @@ export default function FechamentoPage() {
                 <header>
                   <span>Composição</span>
                   <span>Quando paga</span>
-                  <span>Valor negociado</span>
-                  <span>Quantidade</span>
-                  <span>Valor da parcela</span>
+                  <span>Valor total negociado</span>
+                  <span>Quantidade de parcelas</span>
+                  <span>Valor de cada parcela</span>
                   <span>Primeiro vencimento</span>
                 </header>
                 <NegotiationRow
@@ -645,16 +1043,17 @@ export default function FechamentoPage() {
                   setTiming={setSignalTiming}
                   total={signal}
                   setTotal={setSignal}
-                  qty={1}
+                  qty={signalQty}
+                  setQty={setSignalQty}
                 />
                 <NegotiationRow
                   name="Parcelas mensais"
                   timing={monthlyTiming}
                   setTiming={setMonthlyTiming}
                   total={monthlyTotal}
-                  setTotal={setMonthlyTotal}
                   qty={monthlyQty}
                   setQty={setMonthlyQty}
+                  automatic
                 />
                 <NegotiationRow
                   name="Intercalada 01"
@@ -662,7 +1061,8 @@ export default function FechamentoPage() {
                   setTiming={setInter1Timing}
                   total={intermediate1}
                   setTotal={setIntermediate1}
-                  qty={1}
+                  qty={intermediate1Qty}
+                  setQty={setIntermediate1Qty}
                 />
                 <NegotiationRow
                   name="Intercalada 02"
@@ -670,7 +1070,8 @@ export default function FechamentoPage() {
                   setTiming={setInter2Timing}
                   total={intermediate2}
                   setTotal={setIntermediate2}
-                  qty={1}
+                  qty={intermediate2Qty}
+                  setQty={setIntermediate2Qty}
                 />
                 <NegotiationRow
                   name="Intercalada 03"
@@ -678,7 +1079,8 @@ export default function FechamentoPage() {
                   setTiming={setInter3Timing}
                   total={intermediate3}
                   setTotal={setIntermediate3}
-                  qty={1}
+                  qty={intermediate3Qty}
+                  setQty={setIntermediate3Qty}
                 />
                 <NegotiationRow
                   name="FGTS na entrada"
@@ -686,7 +1088,8 @@ export default function FechamentoPage() {
                   setTiming={setFgtsTiming}
                   total={fgts}
                   setTotal={setFgts}
-                  qty={1}
+                  qty={fgtsQty}
+                  setQty={setFgtsQty}
                 />
                 <NegotiationRow
                   name="Parcelas pós-chaves"
@@ -703,28 +1106,27 @@ export default function FechamentoPage() {
                   setTiming={setOtherTiming}
                   total={otherEntry}
                   setTotal={setOtherEntry}
-                  qty={1}
+                  qty={otherEntryQty}
+                  setQty={setOtherEntryQty}
                 />
                 <footer>
-                  <span>Total da entrada negociada</span>
-                  <b>
-                    {money.format(
-                      signal +
-                        monthlyTotal +
-                        intermediate1 +
-                        intermediate2 +
-                        intermediate3 +
-                        fgts +
-                        postKeyTotal +
-                        otherEntry,
-                    )}
-                  </b>
-                  <span>Saldo da entrada a distribuir</span>
-                  <strong
-                    className={Math.abs(calc.remaining) < 0.01 ? "ok" : "alert"}
-                  >
-                    {money.format(calc.remaining)}
-                  </strong>
+                  <div>
+                    <span>Entrada após bônus</span>
+                    <b>{money.format(calc.entry)}</b>
+                    <small>Valor total que precisa ser negociado</small>
+                  </div>
+                  <div>
+                    <span>Valores já definidos</span>
+                    <b>{money.format(fixedEntryDistribution)}</b>
+                    <small>
+                      Sinal, intercaladas, FGTS, pós-chaves e outros
+                    </small>
+                  </div>
+                  <div className="automatic-balance">
+                    <span>Saldo nas parcelas mensais</span>
+                    <strong>{money.format(monthlyTotal)}</strong>
+                    <small>Recalculado automaticamente</small>
+                  </div>
                 </footer>
               </div>
 
@@ -935,10 +1337,17 @@ export default function FechamentoPage() {
                 </small>
               </header>
               <div className="preview-property">
-                <i>{(selectedBuilderData?.name || "IM").slice(0, 2).toUpperCase()}</i>
+                <i>
+                  {(selectedBuilderData?.name || "IM")
+                    .slice(0, 2)
+                    .toUpperCase()}
+                </i>
                 <div>
                   <b>{selectedProjectData?.name || "Empreendimento"}</b>
-                  <span>{unit ? `Unidade ${unit}` : "Unidade ainda não informada"} · {selectedBuilderData?.name || "Construtora"}</span>
+                  <span>
+                    {unit ? `Unidade ${unit}` : "Unidade ainda não informada"} ·{" "}
+                    {selectedBuilderData?.name || "Construtora"}
+                  </span>
                 </div>
                 <strong>{money.format(calc.netPropertyValue)}</strong>
               </div>
@@ -1059,7 +1468,7 @@ export default function FechamentoPage() {
                   <span>Total durante a obra</span>
                   <b>{money.format(calc.duringWork)}</b>
                 </div>
-                <button>
+                <button type="button" onClick={openWhatsAppSummary}>
                   <Image
                     src="/whatsapp.svg"
                     alt="WhatsApp"
@@ -1099,57 +1508,76 @@ export default function FechamentoPage() {
               </div>
             </header>
             <div className="outcome-body">
-              {result !== "Fechado" && <label>
-                <span>
-                  {result === "Não fechou"
-                    ? "Motivo do não fechamento"
-                    : "Situação da negociação"}
-                </span>
-                <select
-                  value={reason}
-                  onChange={(e) => setReason(e.target.value)}
-                >
-                  <option value="">Selecione</option>
-                  {(result === "Não fechou" ? [
-                    "Entrada incompatível",
-                    "Parcela acima da capacidade",
-                    "Imóvel não atende ao perfil",
-                    "Localização não atende",
-                    "Família não concordou",
-                    "Escolheu concorrente",
-                    "Crédito deixou de ser viável",
-                    "Desistência temporária",
-                    "Perda de renda ou emprego",
-                    "Outro motivo — detalhar na ficha",
-                  ] : [
-                    "Negociando valor da entrada",
-                    "Negociando parcelas pré-chaves",
-                    "Negociando parcelas pós-chaves",
-                    "Aguardando escolha da unidade",
-                    "Aguardando decisão familiar",
-                    "Aguardando nova simulação CAIXA",
-                    "Aguardando bônus da construtora",
-                    "Aguardando visita ao imóvel",
-                    "Comparando duas opções",
-                    "Proposta enviada — aguardando retorno",
-                  ]).map((option) => <option key={option}>{option}</option>)}
-                </select>
-              </label>}
-              {result !== "Fechado" && <label className="outcome-notes">
-                <span>Detalhes personalizados</span>
-                <textarea
-                  value={outcomeNotes}
-                  onChange={(event) => setOutcomeNotes(event.target.value)}
-                  placeholder={result === "Não fechou" ? "Registre a causa real, objeções e condição para retomada." : "Registre o ponto em negociação, responsável e condição para avançar."}
-                />
-              </label>}
-              {result !== "Fechado" && <label>
-                <span>Próxima ação obrigatória</span>
-                <input type="datetime-local" value={nextActionAt} onChange={(event) => setNextActionAt(event.target.value)} />
-              </label>}
+              {result !== "Fechado" && (
+                <label>
+                  <span>
+                    {result === "Não fechou"
+                      ? "Motivo do não fechamento"
+                      : "Situação da negociação"}
+                  </span>
+                  <select
+                    value={reason}
+                    onChange={(e) => setReason(e.target.value)}
+                  >
+                    <option value="">Selecione</option>
+                    {(result === "Não fechou"
+                      ? [
+                          "Entrada incompatível",
+                          "Parcela acima da capacidade",
+                          "Imóvel não atende ao perfil",
+                          "Localização não atende",
+                          "Família não concordou",
+                          "Escolheu concorrente",
+                          "Crédito deixou de ser viável",
+                          "Desistência temporária",
+                          "Perda de renda ou emprego",
+                          "Outro motivo — detalhar na ficha",
+                        ]
+                      : [
+                          "Negociando valor da entrada",
+                          "Negociando parcelas pré-chaves",
+                          "Negociando parcelas pós-chaves",
+                          "Aguardando escolha da unidade",
+                          "Aguardando decisão familiar",
+                          "Aguardando nova simulação CAIXA",
+                          "Aguardando bônus da construtora",
+                          "Aguardando visita ao imóvel",
+                          "Comparando duas opções",
+                          "Proposta enviada — aguardando retorno",
+                        ]
+                    ).map((option) => (
+                      <option key={option}>{option}</option>
+                    ))}
+                  </select>
+                </label>
+              )}
+              {result !== "Fechado" && (
+                <label className="outcome-notes">
+                  <span>Detalhes personalizados</span>
+                  <textarea
+                    value={outcomeNotes}
+                    onChange={(event) => setOutcomeNotes(event.target.value)}
+                    placeholder={
+                      result === "Não fechou"
+                        ? "Registre a causa real, objeções e condição para retomada."
+                        : "Registre o ponto em negociação, responsável e condição para avançar."
+                    }
+                  />
+                </label>
+              )}
+              {result !== "Fechado" && (
+                <label>
+                  <span>Próxima ação obrigatória</span>
+                  <input
+                    type="datetime-local"
+                    value={nextActionAt}
+                    onChange={(event) => setNextActionAt(event.target.value)}
+                  />
+                </label>
+              )}
               <label>
-                <span>VGV previsto · após desconto</span>
-                <input value={money.format(calc.netPropertyValue)} readOnly />
+                <span>VGV confirmado · valor bruto do imóvel</span>
+                <input value={money.format(propertyValue)} readOnly />
               </label>
               <button onClick={saveOutcome}>
                 {saved
@@ -1164,8 +1592,8 @@ export default function FechamentoPage() {
                   <span>
                     <b>Destino: Gestão financeira</b>
                     <small>
-                      O VGV líquido confirmado será enviado para cálculo de
-                      comissão e bônus.
+                      O valor bruto do imóvel será enviado como base do VGV e do
+                      cálculo da comissão.
                     </small>
                   </span>
                 </aside>
@@ -1196,11 +1624,20 @@ export default function FechamentoPage() {
                 <div>
                   <span>PROPOSTA DE COMPRA</span>
                   <h1>{selectedProjectData?.name || "Empreendimento"}</h1>
-                  <p>{unit ? `Unidade ${unit}` : "Unidade não informada"} · {selectedBuilderData?.name || "Construtora"}</p>
+                  <p>
+                    {unit ? `Unidade ${unit}` : "Unidade não informada"} ·{" "}
+                    {selectedBuilderData?.name || "Construtora"}
+                  </p>
                 </div>
                 <aside>
                   <b>MONTEIRO CRM</b>
-                  <span>09 de agosto de 2026</span>
+                  <span>
+                    {new Intl.DateTimeFormat("pt-BR", {
+                      dateStyle: "long",
+                      timeStyle: "short",
+                      timeZone: "America/Sao_Paulo",
+                    }).format(new Date())}
+                  </span>
                 </aside>
               </header>
               <section className="pdf-parties">
@@ -1355,6 +1792,7 @@ export default function FechamentoPage() {
         )}
         {pdfPreview && (
           <FullProposalPreview
+            key={`${selectedBuilderId}-${selectedProjectId}-${unit}`}
             onClose={() => setPdfPreview(false)}
             data={{
               clientProfile,
@@ -1364,22 +1802,28 @@ export default function FechamentoPage() {
               bonus,
               calc,
               signal,
+              signalQty,
               signalTiming,
               monthlyTotal,
               monthlyTiming,
               monthlyQty,
               intermediate1,
+              intermediate1Qty,
               inter1Timing,
               intermediate2,
+              intermediate2Qty,
               inter2Timing,
               intermediate3,
+              intermediate3Qty,
               inter3Timing,
               fgts,
+              fgtsQty,
               fgtsTiming,
               postKeyTotal,
               postKeyTiming,
               postKeyTerms,
               otherEntry,
+              otherEntryQty,
               otherTiming,
               propertyMode,
               system,
@@ -1424,11 +1868,32 @@ export default function FechamentoPage() {
               system,
               term,
               caixaPayment,
-              propertyValue: calc.netPropertyValue,
+              propertyValue,
+              negotiatedPropertyValue,
+              bonus,
               financing,
               subsidy,
               entry: calc.entry,
-              projectName: selectedProjectData?.name || "empreendimento selecionado",
+              signal,
+              signalQty,
+              monthlyTotal,
+              monthlyQty,
+              intermediate1,
+              intermediate1Qty,
+              intermediate2,
+              intermediate2Qty,
+              intermediate3,
+              intermediate3Qty,
+              fgts,
+              fgtsQty,
+              postKeyTotal,
+              postKeyTerms,
+              otherEntry,
+              otherEntryQty,
+              builderName:
+                selectedBuilderData?.name || "construtora selecionada",
+              projectName:
+                selectedProjectData?.name || "empreendimento selecionado",
               unit,
             }}
           />
@@ -1458,9 +1923,11 @@ function MoneyInput({
 function CurrencyBox({
   value,
   onChange,
+  readOnly = false,
 }: {
   value: number;
   onChange: (value: number) => void;
+  readOnly?: boolean;
 }) {
   const [display, setDisplay] = useState(formatNumber(value));
   const [syncedValue, setSyncedValue] = useState(value);
@@ -1473,6 +1940,7 @@ function CurrencyBox({
       <i>R$</i>
       <input
         inputMode="numeric"
+        readOnly={readOnly}
         value={display}
         onChange={(e) => {
           const cents = Number(e.target.value.replace(/\D/g, ""));
@@ -1500,14 +1968,16 @@ function NegotiationRow({
   setTotal,
   qty,
   setQty,
+  automatic = false,
 }: {
   name: string;
   timing: string;
   setTiming: (s: string) => void;
   total: number;
-  setTotal: (n: number) => void;
+  setTotal?: (n: number) => void;
   qty: number;
   setQty?: (n: number) => void;
+  automatic?: boolean;
 }) {
   return (
     <article>
@@ -1517,7 +1987,14 @@ function NegotiationRow({
         <option>Pós-chave</option>
         <option>Ambos</option>
       </select>
-      <CurrencyBox value={total} onChange={setTotal} />
+      <div className={automatic ? "automatic-monthly-value" : ""}>
+        <CurrencyBox
+          value={total}
+          onChange={setTotal || (() => undefined)}
+          readOnly={automatic}
+        />
+        {automatic && <small>Saldo automático</small>}
+      </div>
       <input
         className="qty-input"
         type="number"
@@ -1564,7 +2041,12 @@ function ApplicantCard({
         <b>{money.format(income)}</b>
         <small>{incomeType}</small>
       </aside>
-      <Link className="qualification-link" href={clientId ? `/clientes?clientId=${clientId}` : "/carteira"}>Ver qualificação</Link>
+      <Link
+        className="qualification-link"
+        href={clientId ? `/clientes/${clientId}` : "/carteira"}
+      >
+        Ver qualificação
+      </Link>
     </article>
   );
 }
@@ -1627,15 +2109,13 @@ function FeeRow({
       </label>
       <label>
         <span>Total parcelas</span>
-        <select
+        <input
+          type="number"
+          min={1}
           disabled={bonus}
           value={safeTerms}
           onChange={(e) => setTerms(+e.target.value)}
-        >
-          {[1, 12, 24, 36, 48, 60].map((n) => (
-            <option key={n}>{n}</option>
-          ))}
-        </select>
+        />
       </label>
       <label>
         <span>Momento do pagamento</span>
@@ -1750,32 +2230,36 @@ function FullProposalPreview({
 }) {
   const holderLanguage = genderLanguage(d.clientProfile.holder.sex);
   const spouseLanguage = genderLanguage(d.clientProfile.spouse.sex);
-  const entryRows = [
-    ["Sinal / ato", d.signalTiming, d.signal, 1],
-    ["Parcelas mensais", d.monthlyTiming, d.monthlyTotal, d.monthlyQty],
-    ["Intercalada 01", d.inter1Timing, d.intermediate1, 1],
-    ["Intercalada 02", d.inter2Timing, d.intermediate2, 1],
-    ["Intercalada 03", d.inter3Timing, d.intermediate3, 1],
-    ["FGTS na entrada", d.fgtsTiming, d.fgts, 1],
-    ["Parcelas pós-chaves", d.postKeyTiming, d.postKeyTotal, d.postKeyTerms],
-    ["Outros", d.otherTiming, d.otherEntry, 1],
-  ] as [string, string, number, number][];
-  const fees = [
-    ["ITBI + Cartório", d.itbi, d.itbiBonus, d.itbiTerms, d.itbiTiming],
-    ["TAC", d.tac, d.tacBonus, d.tacTerms, d.tacTiming],
-    ...(d.propertyMode === "Aquisição e construção"
-      ? [
-          ["TAO", d.tao, d.taoBonus, d.taoTerms, d.taoTiming],
-          [
-            "Engenharia",
-            d.engineering,
-            d.engineeringBonus,
-            d.engineeringTerms,
-            d.engineeringTiming,
-          ],
-        ]
-      : []),
-  ] as [string, number, boolean, number, string][];
+  const entryRows = (
+    [
+      ["Sinal / ato", d.signalTiming, d.signal, d.signalQty],
+      ["Parcelas mensais", d.monthlyTiming, d.monthlyTotal, d.monthlyQty],
+      ["Intercalada 01", d.inter1Timing, d.intermediate1, d.intermediate1Qty],
+      ["Intercalada 02", d.inter2Timing, d.intermediate2, d.intermediate2Qty],
+      ["Intercalada 03", d.inter3Timing, d.intermediate3, d.intermediate3Qty],
+      ["FGTS na entrada", d.fgtsTiming, d.fgts, d.fgtsQty],
+      ["Parcelas pós-chaves", d.postKeyTiming, d.postKeyTotal, d.postKeyTerms],
+      ["Outros", d.otherTiming, d.otherEntry, d.otherEntryQty],
+    ] as [string, string, number, number][]
+  ).filter(([, , total]) => total > 0);
+  const fees = (
+    [
+      ["ITBI + Cartório", d.itbi, d.itbiBonus, d.itbiTerms, d.itbiTiming],
+      ["TAC", d.tac, d.tacBonus, d.tacTerms, d.tacTiming],
+      ...(d.propertyMode === "Aquisição e construção"
+        ? [
+            ["TAO", d.tao, d.taoBonus, d.taoTerms, d.taoTiming],
+            [
+              "Engenharia",
+              d.engineering,
+              d.engineeringBonus,
+              d.engineeringTerms,
+              d.engineeringTiming,
+            ],
+          ]
+        : []),
+    ] as [string, number, boolean, number, string][]
+  ).filter(([, amount]) => amount > 0);
   const pdfTotalBonus =
     d.bonus +
     fees
@@ -1811,7 +2295,13 @@ function FullProposalPreview({
           </div>
           <aside>
             <b>MONTEIRO CRM</b>
-            <span>09 de agosto de 2026</span>
+            <span>
+              {new Intl.DateTimeFormat("pt-BR", {
+                dateStyle: "long",
+                timeStyle: "short",
+                timeZone: "America/Sao_Paulo",
+              }).format(new Date())}
+            </span>
           </aside>
         </header>
         <section className="pdf-parties">
@@ -1833,6 +2323,21 @@ function FullProposalPreview({
               </small>
             </div>
           )}
+        </section>
+        <section className="pdf-property-selection">
+          <article>
+            <span>Construtora selecionada</span>
+            <b>{d.builderName}</b>
+          </article>
+          <i>→</i>
+          <article>
+            <span>Empreendimento selecionado</span>
+            <b>{d.projectName}</b>
+          </article>
+          <article>
+            <span>Unidade</span>
+            <b>{d.unit || "A definir"}</b>
+          </article>
         </section>
         <section className="pdf-full-stage">
           <h2>ETAPA 01 · FINANCIAMENTO LIBERADO E NEGOCIAÇÃO DA ENTRADA</h2>
@@ -1858,6 +2363,17 @@ function FullProposalPreview({
             A entrada corresponde ao valor do imóvel menos financiamento,
             subsídio e bônus concedidos.
           </p>
+          <div className="pdf-constructor-bonus">
+            <div>
+              <span>Bônus concedido pela construtora</span>
+              <strong>{money.format(d.bonus)}</strong>
+            </div>
+            <p>
+              {d.bonus > 0
+                ? `Benefício aplicado diretamente na entrada: o cliente deixa de pagar ${money.format(d.bonus)}.`
+                : "Esta opção não possui bônus da construtora aplicado à entrada."}
+            </p>
+          </div>
           <table>
             <thead>
               <tr>
@@ -1958,6 +2474,17 @@ function FullProposalPreview({
               </div>
             )}
           </div>
+          {d.propertyMode !== "Imóvel novo" && (
+            <div className="pdf-construction-interest-notice">
+              <b>COBRANÇA DE JUROS DE OBRA</b>
+              <p>
+                Durante a construção haverá cobrança mensal de juros de obra
+                pela instituição financeira. Esse valor não é fixo: varia
+                conforme a evolução da obra, o saldo liberado e as regras da
+                CAIXA, sendo cobrado além dos valores mensais desta proposta.
+              </p>
+            </div>
+          )}
           <div className="pdf-protections">
             <article>
               <b>Seguro habitacional por morte ou invalidez</b>
@@ -2033,7 +2560,10 @@ function FullProposalPreview({
                 {money.format(d.calc.monthlyDuringWork)} recorrentes
               </strong>
               {d.propertyMode !== "Imóvel novo" && (
-                <small>Adicionar juros de obra variáveis.</small>
+                <small>
+                  Além deste valor, haverá cobrança mensal variável de juros de
+                  obra durante a construção.
+                </small>
               )}
             </article>
             <article>
@@ -2160,8 +2690,8 @@ function ContractPreview({
             O presente instrumento registra a atuação do CORRETOR na
             aproximação, orientação e intermediação entre os PROPONENTES
             COMPRADORES e a construtora/incorporadora responsável pelo
-            empreendimento {d.projectName}, unidade inicialmente
-            indicada como Bloco B, Unidade 204.
+            empreendimento {d.projectName}, da construtora {d.builderName},
+            unidade {d.unit || "a definir"}.
           </p>
           <p>
             O CORRETOR não é proprietário, vendedor, incorporador, construtor,
@@ -2177,6 +2707,12 @@ function ContractPreview({
           <div className="contract-values">
             <span>
               Valor atual do imóvel <b>{money.format(d.propertyValue)}</b>
+            </span>
+            <span>
+              Preço negociado <b>{money.format(d.negotiatedPropertyValue)}</b>
+            </span>
+            <span>
+              Bônus da construtora <b>{money.format(d.bonus)}</b>
             </span>
             <span>
               Financiamento estimado <b>{money.format(d.financing)}</b>
@@ -2195,6 +2731,20 @@ function ContractPreview({
             proposta e podem variar por atualização de tabela, avaliação do
             imóvel, análise da CAIXA, seguros, taxas e condições comerciais da
             construtora.
+          </p>
+          <p>
+            A entrada estimada de <b>{money.format(d.entry)}</b> está
+            distribuída conforme a ficha-proposta: sinal de{" "}
+            <b>{money.format(d.signal)}</b>, parcelas mensais no total de{" "}
+            <b>{money.format(d.monthlyTotal)}</b>, intercaladas de{" "}
+            <b>
+              {money.format(
+                d.intermediate1 + d.intermediate2 + d.intermediate3,
+              )}
+            </b>
+            , FGTS de <b>{money.format(d.fgts)}</b>, parcelas pós-chaves de{" "}
+            <b>{money.format(d.postKeyTotal)}</b> e outros valores de{" "}
+            <b>{money.format(d.otherEntry)}</b>.
           </p>
         </section>
         <section>

@@ -18,9 +18,15 @@ export async function GET() {
   const supabase = supabaseAdmin();
   const [clients, events, appointments, sales] = await Promise.all([
     supabase.from("clients").select("id,funnel_stage,data_quality"),
-    supabase.from("client_events").select("client_id,metric_key").not("metric_key", "is", null),
+    supabase
+      .from("client_events")
+      .select("client_id,metric_key")
+      .not("metric_key", "is", null),
     supabase.from("appointments").select("client_id,status"),
-    supabase.from("sales").select("client_id,vgv,commission_rate,invoice_discount,bonus"),
+    supabase
+      .from("sales")
+      .select("client_id,vgv,commission_rate,invoice_discount,bonus")
+      .is("cancelled_at", null),
   ]);
   const error = [clients, events, appointments, sales].find(
     (result) => result.error,
@@ -76,7 +82,7 @@ export async function GET() {
       vgv: acc.vgv + Number(sale.vgv || 0),
       commission:
         acc.commission +
-        (Number(sale.vgv || 0) * Number(sale.commission_rate || 0)) / 100 *
+        ((Number(sale.vgv || 0) * Number(sale.commission_rate || 0)) / 100) *
           (1 - Number(sale.invoice_discount || 0) / 100) +
         Number(sale.bonus || 0),
     }),

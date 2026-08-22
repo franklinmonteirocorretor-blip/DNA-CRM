@@ -25,7 +25,7 @@
   line-height: 1;
   color: #a99d83;
   text-transform: uppercase;
-  letter-spacing: .04em;
+  letter-spacing: 0.04em;
   white-space: nowrap;
   text-align: left;
 }
@@ -41,15 +41,27 @@
   padding-left: 14%;
   padding-right: 14%;
 }
-.ind-shell .funnel-panel article:nth-child(n + 6) div b { font-size: 10px; }
-.ind-shell .funnel-panel article:nth-child(n + 6) div small { font-size: 5.5px; }
-.ind-shell .funnel-panel article:nth-child(n + 6) > strong { left: 74%; }
-.ind-shell .funnel-panel article:nth-child(7) > strong { left: 78%; }
+.ind-shell .funnel-panel article:nth-child(n + 6) div b {
+  font-size: 10px;
+}
+.ind-shell .funnel-panel article:nth-child(n + 6) div small {
+  font-size: 5.5px;
+}
+.ind-shell .funnel-panel article:nth-child(n + 6) > strong {
+  left: 74%;
+}
+.ind-shell .funnel-panel article:nth-child(7) > strong {
+  left: 78%;
+}
 .ind-shell .funnel-panel article:nth-child(8) {
   width: 40%;
   min-width: 280px;
 }
 @media (max-width: 800px) {
-  .ind-shell .funnel-panel article { grid-template-columns: 24px minmax(100px, 1fr); }
-  .ind-shell .funnel-panel article:nth-child(8) { min-width: 260px; }
+  .ind-shell .funnel-panel article {
+    grid-template-columns: 24px minmax(100px, 1fr);
+  }
+  .ind-shell .funnel-panel article:nth-child(8) {
+    min-width: 260px;
+  }
 }

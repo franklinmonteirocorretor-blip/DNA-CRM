@@ -7,7 +7,14 @@ const MONEY = "(?:R\\$\\s*)?([\\d.]+,\\d{2})";
 
 function value(raw?: string) {
   if (!raw) return 0;
-  return Number(raw.replace(/\./g, "").replace(",", ".").replace(/[^\d.-]/g, "")) || 0;
+  return (
+    Number(
+      raw
+        .replace(/\./g, "")
+        .replace(",", ".")
+        .replace(/[^\d.-]/g, ""),
+    ) || 0
+  );
 }
 
 function normalize(text: string) {
@@ -66,23 +73,30 @@ function parseSimulation(source: string) {
   const installment = lowestFirstInstallment(text);
 
   const term = Number(
-    text.match(/Prazo (?:escolhido|Maximo)\s*:?\s*(\d{2,3})\s*meses/i)?.[1]
-      || text.match(/Prazo\s*:?\s*(\d{2,3})\s*meses/i)?.[1]
-      || 0,
+    text.match(/Prazo (?:escolhido|Maximo)\s*:?\s*(\d{2,3})\s*meses/i)?.[1] ||
+      text.match(/Prazo\s*:?\s*(\d{2,3})\s*meses/i)?.[1] ||
+      0,
   );
-  const system = /\bPRICE\b/i.test(text) ? "PRICE" : /\bSAC\b/i.test(text) ? "SAC" : "";
-  const modality = /CONSTRUCAO\/AQ TER|Aquisicao e Construcao|construcao.*terreno/i.test(text)
-    ? "Aquisição e construção"
-    : /Empreendimento|imovel na planta|IM\. PLANTA/i.test(text)
-      ? "Empreendimento"
-      : "Imóvel novo";
+  const system = /\bPRICE\b/i.test(text)
+    ? "PRICE"
+    : /\bSAC\b/i.test(text)
+      ? "SAC"
+      : "";
+  const modality =
+    /CONSTRUCAO\/AQ TER|Aquisicao e Construcao|construcao.*terreno/i.test(text)
+      ? "Aquisição e construção"
+      : /Empreendimento|imovel na planta|IM\. PLANTA/i.test(text)
+        ? "Empreendimento"
+        : "Imóvel novo";
 
   if (subsidy > 0 && subsidy < 1) subsidy = 0;
   if (!subsidy && propertyValue && financing && entry) {
     subsidy = Math.max(0, propertyValue - financing - entry);
   }
 
-  const found = [propertyValue, financing, installment, term].filter(Boolean).length;
+  const found = [propertyValue, financing, installment, term].filter(
+    Boolean,
+  ).length;
   return {
     propertyValue,
     financing,
@@ -101,21 +115,32 @@ export async function POST(request: Request) {
     const form = await request.formData();
     const file = form.get("file");
     if (!(file instanceof File) || file.type !== "application/pdf") {
-      return NextResponse.json({ error: "Selecione um PDF da CAIXA." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Selecione um PDF da CAIXA." },
+        { status: 400 },
+      );
     }
 
     const data = await pdf(Buffer.from(await file.arrayBuffer()));
     const parsed = parseSimulation(data.text || "");
     if (!parsed.financing || !parsed.installment) {
       return NextResponse.json(
-        { error: "O PDF foi lido, mas não contém financiamento e prestação identificáveis." },
+        {
+          error:
+            "O PDF foi lido, mas não contém financiamento e prestação identificáveis.",
+        },
         { status: 422 },
       );
     }
     return NextResponse.json({ ...parsed, fileName: file.name });
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Falha ao analisar a simulação." },
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Falha ao analisar a simulação.",
+      },
       { status: 500 },
     );
   }
