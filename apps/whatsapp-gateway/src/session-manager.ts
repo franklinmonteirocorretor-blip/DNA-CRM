@@ -211,7 +211,33 @@ export class SessionManager {
     return { providerMessageId: result?.key.id, accepted: Boolean(result?.key.id) };
   }
   qr(id: string) { const qr = this.runtimes.get(id)?.qr; if (!qr || Date.parse(qr.expiresAt) <= Date.now()) throw new Error("QR indisponível ou expirado."); return qr; }
-  heartbeat() { return Promise.all([...this.runtimes.keys()].map(id => this.db.from("whatsapp_sessions").update({ heartbeat_at: new Date().toISOString() }).eq("id", id))); }
+  async heartbeat() {
+    const results = await Promise.all([...this.runtimes.keys()].map(id => this.db.from("whatsapp_sessions").update({ heartbeat_at: new Date().toISOString() }).eq("id", id)));
+    const failed = results.find(result => result.error);
+    if (failed?.error) throw new Error(`Heartbeat falhou: ${failed.error.code}`);
+  }
+  async healthSnapshot() {
+    const runtimeIds = [...this.runtimes.keys()];
+    if (!runtimeIds.length) return { runtimeSessions: 0, statuses: {}, circuits: {}, reconnectAttempts: 0, latestHeartbeat: null, lastError: null };
+    const { data, error } = await this.db.from("whatsapp_sessions")
+      .select("id,status,heartbeat_at,reconnect_attempts,circuit_state,failure_reason,updated_at")
+      .in("id", runtimeIds);
+    if (error) throw new Error(`Health snapshot falhou: ${error.code}`);
+    const statuses: Record<string, number> = {};
+    const circuits: Record<string, number> = {};
+    let reconnectAttempts = 0;
+    let latestHeartbeat: string | null = null;
+    let lastError: { message: string; at: string } | null = null;
+    for (const session of data || []) {
+      statuses[session.status] = (statuses[session.status] || 0) + 1;
+      const circuit = session.circuit_state || "unknown";
+      circuits[circuit] = (circuits[circuit] || 0) + 1;
+      reconnectAttempts += session.reconnect_attempts || 0;
+      if (session.heartbeat_at && (!latestHeartbeat || session.heartbeat_at > latestHeartbeat)) latestHeartbeat = session.heartbeat_at;
+      if (session.failure_reason && (!lastError || session.updated_at > lastError.at)) lastError = { message: session.failure_reason, at: session.updated_at };
+    }
+    return { runtimeSessions: data?.length || 0, statuses, circuits, reconnectAttempts, latestHeartbeat, lastError };
+  }
   async shutdown() {
     const runtimes = [...this.runtimes.values()];
     for (const runtime of runtimes) {
