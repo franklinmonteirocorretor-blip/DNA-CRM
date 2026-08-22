@@ -29,8 +29,28 @@ const server = createServer(async (req, res) => {
   } catch (error) { console.error(JSON.stringify({ level: "error", event: "request_failed", message: error instanceof Error ? error.message.replace(/[A-Za-z0-9+/=]{24,}/g, "[redacted]") : "unknown" })); return json(res, 500, { error: "Falha interna do gateway." }); }
 });
 
-setInterval(() => { void sessions.heartbeat(); }, 30_000).unref();
+const heartbeatTimer = setInterval(() => { void sessions.heartbeat(); }, 30_000);
+heartbeatTimer.unref();
 await sessions.restoreActiveSessions().catch(error => {
   console.error(JSON.stringify({ level: "error", event: "gateway_restore_failed", message: error instanceof Error ? error.message : "unknown" }));
 });
 server.listen(config.port, "0.0.0.0", () => console.log(JSON.stringify({ level: "info", event: "gateway_ready", port: config.port, outboundReal: config.realOutboundEnabled })));
+
+let shuttingDown = false;
+async function shutdown(signal: NodeJS.Signals) {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  clearInterval(heartbeatTimer);
+  console.log(JSON.stringify({ level: "info", event: "gateway_shutdown_started", signal }));
+  server.close();
+  const forcedExit = setTimeout(() => process.exit(1), 25_000);
+  forcedExit.unref();
+  await sessions.shutdown();
+  server.closeAllConnections();
+  clearTimeout(forcedExit);
+  console.log(JSON.stringify({ level: "info", event: "gateway_shutdown_complete", signal }));
+  process.exit(0);
+}
+
+process.on("SIGTERM", () => { void shutdown("SIGTERM"); });
+process.on("SIGINT", () => { void shutdown("SIGINT"); });

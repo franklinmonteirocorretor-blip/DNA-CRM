@@ -212,4 +212,13 @@ export class SessionManager {
   }
   qr(id: string) { const qr = this.runtimes.get(id)?.qr; if (!qr || Date.parse(qr.expiresAt) <= Date.now()) throw new Error("QR indisponível ou expirado."); return qr; }
   heartbeat() { return Promise.all([...this.runtimes.keys()].map(id => this.db.from("whatsapp_sessions").update({ heartbeat_at: new Date().toISOString() }).eq("id", id))); }
+  async shutdown() {
+    const runtimes = [...this.runtimes.values()];
+    for (const runtime of runtimes) {
+      runtime.stopped = true;
+      if (runtime.reconnectTimer) clearTimeout(runtime.reconnectTimer);
+      runtime.socket?.end(undefined);
+    }
+    this.runtimes.clear();
+  }
 }
