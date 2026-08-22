@@ -38,6 +38,10 @@ test("policy engine bloqueia opt-out e kill switch", () => {
   const contact = { canContact: true, doNotContact: true, localHour: 10, allowedStartHour: 8, allowedEndHour: 20 };
   assert.equal(evaluatePolicy({ ...decision, action: "send_whatsapp" }, control, contact).allowed, false);
   assert.equal(evaluatePolicy(decision, { ...control, killSwitch: true }).allowed, false);
+  assert.equal(
+    evaluatePolicy({ ...decision, action: "send_whatsapp" }, { ...control, outboundKillSwitch: true }).allowed,
+    false,
+  );
 });
 
 test("confidence gate exige humano abaixo do limiar automático", () => {

@@ -20,5 +20,8 @@ test("ciphertext adulterado não pode ser recuperado", () => {
 test("circuit breaker abre na quinta falha", () => {
   assert.equal(reconnectPlan(4).openCircuit, false);
   assert.equal(reconnectPlan(5).openCircuit, true);
-  assert.ok(reconnectPlan(3).waitMs <= 60_000);
+  assert.equal(reconnectPlan(0).waitMs, 1_000);
+  assert.equal(reconnectPlan(3).waitMs, 8_000);
+  assert.equal(reconnectPlan(6).waitMs, 60_000);
+  assert.equal(reconnectPlan(20).waitMs, 60_000);
 });
