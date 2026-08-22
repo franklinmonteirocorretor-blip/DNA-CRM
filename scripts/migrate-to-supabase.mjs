@@ -16,8 +16,8 @@ function loadEnv(file) {
 
 loadEnv(path.join(process.cwd(), ".env.local"));
 const url = process.env.SUPABASE_URL;
-const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-if (!url || !key) throw new Error("SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY são obrigatórios.");
+const key = process.env.SUPABASE_SECRET_KEY;
+if (!url || !key) throw new Error("SUPABASE_URL e SUPABASE_SECRET_KEY são obrigatórios.");
 
 const supabase = createClient(url, key, {
   auth: { persistSession: false, autoRefreshToken: false },

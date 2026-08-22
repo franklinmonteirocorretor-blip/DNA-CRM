@@ -9,7 +9,7 @@ for (const line of readFileSync(".env.local", "utf8").split(/\r?\n/)) {
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
+  process.env.SUPABASE_SECRET_KEY,
   { auth: { persistSession: false, autoRefreshToken: false } },
 );
 const phone = "5599999999999";
