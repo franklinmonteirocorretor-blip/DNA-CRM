@@ -1,12 +1,6 @@
 export const DISPATCH_CAMPAIGN_SOURCES = [
   "DAILY_WALLET",
   "OWN_DATABASE",
-  "DNA",
-  "INDICATION",
-  "MANUAL_LIST",
-  "PROJECT_LIST",
-  "REACTIVATION",
-  "CUSTOM",
 ] as const;
 
 export type DispatchCampaignSource = (typeof DISPATCH_CAMPAIGN_SOURCES)[number];

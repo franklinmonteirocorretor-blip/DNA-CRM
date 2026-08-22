@@ -47,8 +47,12 @@ type DispatcherSnapshot = {
   templates: Entity[];
   cadences: Entity[];
   bases: Entity[];
+  builders: Entity[];
   projects: Entity[];
+  media: (Entity & { media_type?: string; mime_type?: string; file_size_bytes?: number })[];
 };
+
+type AudienceClient = { id: number; name: string; phone?: string; project_interest?: string };
 
 type PreviewRow = Record<string, unknown>;
 type Preview = {
@@ -60,12 +64,15 @@ type CampaignConfig = {
   name: string;
   source: string;
   baseId: string;
+  builderId: string;
   projectId: string;
+  selectedClientIds: number[];
   approachId: string;
   templateIds: string[];
   distributionMode: "ROUND_ROBIN" | "RANDOM" | "WEIGHTED";
   templateWeights: Record<string, number>;
   mediaType: "NONE" | "IMAGE" | "VIDEO" | "DOCUMENT";
+  mediaId: string;
   batchSize: number;
   messageIntervalMin: number;
   messageIntervalMax: number;
@@ -83,12 +90,15 @@ const INITIAL_CONFIG: CampaignConfig = {
   name: "",
   source: "DAILY_WALLET",
   baseId: "",
+  builderId: "",
   projectId: "",
+  selectedClientIds: [],
   approachId: "",
   templateIds: [],
   distributionMode: "ROUND_ROBIN",
   templateWeights: {},
   mediaType: "NONE",
+  mediaId: "",
   batchSize: 3,
   messageIntervalMin: 45,
   messageIntervalMax: 90,
@@ -103,14 +113,8 @@ const INITIAL_CONFIG: CampaignConfig = {
 };
 
 const SOURCES = [
-  "DAILY_WALLET",
-  "OWN_DATABASE",
-  "DNA",
-  "INDICATION",
-  "MANUAL_LIST",
-  "PROJECT_LIST",
-  "REACTIVATION",
-  "CUSTOM",
+  { value: "DAILY_WALLET", label: "Carteira do Dia" },
+  { value: "OWN_DATABASE", label: "Base de clientes cadastrados" },
 ];
 
 function entityName(entity: Entity) {
@@ -176,6 +180,10 @@ export function SmartWhatsAppDispatcher() {
   const [pending, setPending] = useState<string | null>(null);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
+  const [audience, setAudience] = useState<AudienceClient[]>([]);
+  const [audienceLoading, setAudienceLoading] = useState(false);
+  const [mediaFile, setMediaFile] = useState<File | null>(null);
+  const [mediaName, setMediaName] = useState("");
 
   const refresh = useCallback(async () => {
     const response = await fetch("/api/whatsapp-dispatcher", {
@@ -237,6 +245,7 @@ export function SmartWhatsAppDispatcher() {
   }, [refresh, snapshot]);
 
   const selectedProject = config.projectId;
+  const projects = useMemo(() => (snapshot?.projects || []).filter((project) => !config.builderId || String((project as Entity & { builder_id?: string | number }).builder_id || "") === config.builderId), [snapshot?.projects, config.builderId]);
   const approaches = useMemo(
     () =>
       (snapshot?.approaches || []).filter((approach) => {
@@ -291,6 +300,7 @@ export function SmartWhatsAppDispatcher() {
     if (!config.name.trim()) return "Informe o nome da campanha.";
     if (!config.approachId) return "Selecione uma abordagem.";
     if (!config.templateIds.length) return "Selecione pelo menos um modelo.";
+    if (config.source === "OWN_DATABASE" && !config.baseId && !config.selectedClientIds.length) return "Selecione uma base ou contatos específicos.";
     if (config.messageIntervalMax < config.messageIntervalMin) {
       return "Intervalo máximo deve ser maior ou igual ao mínimo.";
     }
@@ -307,6 +317,37 @@ export function SmartWhatsAppDispatcher() {
       return "Pesos dos modelos devem somar 100%.";
     }
     return "";
+  };
+
+  const loadAudience = async () => {
+    setAudienceLoading(true);
+    setError("");
+    try {
+      const params = new URLSearchParams({ source: config.source });
+      if (config.baseId) params.set("baseId", config.baseId);
+      if (config.builderId) params.set("builderId", config.builderId);
+      if (config.projectId) params.set("projectId", config.projectId);
+      const response = await fetch(`/api/whatsapp-dispatcher/audience?${params}`, { cache: "no-store" });
+      const data = await readResponse(response) as { clients?: AudienceClient[] };
+      setAudience(data.clients || []);
+      updateConfig("selectedClientIds", []);
+    } catch (reason) { setError(reason instanceof Error ? reason.message : "Falha ao carregar público."); }
+    finally { setAudienceLoading(false); }
+  };
+
+  const uploadMedia = async () => {
+    if (!mediaFile || !mediaName.trim()) { setError("Informe nome e arquivo da mídia."); return; }
+    setPending("media"); setError("");
+    try {
+      const form = new FormData(); form.set("name", mediaName.trim()); form.set("file", mediaFile);
+      const response = await fetch("/api/whatsapp-dispatcher/media", { method: "POST", body: form });
+      const data = await readResponse(response) as { media?: { id?: string; media_type?: CampaignConfig["mediaType"] } };
+      await refresh();
+      updateConfig("mediaId", String(data.media?.id || ""));
+      updateConfig("mediaType", data.media?.media_type || "NONE");
+      setMediaFile(null); setMediaName(""); setNotice("Mídia enviada ao armazenamento privado.");
+    } catch (reason) { setError(reason instanceof Error ? reason.message : "Falha no upload."); }
+    finally { setPending(null); }
   };
 
   const post = async (payload: Record<string, unknown>) => {
@@ -482,7 +523,7 @@ export function SmartWhatsAppDispatcher() {
           onClick={() => lifecycle("start")}
           disabled={!canStart || Boolean(pending)}
         >
-          {pending === "start" ? "Ativando..." : "Ativar"}
+          {pending === "start" ? "Iniciando..." : currentDryRun ? "Iniciar Dry Run" : "Iniciar campanha teste"}
         </button>
         <button
           type="button"
@@ -513,6 +554,10 @@ export function SmartWhatsAppDispatcher() {
         </button>
       </div>
 
+      {campaignState === "READY" && !canStart ? (
+        <p className="swd-feedback error" role="status">Início real bloqueado: exige conta teste allowlisted, sessão conectada, worker ativo, autorização temporária e outbound de teste. Número comercial permanece proibido.</p>
+      ) : null}
+
       {error ? (
         <p className="swd-feedback error" role="alert">
           {error}
@@ -542,7 +587,7 @@ export function SmartWhatsAppDispatcher() {
                 onChange={(event) => updateConfig("source", event.target.value)}
               >
                 {SOURCES.map((source) => (
-                  <option key={source}>{source}</option>
+                  <option key={source.value} value={source.value}>{source.label}</option>
                 ))}
               </select>
             </label>
@@ -552,12 +597,19 @@ export function SmartWhatsAppDispatcher() {
                 value={config.baseId}
                 onChange={(event) => updateConfig("baseId", event.target.value)}
               >
-                <option value="">Carteira do Dia</option>
+                <option value="">Todas as bases</option>
                 {(snapshot?.bases || []).map((base) => (
                   <option key={base.id} value={String(base.id)}>
                     {entityName(base)}
                   </option>
                 ))}
+              </select>
+            </label>
+            <label>
+              Construtora
+              <select value={config.builderId} onChange={(event) => { updateConfig("builderId", event.target.value); updateConfig("projectId", ""); }}>
+                <option value="">Todas as construtoras</option>
+                {(snapshot?.builders || []).map((item) => <option key={item.id} value={String(item.id)}>{entityName(item)}</option>)}
               </select>
             </label>
             <label>
@@ -571,7 +623,7 @@ export function SmartWhatsAppDispatcher() {
                 }}
               >
                 <option value="">Todos / não definido</option>
-                {(snapshot?.projects || []).map((item) => (
+                {projects.map((item) => (
                   <option key={item.id} value={String(item.id)}>
                     {entityName(item)}
                   </option>
@@ -630,18 +682,13 @@ export function SmartWhatsAppDispatcher() {
             <label>
               Mídia
               <select
-                value={config.mediaType}
+                value={config.mediaId}
                 onChange={(event) =>
-                  updateConfig(
-                    "mediaType",
-                    event.target.value as CampaignConfig["mediaType"],
-                  )
+                  updateConfig("mediaId", event.target.value)
                 }
               >
-                <option value="NONE">Sem mídia</option>
-                <option value="IMAGE">Imagem</option>
-                <option value="VIDEO">Vídeo</option>
-                <option value="DOCUMENT">Documento</option>
+                <option value="">Sem mídia</option>
+                {(snapshot?.media || []).map((item) => <option key={item.id} value={String(item.id)}>{entityName(item)} · {item.media_type}</option>)}
               </select>
             </label>
             <NumberField
@@ -701,6 +748,20 @@ export function SmartWhatsAppDispatcher() {
               />
             </label>
           </div>
+
+          <section className="swd-audience" aria-label="Público selecionado">
+            <header><strong>Público-alvo</strong><span>{config.selectedClientIds.length} contatos selecionados</span></header>
+            <p>Fonte canônica: {config.source === "DAILY_WALLET" ? "Carteira do Dia" : "Base de clientes"}. Filtros seguem Construtora &gt; Empreendimento.</p>
+            <button type="button" className="secondary" onClick={loadAudience} disabled={audienceLoading}>{audienceLoading ? "Carregando..." : "Carregar contatos"}</button>
+            {audience.length ? <div className="swd-client-list">{audience.map((client) => <label key={client.id}><input type="checkbox" checked={config.selectedClientIds.includes(client.id)} onChange={() => updateConfig("selectedClientIds", config.selectedClientIds.includes(client.id) ? config.selectedClientIds.filter((id) => id !== client.id) : [...config.selectedClientIds, client.id])}/><span>{client.name}<small>{client.project_interest || "Empreendimento não informado"}</small></span></label>)}</div> : null}
+          </section>
+
+          <section className="swd-upload" aria-label="Upload de mídia">
+            <header><strong>Mídia da abordagem</strong><span>Armazenamento privado · até 4 MB</span></header>
+            <input value={mediaName} onChange={(event) => setMediaName(event.target.value)} placeholder="Nome da mídia" />
+            <input type="file" accept="image/jpeg,image/png,video/mp4,application/pdf" onChange={(event) => setMediaFile(event.target.files?.[0] || null)} />
+            <button type="button" onClick={uploadMedia} disabled={pending === "media"}>{pending === "media" ? "Enviando..." : "Fazer upload"}</button>
+          </section>
 
           <fieldset className="swd-templates">
             <legend>Modelos da campanha</legend>

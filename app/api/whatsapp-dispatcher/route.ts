@@ -11,15 +11,15 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 type UiConfig = {
-  name?: unknown; source?: unknown; baseId?: unknown; projectId?: unknown; approachId?: unknown;
-  templateIds?: unknown; distributionMode?: unknown; templateWeights?: unknown; mediaType?: unknown;
+  name?: unknown; source?: unknown; baseId?: unknown; builderId?: unknown; projectId?: unknown; selectedClientIds?: unknown; approachId?: unknown;
+  templateIds?: unknown; distributionMode?: unknown; templateWeights?: unknown; mediaType?: unknown; mediaId?: unknown;
   batchSize?: unknown; messageIntervalMin?: unknown; messageIntervalMax?: unknown;
   batchPauseMinutes?: unknown; hourlyLimit?: unknown; dailyLimit?: unknown; cadenceId?: unknown;
   allowedStartTime?: unknown; allowedEndTime?: unknown; stopOnReply?: unknown; dryRun?: unknown;
 };
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const sources = new Set(["DAILY_WALLET", "OWN_DATABASE", "DNA", "INDICATION", "MANUAL_LIST", "PROJECT_LIST", "REACTIVATION", "CUSTOM"]);
+const sources = new Set(["DAILY_WALLET", "OWN_DATABASE"]);
 const modes = new Set(["ROUND_ROBIN", "RANDOM", "WEIGHTED"]);
 
 function testClientAllowlist() {
@@ -60,7 +60,14 @@ function normalizeConfig(input: UiConfig) {
     stopOnReply: input.stopOnReply === true, dryRun: input.dryRun !== false,
   });
   if (!domain.valid) throw new Error(domain.errors.join(" "));
-  return { name, source, approachId, cadenceId, templateIds, distributionMode, weights, baseId: optionalId(input.baseId), projectId: optionalId(input.projectId), domain: domain.value };
+  const selectedClientIds = Array.isArray(input.selectedClientIds)
+    ? [...new Set(input.selectedClientIds.map(Number).filter((id) => Number.isSafeInteger(id) && id > 0))].slice(0, 500)
+    : [];
+  const baseId = optionalId(input.baseId);
+  if (source === "OWN_DATABASE" && !baseId && !selectedClientIds.length) throw new Error("Base de clientes exige uma base ou contatos selecionados.");
+  const mediaId = input.mediaId == null || input.mediaId === "" ? null : String(input.mediaId);
+  if (mediaId && !uuid.test(mediaId)) throw new Error("Mídia inválida.");
+  return { name, source, approachId, cadenceId, templateIds, distributionMode, weights, baseId, builderId: optionalId(input.builderId), projectId: optionalId(input.projectId), selectedClientIds, mediaId, domain: domain.value };
 }
 
 async function health() {
@@ -99,21 +106,23 @@ async function health() {
 
 async function loadLibrary() {
   const db = supabaseAdmin();
-  const [approaches, templates, versions, cadences, bases, projects, campaigns] = await Promise.all([
+  const [approaches, templates, versions, cadences, bases, builders, projects, media, campaigns] = await Promise.all([
     db.from("whatsapp_approaches").select("id,name,objective,project_id,base_id,cadence_id,active").eq("active", true).order("name"),
     db.from("whatsapp_templates").select("id,approach_id,name,active").eq("active", true).order("name"),
     db.from("whatsapp_template_versions").select("template_id,version,body,media_id,media_version,active").eq("active", true).order("version", { ascending: false }),
     db.from("whatsapp_cadences").select("id,name,active").eq("active", true).order("name"),
     db.from("lead_imports").select("id,file_name,origin_type,created_at").order("created_at", { ascending: false }),
-    db.from("projects").select("id,name,city,active").eq("active", true).order("name"),
+    db.from("builders").select("id,name,active").eq("active", true).order("name"),
+    db.from("projects").select("id,builder_id,name,city,active").eq("active", true).order("name"),
+    db.from("whatsapp_dispatch_media").select("id,name,version,media_type,mime_type,file_size_bytes").eq("active", true).order("created_at", { ascending: false }),
     db.from("whatsapp_campaigns").select("id,name,status,dry_run,source,created_at").order("created_at", { ascending: false }).limit(30),
   ]);
-  const error = approaches.error || templates.error || versions.error || cadences.error || bases.error || projects.error || campaigns.error;
+  const error = approaches.error || templates.error || versions.error || cadences.error || bases.error || builders.error || projects.error || media.error || campaigns.error;
   if (error) throw error;
   const latest = new Map<string, (typeof versions.data)[number]>();
   for (const version of versions.data || []) if (!latest.has(String(version.template_id))) latest.set(String(version.template_id), version);
   return {
-    approaches: approaches.data || [], cadences: cadences.data || [], bases: (bases.data || []).map((row) => ({ id: row.id, name: row.file_name })), projects: projects.data || [], campaigns: campaigns.data || [],
+    approaches: approaches.data || [], cadences: cadences.data || [], bases: (bases.data || []).map((row) => ({ id: row.id, name: row.file_name })), builders: builders.data || [], projects: projects.data || [], media: media.data || [], campaigns: campaigns.data || [],
     templates: (templates.data || []).map((row) => ({ ...row, ...latest.get(String(row.id)) })),
   };
 }
@@ -126,25 +135,39 @@ async function candidateRows(config: ReturnType<typeof normalizeConfig>) {
     const { data, error } = await db.from("daily_portfolios").select("client_id").eq("assigned_date", today);
     if (error) throw error;
     ids = (data || []).map((row) => Number(row.client_id));
-  } else if (config.baseId) {
+  } else if (config.source === "OWN_DATABASE" && config.baseId) {
     const { data: base, error: baseError } = await db.from("lead_imports").select("file_name").eq("id", config.baseId).single();
     if (baseError) throw baseError;
-    const { data, error } = await db.from("client_sources").select("client_id").eq("source_file", base.file_name);
+    let sourcesQuery = db.from("client_sources").select("client_id,project_interest").eq("source_file", base.file_name);
+    if (config.projectId) {
+      const project = await db.from("projects").select("name").eq("id", config.projectId).single();
+      if (project.error) throw project.error;
+      sourcesQuery = sourcesQuery.eq("project_interest", project.data.name);
+    }
+    const { data, error } = await sourcesQuery;
     if (error) throw error;
     ids = [...new Set((data || []).map((row) => Number(row.client_id)))];
   }
+  if (config.selectedClientIds.length) ids = ids ? ids.filter((id) => config.selectedClientIds.includes(id)) : config.selectedClientIds;
   if (!config.domain.dryRun) {
     const allowlist = testClientAllowlist();
     if (!allowlist.length) throw new Error("Campanha real exige WHATSAPP_DISPATCH_TEST_CLIENT_IDS explícita.");
     ids = ids ? ids.filter((id) => allowlist.includes(id)) : allowlist;
   }
   if (ids && !ids.length) return [];
-  let query = db.from("clients").select("id,name,phone,can_contact,do_not_contact,opt_out_at,project_interest,data_quality").limit(10_000);
+  let query = db.from("clients").select("id,name,phone,can_contact,do_not_contact,opt_out_at,project_interest,data_quality").eq("data_quality", "validado").neq("name", "CLIENTE TESTE - MONTEIRO CRM").limit(10_000);
   if (ids) query = query.in("id", ids);
-  if (config.projectId) {
-    const { data: project, error } = await db.from("projects").select("name").eq("id", config.projectId).single();
+  if (config.projectId && !(config.source === "OWN_DATABASE" && config.baseId)) {
+    const { data: project, error } = await db.from("projects").select("name,builder_id").eq("id", config.projectId).single();
     if (error) throw error;
+    if (config.builderId && Number(project.builder_id) !== config.builderId) throw new Error("Empreendimento não pertence à construtora selecionada.");
     query = query.eq("project_interest", project.name);
+  } else if (config.builderId) {
+    const projects = await db.from("projects").select("name").eq("builder_id", config.builderId).eq("active", true);
+    if (projects.error) throw projects.error;
+    const names = (projects.data || []).map((item) => item.name);
+    if (!names.length) return [];
+    query = query.in("project_interest", names);
   }
   const { data, error } = await query.order("id");
   if (error) throw error;
@@ -181,9 +204,11 @@ async function makePreview(config: ReturnType<typeof normalizeConfig>, campaignI
   const projectName = config.projectId ? library.projects.find((item) => Number(item.id) === config.projectId)?.name : null;
   const candidates: DryRunCandidate[] = rows.map((client) => {
     const phone = normalizePhoneE164(client.phone);
+    const safeName = String(client.name || "").trim();
+    const confirmedName = Boolean(safeName) && !/^contato importado\b/i.test(safeName) && safeName !== "CLIENTE TESTE - MONTEIRO CRM";
     const placeholders: ConfirmedTemplateData = {
-      nome: { value: client.name, confirmed: Boolean(client.name) },
-      primeiro_nome: { value: String(client.name || "").trim().split(/\s+/)[0] || null, confirmed: Boolean(client.name) },
+      nome: { value: confirmedName ? safeName : null, confirmed: confirmedName },
+      primeiro_nome: { value: confirmedName ? safeName.split(/\s+/)[0] : null, confirmed: confirmedName },
       empreendimento: { value: projectName || client.project_interest || null, confirmed: Boolean(projectName || client.project_interest) },
       corretor: { value: "Franklin Monteiro", confirmed: true },
       base: { value: baseName || null, confirmed: Boolean(baseName) },
@@ -199,7 +224,10 @@ async function makePreview(config: ReturnType<typeof normalizeConfig>, campaignI
     };
   });
   const templates: DispatchTemplate[] = selected.map((item) => ({ id: String(item.id), version: Number(item.version), body: String(item.body), weight: config.weights[String(item.id)], active: true }));
-  return buildDryRun({ campaignId, config: config.domain, templates, selectionMode: config.distributionMode, candidates, startAt: new Date(), seed: campaignId });
+  const selectedMedia = config.mediaId ? library.media.find((item) => String(item.id) === config.mediaId) : null;
+  if (config.mediaId && !selectedMedia) throw new Error("Mídia ativa não encontrada.");
+  const media = selectedMedia ? { id: String(selectedMedia.id), version: Number(selectedMedia.version), type: selectedMedia.media_type as "IMAGE" | "VIDEO" | "DOCUMENT", sequence: "MEDIA_THEN_TEXT" as const } : null;
+  return buildDryRun({ campaignId, config: config.domain, templates, selectionMode: config.distributionMode, candidates, startAt: new Date(), seed: campaignId, media });
 }
 
 export async function GET() {
