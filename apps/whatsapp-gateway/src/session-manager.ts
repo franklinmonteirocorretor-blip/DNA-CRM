@@ -5,9 +5,10 @@ import { config } from "./config.js";
 import { SupabaseBaileysAuthStore } from "./auth-store.js";
 import { reconnectPlan } from "./recovery.js";
 import { createGatewaySupabaseClient } from "./supabase-client.js";
+import { ProviderAckRegistry, type DispatchMedia, type ProviderAck } from "./dispatcher-provider.js";
 
 export type Lifecycle = "created" | "waiting_qr" | "connecting" | "connected" | "reconnecting" | "disconnected" | "failed" | "logged_out";
-type Runtime = { socket?: WASocket; qr?: { value: string; expiresAt: string }; reconnectTimer?: NodeJS.Timeout; failures: number; stopped: boolean; gatewayMessageIds: Set<string> };
+type Runtime = { socket?: WASocket; qr?: { value: string; expiresAt: string }; reconnectTimer?: NodeJS.Timeout; failures: number; stopped: boolean; connected: boolean; gatewayMessageIds: Set<string> };
 
 function numericValue(value: unknown) {
   if (typeof value === "number") return value;
@@ -36,6 +37,7 @@ function normalizedMediaType(mimeType: string | null | undefined, messageType: s
 export class SessionManager {
   private readonly db: SupabaseClient;
   private readonly runtimes = new Map<string, Runtime>();
+  private readonly providerAcks = new ProviderAckRegistry();
   constructor(db?: SupabaseClient) { this.db = db || createGatewaySupabaseClient(); }
 
   private async persistMedia(sessionId: string, message: WAMessage, messageType: string, mimeType?: string | null, fileName?: string | null) {
@@ -90,7 +92,7 @@ export class SessionManager {
   }
 
   private scheduleHalfOpen(id: string, delayMs = config.circuitCooldownMs) {
-    const runtime = this.runtimes.get(id) || { failures: 0, stopped: false, gatewayMessageIds: new Set<string>() };
+    const runtime = this.runtimes.get(id) || { failures: 0, stopped: false, connected: false, gatewayMessageIds: new Set<string>() };
     if (runtime.reconnectTimer) clearTimeout(runtime.reconnectTimer);
     this.runtimes.set(id, runtime);
     runtime.reconnectTimer = setTimeout(() => {
@@ -105,7 +107,7 @@ export class SessionManager {
   async connect(id: string, reconnecting = false) {
     const current = this.runtimes.get(id);
     if (current?.socket && !current.stopped) return this.status(id);
-    const runtime: Runtime = current || { failures: 0, stopped: false, gatewayMessageIds: new Set<string>() };
+    const runtime: Runtime = current || { failures: 0, stopped: false, connected: false, gatewayMessageIds: new Set<string>() };
     runtime.stopped = false;
     this.runtimes.set(id, runtime);
     await this.update(id, reconnecting ? "reconnecting" : "connecting", { failure_reason: null });
@@ -122,8 +124,10 @@ export class SessionManager {
     socket.ev.on("creds.update", auth.saveCreds);
     socket.ev.on("connection.update", async ({ connection, qr, lastDisconnect }) => {
       if (qr) { runtime.qr = { value: qr, expiresAt: new Date(Date.now() + 55_000).toISOString() }; await this.update(id, "waiting_qr", { qr_expires_at: runtime.qr.expiresAt }); }
-      if (connection === "open") { runtime.qr = undefined; runtime.failures = 0; await this.update(id, "connected", { qr_expires_at: null, connected_phone: socket.user?.id || null, last_connected_at: new Date().toISOString(), last_activity_at: new Date().toISOString(), failure_reason: null, reconnect_attempts: 0, circuit_state: "closed", circuit_open_until: null }); }
+      if (connection === "open") { runtime.qr = undefined; runtime.failures = 0; runtime.connected = true; await this.update(id, "connected", { qr_expires_at: null, connected_phone: socket.user?.id || null, last_connected_at: new Date().toISOString(), last_activity_at: new Date().toISOString(), failure_reason: null, reconnect_attempts: 0, circuit_state: "closed", circuit_open_until: null }); }
       if (connection === "close" && !runtime.stopped) {
+        runtime.connected = false;
+        this.providerAcks.clearSession(id);
         runtime.socket = undefined;
         const code = (lastDisconnect?.error as { output?: { statusCode?: number } } | undefined)?.output?.statusCode;
         if (code === DisconnectReason.loggedOut) { runtime.stopped = true; runtime.qr = undefined; await auth.clear(); await this.update(id, "logged_out", { failure_reason: "Sessão encerrada pelo WhatsApp.", qr_expires_at: null }); return; }
@@ -132,6 +136,12 @@ export class SessionManager {
         await this.update(id, openCircuit ? "failed" : "reconnecting", { reconnect_attempts: runtime.failures, failure_reason: lastDisconnect?.error?.message?.slice(0, 300) || "Conexão interrompida.", circuit_state: openCircuit ? "open" : "closed", circuit_open_until: openCircuit ? new Date(Date.now() + config.circuitCooldownMs).toISOString() : null });
         if (openCircuit) this.scheduleHalfOpen(id);
         else runtime.reconnectTimer = setTimeout(() => { void this.connect(id, true); }, wait);
+      }
+    });
+    socket.ev.on("messages.update", async (updates) => {
+      for (const { key, update } of updates) {
+        if (!key.id || typeof update.status !== "number") continue;
+        this.providerAcks.observe(id, key.id, update.status, providerTimestamp(update.messageTimestamp));
       }
     });
     socket.ev.on("messages.upsert", async ({ messages }) => {
@@ -196,16 +206,45 @@ export class SessionManager {
     return this.status(id);
   }
 
-  async disconnect(id: string) { const runtime = this.runtimes.get(id); if (runtime) { runtime.stopped = true; if (runtime.reconnectTimer) clearTimeout(runtime.reconnectTimer); runtime.socket?.end(undefined); this.runtimes.delete(id); } await this.update(id, "disconnected", { qr_expires_at: null }); return this.status(id); }
+  async disconnect(id: string) { const runtime = this.runtimes.get(id); if (runtime) { runtime.stopped = true; runtime.connected = false; this.providerAcks.clearSession(id); if (runtime.reconnectTimer) clearTimeout(runtime.reconnectTimer); runtime.socket?.end(undefined); this.runtimes.delete(id); } await this.update(id, "disconnected", { qr_expires_at: null }); return this.status(id); }
   async reconnect(id: string) { await this.disconnect(id); return this.connect(id, true); }
-  async logout(id: string) { const runtime = this.runtimes.get(id); if (runtime) { runtime.stopped = true; if (runtime.reconnectTimer) clearTimeout(runtime.reconnectTimer); await runtime.socket?.logout().catch(() => undefined); this.runtimes.delete(id); } await new SupabaseBaileysAuthStore(id, this.db).load().then(auth => auth.clear()); await this.update(id, "logged_out", { connected_phone: null, qr_expires_at: null, failure_reason: null }); return this.status(id); }
-  async sendText(id: string, phone: string, text: string) {
+  async logout(id: string) { const runtime = this.runtimes.get(id); if (runtime) { runtime.stopped = true; runtime.connected = false; this.providerAcks.clearSession(id); if (runtime.reconnectTimer) clearTimeout(runtime.reconnectTimer); await runtime.socket?.logout().catch(() => undefined); this.runtimes.delete(id); } await new SupabaseBaileysAuthStore(id, this.db).load().then(auth => auth.clear()); await this.update(id, "logged_out", { connected_phone: null, qr_expires_at: null, failure_reason: null }); return this.status(id); }
+  private outboundSocket(id: string, phone: string) {
     if (!config.realOutboundEnabled) throw new Error("Outbound real desativado.");
     const normalized = phone.replace(/\D/g, "");
     if (!config.authorizedTestNumbers.has(normalized)) throw new Error("Destinatário fora da allowlist de teste.");
     const runtime = this.runtimes.get(id);
-    if (!runtime?.socket) throw new Error("Sessão não conectada.");
-    const result = await runtime.socket.sendMessage(`${normalized}@s.whatsapp.net`, { text });
+    if (!runtime?.socket || !runtime.connected) throw new Error("Sessão não conectada.");
+    return { normalized, runtime, socket: runtime.socket };
+  }
+  isConnected(id: string) { return this.runtimes.get(id)?.connected === true; }
+  waitForProviderAck(id: string, providerMessageId: string, timeoutMs: number): Promise<ProviderAck> {
+    return this.providerAcks.wait(id, providerMessageId, timeoutMs);
+  }
+  async sendText(id: string, phone: string, text: string) {
+    const { normalized, runtime, socket } = this.outboundSocket(id, phone);
+    const result = await socket.sendMessage(`${normalized}@s.whatsapp.net`, { text });
+    if (result?.key.id) runtime.gatewayMessageIds.add(result.key.id);
+    await this.update(id, "connected", { last_activity_at: new Date().toISOString() });
+    return { providerMessageId: result?.key.id, accepted: Boolean(result?.key.id) };
+  }
+  async sendMedia(id: string, phone: string, media: DispatchMedia) {
+    const { normalized, runtime, socket } = this.outboundSocket(id, phone);
+    if (!media.storageBucket.trim() || !media.storagePath.trim()) throw new Error("Referência de mídia inválida.");
+    if (media.storageBucket !== config.mediaBucket) throw new Error("Bucket de mídia não autorizado.");
+    if ((media.type === "image" && !media.mimeType.startsWith("image/"))
+      || (media.type === "video" && !media.mimeType.startsWith("video/"))) throw new Error("Tipo MIME incompatível com mídia.");
+    const { data, error } = await this.db.storage.from(media.storageBucket).download(media.storagePath);
+    if (error || !data) throw new Error(`Media download falhou: ${error?.message || "objeto ausente"}`);
+    if (data.size > 25 * 1024 * 1024) throw new Error("Mídia excede 25 MB.");
+    const buffer = Buffer.from(await data.arrayBuffer());
+    if (!buffer.length) throw new Error("Mídia vazia.");
+    const jid = `${normalized}@s.whatsapp.net`;
+    const result = media.type === "image"
+      ? await socket.sendMessage(jid, { image: buffer, mimetype: media.mimeType, caption: media.caption || undefined })
+      : media.type === "video"
+        ? await socket.sendMessage(jid, { video: buffer, mimetype: media.mimeType, caption: media.caption || undefined })
+        : await socket.sendMessage(jid, { document: buffer, mimetype: media.mimeType, fileName: media.fileName || "documento", caption: media.caption || undefined });
     if (result?.key.id) runtime.gatewayMessageIds.add(result.key.id);
     await this.update(id, "connected", { last_activity_at: new Date().toISOString() });
     return { providerMessageId: result?.key.id, accepted: Boolean(result?.key.id) };
@@ -239,9 +278,11 @@ export class SessionManager {
     return { runtimeSessions: data?.length || 0, statuses, circuits, reconnectAttempts, latestHeartbeat, lastError };
   }
   async shutdown() {
-    const runtimes = [...this.runtimes.values()];
-    for (const runtime of runtimes) {
+    const runtimes = [...this.runtimes.entries()];
+    for (const [id, runtime] of runtimes) {
       runtime.stopped = true;
+      runtime.connected = false;
+      this.providerAcks.clearSession(id);
       if (runtime.reconnectTimer) clearTimeout(runtime.reconnectTimer);
       runtime.socket?.end(undefined);
     }
