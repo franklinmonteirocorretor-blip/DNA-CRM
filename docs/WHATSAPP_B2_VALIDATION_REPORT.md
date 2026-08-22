@@ -75,7 +75,7 @@ Status: **NO-GO para número comercial**.
 
 ## Bloqueio estrutural
 
-Render Free foi retirado do caminho ativo porque pode suspender o processo por inatividade. O Back4App Free executou corretamente o container, mas o painel marcou o domínio gerado como temporário e válido por apenas 60 minutos. Enquanto não houver URL permanente e continuidade comprovada, não existe soak válido. Número comercial permanece proibido.
+Render Free foi retirado do caminho ativo porque pode suspender o processo por inatividade. O Back4App Free executou corretamente o container. O subdomínio `b4a.run` pertence ao Container App e permanece igual entre deploys, mas o painel limita sua disponibilidade pública a 60 minutos e oferece URL permanentemente ativa somente após upgrade. Enquanto não houver disponibilidade permanente e continuidade comprovada, não existe soak válido. Número comercial permanece proibido.
 
 ## Runtime durável: decisão de infraestrutura
 
@@ -99,9 +99,24 @@ Recomendação: concluir os gates destrutivos na conta teste e mover o gateway p
 - Segurança de corte: aprovada; Render foi suspenso antes do Back4App restaurar a sessão.
 - Outbound geral: permaneceu desligado.
 - Limite de memória: aprovado no instante observado, com cerca de 110 MB de RSS para 256 MB disponíveis.
-- Runtime durável: não aprovado, porque a URL gratuita foi apresentada como temporária por 60 minutos.
-- Soak de 24 horas: não iniciado; a URL temporária invalida o pré-requisito.
+- Runtime durável: não aprovado. O subdomínio é estável, mas sua disponibilidade pública no plano Free foi apresentada como temporária por 60 minutos.
+- Soak de 24 horas: não iniciado; a limitação de disponibilidade invalida o pré-requisito.
+
+### Back4App canonical URL correction
+
+- Recurso: Back4App Containers, Web Deployment ID `13459748-7141-47e6-be66-ce58438e3b05`; não é Back4App Agents nem preview isolado.
+- Classificação anterior corrigida: o subdomínio usado não era URL específica do deployment; já era o `Your Back4app's subdomain` vinculado ao Container App.
+- URL canônica do app: o mesmo subdomínio `b4a.run` já configurado na Vercel. Nenhuma segunda URL canônica foi oferecida no plano Free.
+- Disponibilidade: `Temporary URL Active`, 60 minutos; painel oferece `Upgrade for a Permanent URL` e restringe custom domains a planos pagos.
+- Redeploy controlado: deployment `8ca428e3-c134-4291-80f7-540c78bd0095` ficou `Ready` em cerca de 40 segundos e manteve exatamente o mesmo subdomínio.
+- Health após redeploy: HTTP 200, `ok: true`, `outboundReal: false`, `startupError` nulo.
+- Autenticação: rota protegida sem segredo e com segredo inválido respondeu HTTP 401; segredo correto passou.
+- Sessão: restaurada sem QR. Durante a substituição houve `Stream Errored (conflict)` transitório; cerca de 104 segundos após o início do redeploy, estabilizou em `connected`, circuito fechado, zero reconnects e `lastError` nulo.
+- Memória estável no instante final: RSS 116.162.560 bytes, heap usado 34.118.160 bytes e heap total 43.147.264 bytes. `external` não é exposto pelo health atual.
+- Vercel: já apontava para o subdomínio canônico do app; nenhuma troca adicional de valor foi necessária. `/configuracoes/whatsapp` confirmou conexão, heartbeat recente, circuito fechado, zero reconexões e outbound OFF.
+- Single owner: Render permaneceu suspenso; Back4App continuou único runtime ativo fora da sobreposição interna transitória do próprio redeploy.
+- Decisão: `BACK4APP_ENDPOINT = NO-GO` para soak. Motivo não é mudança da string da URL, mas expiração da disponibilidade pública no plano Free.
 
 ## Decisão
 
-Sprint B.2 ainda não está fechada. Código, container e conta de teste funcionam, e o corte Render → Back4App foi validado sem QR e sem dois sockets. Porém a URL gratuita temporária não oferece runtime contínuo; soak e gates destrutivos/controlados permanecem pendentes. **NO-GO técnico para número comercial.**
+Sprint B.2 ainda não está fechada. Código, container e conta de teste funcionam, e o corte Render → Back4App foi validado sem QR. O subdomínio do app é estável entre deploys, porém sua disponibilidade Free expira em 60 minutos; soak e gates destrutivos/controlados permanecem pendentes. **NO-GO técnico para número comercial.**

@@ -208,6 +208,7 @@ Prompt inicial obrigatorio de cada tarefa:
 - Imagem JPEG inbound real validada em 22/08/2026: objeto de 124.566 bytes no bucket privado `whatsapp-media`, `storageError` nulo, cliente/conversa vinculados, evento e auditoria persistidos e uma única mensagem por `providerMessageId`.
 - Human Takeover e retorno para `AUTO` observados.
 - Disconnect/reconnect controlado passou; falha simulada de Storage preservou mensagem, evento e auditoria sem duplicação.
-- O domínio gratuito fornecido pelo Back4App foi explicitamente marcado no painel como temporário por 60 minutos. Portanto ele comprova portabilidade e restauração, mas não comprova runtime durável nem soak.
+- O subdomínio `b4a.run` está vinculado ao Container App e permaneceu igual após novo deploy, portanto não é URL específica de uma versão. Porém o plano Free marca seu acesso como `Temporary URL Active`, válido por 60 minutos, e exige upgrade para URL permanentemente ativa. A string é canônica do app; a disponibilidade não é permanente.
+- Redeploy controlado `8ca428e3-c134-4291-80f7-540c78bd0095` preservou o mesmo subdomínio e restaurou a sessão sem QR. Houve conflito transitório durante a troca de instâncias; cerca de 104 segundos após o início, a sessão voltou a `connected`, circuito fechado, zero reconnects e `lastError` nulo.
 - Sprint B.2 permanece `NO-GO` para número comercial até validar perda física de rede, outbound allowlisted, URL/runtime permanente sem sleep e soak de 24 horas.
 - Sprint C não foi iniciada.
