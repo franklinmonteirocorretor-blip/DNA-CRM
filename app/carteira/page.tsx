@@ -7,6 +7,7 @@ import { DailyMissionTabs } from "../components/daily-mission-tabs";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { PhoneIcon } from "../components/phone-icon";
 import { CATALOG_CITIES, normalizeCatalogCity } from "@/lib/catalog-hierarchy";
+import { SmartWhatsAppDispatcher } from "./smart-whatsapp-dispatcher";
 import "./carteira.css";
 import "./carteira-fixes.css";
 
@@ -455,6 +456,8 @@ export default function CarteiraPage() {
               </i>
             </div>
           </section>
+
+          <SmartWhatsAppDispatcher />
 
           <section className="daily-base-control">
             <button onClick={() => setBasePanel((v) => !v)}>

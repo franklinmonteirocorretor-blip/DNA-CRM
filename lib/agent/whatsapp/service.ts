@@ -88,6 +88,26 @@ async function registerAgentDecision(input: { providerMessageId: string; convers
   });
 }
 
+async function stopDispatchesOnReply(clientId: number, replyMessageId: number) {
+  const db = supabaseAdmin();
+  const { data, error } = await db
+    .from("whatsapp_campaign_queue")
+    .select("campaign_id,whatsapp_campaigns!inner(status,stop_on_reply)")
+    .eq("client_id", clientId)
+    .in("whatsapp_campaigns.status", ["READY", "RUNNING", "PAUSED"])
+    .eq("whatsapp_campaigns.stop_on_reply", true);
+  if (error) throw error;
+  const campaignIds = [...new Set((data || []).map((row) => String(row.campaign_id)))];
+  for (const campaignId of campaignIds) {
+    const { error: stopError } = await db.rpc("stop_whatsapp_campaign_on_reply", {
+      p_campaign_id: campaignId,
+      p_client_id: clientId,
+      p_reply_message_id: replyMessageId,
+    });
+    if (stopError) throw stopError;
+  }
+}
+
 export async function processProviderMessage(input: { sessionId: string; providerMessageId: string; providerConversationId: string; phone?: string; text?: string; occurredAt: string; fromMe?: boolean; manual?: boolean; messageType?: "text" | "audio" | "image" | "document" | "video"; mediaMetadata?: MediaMetadata | null }) {
   const db = supabaseAdmin();
   const { data: existing } = await db.from("whatsapp_messages").select("id,conversation_id,client_id,body,direction").eq("provider_message_id", input.providerMessageId).maybeSingle();
@@ -107,7 +127,7 @@ export async function processProviderMessage(input: { sessionId: string; provide
     }
     if (!input.fromMe && existingClientId) {
       const { data: conversation } = await db.from("whatsapp_conversations").select("control_mode").eq("id", existing.conversation_id).single();
-      await registerAgentDecision({ providerMessageId: input.providerMessageId, conversationId: existing.conversation_id, clientId: existingClientId, controlMode: conversation?.control_mode || "auto", text: existing.body || input.text });
+      if (process.env.AGENT_BRAIN_ENABLED === "true") await registerAgentDecision({ providerMessageId: input.providerMessageId, conversationId: existing.conversation_id, clientId: existingClientId, controlMode: conversation?.control_mode || "auto", text: existing.body || input.text });
     }
     return { duplicate: true };
   }
@@ -122,7 +142,7 @@ export async function processProviderMessage(input: { sessionId: string; provide
   if (error) throw error;
   const mode = input.manual ? "human_takeover" : conversation.control_mode;
   if (input.manual) await setConversationMode(conversation.id, mode, "crm_operator", "Mensagem manual detectada");
-  const { error: messageError } = await db.from("whatsapp_messages").insert({ conversation_id: conversation.id, client_id: conversation.client_id, provider_message_id: input.providerMessageId, direction: input.fromMe ? "outbound" : "inbound", message_type: input.messageType || "text", body: input.text, media_metadata: input.mediaMetadata || {}, status: input.fromMe ? "sent" : "received", provider_timestamp: input.occurredAt });
+  const { data: persistedMessage, error: messageError } = await db.from("whatsapp_messages").insert({ conversation_id: conversation.id, client_id: conversation.client_id, provider_message_id: input.providerMessageId, direction: input.fromMe ? "outbound" : "inbound", message_type: input.messageType || "text", body: input.text, media_metadata: input.mediaMetadata || {}, status: input.fromMe ? "sent" : "received", provider_timestamp: input.occurredAt }).select("id").single();
   if (messageError?.code === "23505") return { duplicate: true };
   if (messageError) throw messageError;
   if (!input.fromMe) await db.from("agent_tasks").update({ status: "cancelled", completed_at: new Date().toISOString(), last_error: "Cancelada por mensagem recebida." }).eq("client_id", conversation.client_id).eq("status", "pending").in("task_type", ["follow_up", "send_whatsapp"]);
@@ -133,7 +153,8 @@ export async function processProviderMessage(input: { sessionId: string; provide
   if (auditError && auditError.code !== "23505") throw auditError;
   if (!input.fromMe && conversation.client_id) {
     await db.from("client_events").insert({ client_id: conversation.client_id, event_type: "WhatsApp", title: "Mensagem recebida pelo WhatsApp", description: `Mensagem ${input.messageType || "text"} recebida e vinculada à conversa.` });
-    await registerAgentDecision({ providerMessageId: input.providerMessageId, conversationId: conversation.id, clientId: conversation.client_id, controlMode: mode, text: input.text });
+    if (persistedMessage?.id) await stopDispatchesOnReply(conversation.client_id, Number(persistedMessage.id));
+    if (process.env.AGENT_BRAIN_ENABLED === "true") await registerAgentDecision({ providerMessageId: input.providerMessageId, conversationId: conversation.id, clientId: conversation.client_id, controlMode: mode, text: input.text });
   }
   return { duplicate: false, conversationId: conversation.id, clientId: conversation.client_id, identityResolution: identity.status, mode };
 }
