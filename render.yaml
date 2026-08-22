@@ -26,3 +26,5 @@ services:
         sync: false
       - key: WHATSAPP_AUTHORIZED_TEST_NUMBERS
         sync: false
+      - key: WHATSAPP_MEDIA_BUCKET
+        value: whatsapp-media

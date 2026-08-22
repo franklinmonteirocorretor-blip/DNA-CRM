@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import makeWASocket, { DisconnectReason, type WASocket } from "@whiskeysockets/baileys";
+import makeWASocket, { DisconnectReason, downloadMediaMessage, type WASocket, type WAMessage } from "@whiskeysockets/baileys";
 import { pino } from "pino";
 import { config } from "./config.js";
 import { SupabaseBaileysAuthStore } from "./auth-store.js";
@@ -28,6 +28,19 @@ export class SessionManager {
   private readonly db: SupabaseClient;
   private readonly runtimes = new Map<string, Runtime>();
   constructor(db?: SupabaseClient) { this.db = db || createGatewaySupabaseClient(); }
+
+  private async persistMedia(sessionId: string, message: WAMessage, messageType: string, mimeType?: string | null, fileName?: string | null) {
+    const providerMessageId = message.key.id;
+    if (!providerMessageId) return null;
+    const socket = this.runtimes.get(sessionId)?.socket;
+    if (!socket) throw new Error("Socket indisponível para baixar mídia.");
+    const buffer = await downloadMediaMessage(message, "buffer", {}, { logger: pino({ level: "silent" }), reuploadRequest: socket.updateMediaMessage });
+    const safeName = (fileName || `${messageType}.bin`).replace(/[^a-zA-Z0-9._-]/g, "_").slice(-120);
+    const storagePath = `${sessionId}/${providerMessageId}/${safeName}`;
+    const { error } = await this.db.storage.from(config.mediaBucket).upload(storagePath, buffer, { upsert: false, contentType: mimeType || "application/octet-stream" });
+    if (error && !/already exists/i.test(error.message)) throw new Error(`Media upload falhou: ${error.message}`);
+    return storagePath;
+  }
 
   private async update(id: string, status: Lifecycle, extra: Record<string, unknown> = {}) {
     const { error } = await this.db.from("whatsapp_sessions").update({ status, heartbeat_at: new Date().toISOString(), updated_at: new Date().toISOString(), ...extra }).eq("id", id);
@@ -120,8 +133,19 @@ export class SessionManager {
         const image = message.message?.imageMessage;
         const video = message.message?.videoMessage;
         const media = audio || document || image || video;
+        const messageType = audio ? "audio" : document ? "document" : image ? "image" : video ? "video" : "text";
         const gatewayOrigin = runtime.gatewayMessageIds.delete(message.key.id);
         try {
+          let storagePath: string | null = null;
+          let mediaStorageError: string | null = null;
+          if (media) {
+            try {
+              storagePath = await this.persistMedia(id, message, messageType, media.mimetype, document?.fileName);
+            } catch (error) {
+              mediaStorageError = error instanceof Error ? error.message.slice(0, 200) : "Falha ao armazenar mídia.";
+              console.error(JSON.stringify({ level: "error", event: "inbound_media_storage_failed", sessionId: id, messageType }));
+            }
+          }
           const response = await fetch(config.crmInboundUrl, {
             method: "POST",
             headers: { "content-type": "application/json", "x-gateway-secret": config.gatewaySecret },
@@ -132,7 +156,7 @@ export class SessionManager {
               fromMe: Boolean(message.key.fromMe),
               manual: Boolean(message.key.fromMe) && !gatewayOrigin,
               text: message.message?.conversation || message.message?.extendedTextMessage?.text || document?.caption || image?.caption || video?.caption,
-              messageType: audio ? "audio" : document ? "document" : image ? "image" : video ? "video" : "text",
+              messageType,
               occurredAt: providerTimestamp(message.messageTimestamp),
               mediaMetadata: media ? {
                 mimeType: media.mimetype || null,
@@ -141,11 +165,14 @@ export class SessionManager {
                 durationSeconds: numericValue(audio?.seconds || video?.seconds),
                 caption: document?.caption || image?.caption || video?.caption || null,
                 pageCount: numericValue(document?.pageCount),
+                storageBucket: config.mediaBucket,
+                storagePath,
+                storageError: mediaStorageError,
               } : null,
             }),
           });
-          if (!response.ok) console.error(JSON.stringify({ level: "error", event: "inbound_forward_failed", sessionId: id, status: response.status, messageType: audio ? "audio" : document ? "document" : image ? "image" : video ? "video" : "text" }));
-          else console.log(JSON.stringify({ level: "info", event: "inbound_forwarded", sessionId: id, messageType: audio ? "audio" : document ? "document" : image ? "image" : video ? "video" : "text" }));
+          if (!response.ok) console.error(JSON.stringify({ level: "error", event: "inbound_forward_failed", sessionId: id, status: response.status, messageType }));
+          else console.log(JSON.stringify({ level: "info", event: "inbound_forwarded", sessionId: id, messageType }));
         } catch (error) {
           console.error(JSON.stringify({ level: "error", event: "inbound_forward_failed", sessionId: id, status: 0, message: error instanceof Error ? error.message : "unknown" }));
         }

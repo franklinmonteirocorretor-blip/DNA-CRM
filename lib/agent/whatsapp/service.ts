@@ -4,7 +4,7 @@ import { loadAgentControl } from "@/lib/agent/store";
 import { normalizePhoneE164, resolveOutboundIdentity } from "./identity-resolver";
 import type { ConversationControlMode } from "./types";
 
-type MediaMetadata = { mimeType?: string | null; fileName?: string | null; fileLength?: number | null; durationSeconds?: number | null; caption?: string | null; pageCount?: number | null };
+type MediaMetadata = { mimeType?: string | null; fileName?: string | null; fileLength?: number | null; durationSeconds?: number | null; caption?: string | null; pageCount?: number | null; storageBucket?: string | null; storagePath?: string | null; storageError?: string | null };
 
 async function resolveInboundClient(phone: string | undefined) {
   const normalized = phone ? normalizePhoneE164(phone) : null;

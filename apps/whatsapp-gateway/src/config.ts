@@ -17,6 +17,7 @@ export const config = {
   supabaseUrl: required("SUPABASE_URL"),
   supabaseSecretKey: required("SUPABASE_SECRET_KEY"),
   crmInboundUrl: process.env.CRM_INBOUND_URL?.trim(),
+  mediaBucket: process.env.WHATSAPP_MEDIA_BUCKET?.trim() || "whatsapp-media",
   realOutboundEnabled: process.env.WHATSAPP_REAL_OUTBOUND_ENABLED === "true",
   circuitCooldownMs: Number(process.env.WHATSAPP_CIRCUIT_COOLDOWN_MS || 300_000),
   authorizedTestNumbers: new Set((process.env.WHATSAPP_AUTHORIZED_TEST_NUMBERS || "").split(",").map(v => v.replace(/\D/g, "")).filter(Boolean)),

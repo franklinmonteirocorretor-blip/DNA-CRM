@@ -2,14 +2,18 @@
 import Image from "next/image";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { CrmNavigation } from "../components/crm-navigation";
+import { CrmCenterTabs } from "../components/crm-center-tabs";
+import { CATALOG_CITIES, normalizeCatalogCity } from "@/lib/catalog-hierarchy";
 import "./construtoras.css";
 import "./management.css";
+import "./editing.css";
 
 type Media = { id: number; name: string; type: string; url: string };
 type Project = {
   id: number;
   name: string;
   kind: string;
+  city: string;
   region: string;
   price: number;
   commission: number;
@@ -34,7 +38,8 @@ const emptyBuilder = {
 };
 const emptyProject = {
   name: "",
-  kind: "",
+  kind: "Casas",
+  city: "Teresina",
   region: "",
   price: "",
   commission: "6",
@@ -53,11 +58,26 @@ const money = new Intl.NumberFormat("pt-BR", {
   style: "currency",
   currency: "BRL",
 });
+const formatPriceInput = (value: string) => {
+  const digits = value.replace(/\D/g, "");
+  if (!digits) return "";
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(Number(digits) / 100);
+};
+const priceToInput = (value: number) =>
+  formatPriceInput(String(Math.round(value * 100)));
+const parsePriceInput = (value: string) =>
+  Number(value.replace(/\D/g, "")) / 100;
+const normalizeProjectKind = (value: string) =>
+  value.toLocaleLowerCase("pt-BR").includes("apart") ? "Apartamentos" : "Casas";
 
 export default function Construtoras() {
   const [catalog, setCatalog] = useState<Builder[]>([]);
   const [builderId, setBuilderId] = useState<number | null>(null);
   const [projectId, setProjectId] = useState<number | null>(null);
+  const [selectedCity, setSelectedCity] = useState("Teresina");
   const [mode, setMode] = useState<
     "" | "new-builder" | "edit-builder" | "new-project" | "edit-project"
   >("");
@@ -65,10 +85,22 @@ export default function Construtoras() {
   const [projectForm, setProjectForm] = useState(emptyProject);
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
-  const builder = catalog.find((item) => item.id === builderId) || catalog[0];
+  const cityBuilders = catalog.filter(
+    (item) =>
+      !item.projects.length ||
+      item.projects.some(
+        (entry) =>
+          normalizeCatalogCity(entry.city, entry.region) === selectedCity,
+      ),
+  );
+  const builder =
+    cityBuilders.find((item) => item.id === builderId) || cityBuilders[0];
+  const cityProjects =
+    builder?.projects.filter(
+      (item) => normalizeCatalogCity(item.city, item.region) === selectedCity,
+    ) || [];
   const project =
-    builder?.projects.find((item) => item.id === projectId) ||
-    builder?.projects[0];
+    cityProjects.find((item) => item.id === projectId) || cityProjects[0];
   const load = async (preferredBuilder?: number, preferredProject?: number) => {
     const response = await fetch("/api/catalog", { cache: "no-store" });
     const data = await response.json();
@@ -77,26 +109,53 @@ export default function Construtoras() {
       return;
     }
     setCatalog(data);
+    const preferredCity = data
+      .flatMap((item: Builder) => item.projects)
+      .find((item: Project) => item.id === preferredProject)?.city;
+    const nextCity = preferredCity
+      ? normalizeCatalogCity(preferredCity)
+      : selectedCity;
+    setSelectedCity(nextCity);
+    const eligibleBuilders = data.filter(
+      (item: Builder) =>
+        !item.projects.length ||
+        item.projects.some(
+          (entry) =>
+            normalizeCatalogCity(entry.city, entry.region) === nextCity,
+        ),
+    );
     const nextBuilder =
-      data.find(
+      eligibleBuilders.find(
         (item: Builder) => item.id === (preferredBuilder || builderId),
-      ) || data[0];
+      ) || eligibleBuilders[0];
     const nextProject =
       nextBuilder?.projects.find(
-        (item: Project) => item.id === (preferredProject || projectId),
-      ) || nextBuilder?.projects[0];
+        (item: Project) =>
+          normalizeCatalogCity(item.city, item.region) === nextCity &&
+          item.id === (preferredProject || projectId),
+      ) ||
+      nextBuilder?.projects.find(
+        (item: Project) =>
+          normalizeCatalogCity(item.city, item.region) === nextCity,
+      );
     setBuilderId(nextBuilder?.id || null);
     setProjectId(nextProject?.id || null);
   };
   useEffect(() => {
     const timer = window.setTimeout(() => void load(), 0);
     return () => window.clearTimeout(timer);
+    // Initial catalog load.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const regions = useMemo(
+  const cities = useMemo(
     () => [
       ...new Set(
         catalog
-          .flatMap((item) => item.projects.map((entry) => entry.region))
+          .flatMap((item) =>
+            item.projects.map((entry) =>
+              normalizeCatalogCity(entry.city, entry.region),
+            ),
+          )
           .filter(Boolean),
       ),
     ],
@@ -122,70 +181,89 @@ export default function Construtoras() {
       edit && project
         ? {
             name: project.name,
-            kind: project.kind,
+            kind: normalizeProjectKind(project.kind),
+            city: normalizeCatalogCity(project.city, project.region),
             region: project.region,
-            price: String(project.price),
+            price: priceToInput(project.price),
             commission: String(project.commission),
             description: project.description,
           }
-        : emptyProject,
+        : { ...emptyProject, city: selectedCity },
     );
     setMode(edit ? "edit-project" : "new-project");
     setMessage("");
   };
   const saveBuilder = async (event: FormEvent) => {
     event.preventDefault();
+    if (busy) return;
     setBusy(true);
     const editing = mode === "edit-builder";
-    const response = await fetch("/api/catalog", {
-      method: editing ? "PATCH" : "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        entity: "builder",
-        id: builder?.id,
-        ...builderForm,
-      }),
-    });
-    const data = await response.json();
-    setBusy(false);
-    if (!response.ok) {
-      setMessage(data.error);
-      return;
+    try {
+      const response = await fetch("/api/catalog", {
+        method: editing ? "PATCH" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          entity: "builder",
+          id: builder?.id,
+          ...builderForm,
+        }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        setMessage(data.error || "Falha ao salvar a construtora.");
+        return;
+      }
+      setMode("");
+      setMessage(
+        data.reactivated
+          ? "Construtora reativada e atualizada."
+          : editing
+            ? "Construtora atualizada."
+            : "Construtora cadastrada. Agora cadastre seus empreendimentos.",
+      );
+      await load(editing ? builder?.id : data.id);
+    } catch {
+      setMessage("Não foi possível salvar a construtora. Tente novamente.");
+    } finally {
+      setBusy(false);
     }
-    setMode("");
-    setMessage(
-      editing
-        ? "Construtora atualizada."
-        : "Construtora cadastrada. Agora cadastre seus empreendimentos.",
-    );
-    await load(editing ? builder?.id : data.id);
   };
   const saveProject = async (event: FormEvent) => {
     event.preventDefault();
-    if (!builder) return;
+    if (!builder || busy) return;
     setBusy(true);
     const editing = mode === "edit-project";
-    const response = await fetch("/api/catalog", {
-      method: editing ? "PATCH" : "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        entity: "project",
-        id: project?.id,
-        builderId: builder.id,
-        ...projectForm,
-      }),
-    });
-    const data = await response.json();
-    setBusy(false);
-    if (!response.ok) {
-      setMessage(data.error);
-      return;
+    try {
+      const response = await fetch("/api/catalog", {
+        method: editing ? "PATCH" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          entity: "project",
+          id: project?.id,
+          builderId: builder.id,
+          ...projectForm,
+          price: parsePriceInput(projectForm.price),
+        }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        setMessage(data.error || "Falha ao salvar o empreendimento.");
+        return;
+      }
+      setMode("");
+      setMessage(
+        data.reactivated
+          ? "Empreendimento reativado e atualizado."
+          : editing
+            ? "Empreendimento atualizado."
+            : "Empreendimento cadastrado.",
+      );
+      await load(builder.id, editing ? project?.id : data.id);
+    } catch {
+      setMessage("Não foi possível salvar o empreendimento. Tente novamente.");
+    } finally {
+      setBusy(false);
     }
-    setMode("");
-    setMessage(
-      editing ? "Empreendimento atualizado." : "Empreendimento cadastrado.",
-    );
-    await load(builder.id, editing ? project?.id : data.id);
   };
   const remove = async (entity: "builder" | "project") => {
     const target = entity === "builder" ? builder : project;
@@ -323,13 +401,16 @@ export default function Construtoras() {
           <div>
             <span>Catálogo comercial</span>
             <h1>Construtoras e Empreendimentos</h1>
-            <p>Construtora primeiro. Depois, somente seus empreendimentos.</p>
+            <p>Cidade primeiro. Depois, construtora e empreendimento.</p>
           </div>
-          <button onClick={() => openBuilder(false)}>
-            ＋ Cadastrar construtora
-          </button>
         </header>
         <div className="builder-content">
+          <CrmCenterTabs />
+          <div className="crm-page-toolbar">
+            <button onClick={() => openBuilder(false)}>
+              ＋ Cadastrar construtora
+            </button>
+          </div>
           {message && <div className="catalog-message">{message}</div>}
           <section className="builder-kpis compact">
             <article>
@@ -346,9 +427,47 @@ export default function Construtoras() {
             </article>
             <article>
               <span>Regiões atendidas</span>
-              <strong>{regions.length}</strong>
+              <strong>{cities.length}</strong>
               <small>Regiões distintas</small>
             </article>
+          </section>
+          <section className="catalog-city-strip">
+            <header>
+              <span>01 · Cidade</span>
+              <b>Localize construtoras e empreendimentos</b>
+            </header>
+            <div>
+              {CATALOG_CITIES.map((city) => (
+                <button
+                  type="button"
+                  key={city}
+                  className={selectedCity === city ? "active" : ""}
+                  onClick={() => {
+                    setSelectedCity(city);
+                    const nextBuilder = catalog.find(
+                      (item) =>
+                        !item.projects.length ||
+                        item.projects.some(
+                          (entry) =>
+                            normalizeCatalogCity(entry.city, entry.region) ===
+                            city,
+                        ),
+                    );
+                    setBuilderId(nextBuilder?.id || null);
+                    setProjectId(
+                      nextBuilder?.projects.find(
+                        (entry) =>
+                          normalizeCatalogCity(entry.city, entry.region) ===
+                          city,
+                      )?.id || null,
+                    );
+                    setMode("");
+                  }}
+                >
+                  {city}
+                </button>
+              ))}
+            </div>
           </section>
           {(mode === "new-builder" || mode === "edit-builder") && (
             <form className="catalog-form" onSubmit={saveBuilder}>
@@ -418,27 +537,27 @@ export default function Construtoras() {
                 <fieldset className="wide region-options">
                   <legend>Regiões atendidas</legend>
                   <div>
-                    {[...new Set([...regionOptions, ...builderForm.regions])].map(
-                      (region) => (
-                        <label key={region}>
-                          <input
-                            type="checkbox"
-                            checked={builderForm.regions.includes(region)}
-                            onChange={(e) =>
-                              setBuilderForm({
-                                ...builderForm,
-                                regions: e.target.checked
-                                  ? [...builderForm.regions, region]
-                                  : builderForm.regions.filter(
-                                      (item) => item !== region,
-                                    ),
-                              })
-                            }
-                          />
-                          <span>{region}</span>
-                        </label>
-                      ),
-                    )}
+                    {[
+                      ...new Set([...regionOptions, ...builderForm.regions]),
+                    ].map((region) => (
+                      <label key={region}>
+                        <input
+                          type="checkbox"
+                          checked={builderForm.regions.includes(region)}
+                          onChange={(e) =>
+                            setBuilderForm({
+                              ...builderForm,
+                              regions: e.target.checked
+                                ? [...builderForm.regions, region]
+                                : builderForm.regions.filter(
+                                    (item) => item !== region,
+                                  ),
+                            })
+                          }
+                        />
+                        <span>{region}</span>
+                      </label>
+                    ))}
                   </div>
                 </fieldset>
               </div>
@@ -451,7 +570,9 @@ export default function Construtoras() {
             <form className="catalog-form" onSubmit={saveProject}>
               <header>
                 <div>
-                  <span>{builder.name} → Empreendimento</span>
+                  <span>
+                    {selectedCity} → {builder.name} → Empreendimento
+                  </span>
                   <h2>
                     {mode === "edit-project"
                       ? "Editar empreendimento"
@@ -475,36 +596,55 @@ export default function Construtoras() {
                 </label>
                 <label>
                   <span>Tipo</span>
-                  <input
+                  <select
                     value={projectForm.kind}
                     onChange={(e) =>
                       setProjectForm({ ...projectForm, kind: e.target.value })
                     }
-                    placeholder="Condomínio de casas"
-                  />
+                  >
+                    <option value="Casas">Casas</option>
+                    <option value="Apartamentos">Apartamentos</option>
+                  </select>
                 </label>
                 <label>
                   <span>Região</span>
-                  <input
-                    value={projectForm.region}
-                    onChange={(e) =>
-                      setProjectForm({ ...projectForm, region: e.target.value })
-                    }
-                  />
+                  <div className="project-region-grid">
+                    {regionOptions.map((region) => {
+                      const selected = projectForm.region
+                        .split(",")
+                        .map((value) => value.trim())
+                        .filter(Boolean);
+                      return (
+                        <label key={region}>
+                          <input
+                            type="checkbox"
+                            checked={selected.includes(region)}
+                            onChange={(event) =>
+                              setProjectForm({
+                                ...projectForm,
+                                region: (event.target.checked
+                                  ? [...selected, region]
+                                  : selected.filter((value) => value !== region)
+                                ).join(", "),
+                              })
+                            }
+                          />
+                          <span>{region}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
                 </label>
                 <label>
                   <span>Valor de venda atual</span>
                   <input
                     required
-                    inputMode="decimal"
+                    inputMode="numeric"
                     value={projectForm.price}
                     onChange={(e) =>
                       setProjectForm({
                         ...projectForm,
-                        price: e.target.value
-                          .replace(/[^0-9.,]/g, "")
-                          .replace(/\./g, "")
-                          .replace(",", "."),
+                        price: formatPriceInput(e.target.value),
                       })
                     }
                   />
@@ -552,12 +692,18 @@ export default function Construtoras() {
                   <h2>Selecione a construtora</h2>
                 </div>
               </header>
-              {catalog.map((item) => (
+              {cityBuilders.map((item) => (
                 <button
                   className={builder?.id === item.id ? "selected" : ""}
                   onClick={() => {
                     setBuilderId(item.id);
-                    setProjectId(item.projects[0]?.id || null);
+                    setProjectId(
+                      item.projects.find(
+                        (entry) =>
+                          normalizeCatalogCity(entry.city, entry.region) ===
+                          selectedCity,
+                      )?.id || null,
+                    );
                     setMode("");
                   }}
                   key={item.id}
@@ -619,6 +765,8 @@ export default function Construtoras() {
                     </div>
                   </section>
                   <div className="hierarchy">
+                    <b>{selectedCity}</b>
+                    <span>›</span>
                     <b>{builder.name}</b>
                     <span>›</span>
                     <strong>
@@ -626,7 +774,7 @@ export default function Construtoras() {
                     </strong>
                   </div>
                   <div className="project-tabs">
-                    {builder.projects.map((item) => (
+                    {cityProjects.map((item) => (
                       <button
                         className={project?.id === item.id ? "active" : ""}
                         onClick={() => {
@@ -715,7 +863,13 @@ export default function Construtoras() {
                           {project.media.map((item, index) => (
                             <article key={item.id}>
                               {item.type.startsWith("image/") ? (
-                                <img src={item.url} alt={item.name} />
+                                <Image
+                                  src={item.url}
+                                  alt={item.name}
+                                  width={420}
+                                  height={250}
+                                  unoptimized
+                                />
                               ) : (
                                 <video
                                   src={item.url}
