@@ -155,6 +155,25 @@
   font-weight: 600 !important;
   line-height: 1 !important;
 }
+.entity-actions button:not(.danger),
+.contact-direct a:first-child,
+.builder-detail > header button {
+  border-color: #70551c !important;
+  background: #17130b !important;
+  color: #e5b84a !important;
+}
+.entity-actions button:not(.danger):hover,
+.contact-direct a:first-child:hover {
+  background: #d9aa3d !important;
+  color: #080808 !important;
+}
+.builder-list > button:hover {
+  background: #14110b;
+}
+.project-tabs button:not(.active) {
+  border-color: #4a3a1b;
+  color: #c5a24e;
+}
 .entity-actions button.danger {
   min-width: 48px !important;
   border-color: #63302d !important;
@@ -340,5 +359,93 @@
   }
   .contact-direct {
     border-top: 1px solid #292929;
+  }
+}
+.catalog-city-strip {
+  margin: 10px 0;
+  border: 1px solid #493a1b;
+  border-radius: 9px;
+  background: #0e0e0e;
+  padding: 10px 12px;
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 12px;
+  align-items: center;
+}
+.catalog-city-strip header {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.catalog-city-strip header span {
+  font-size: 6px;
+  color: #d9aa3d;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.catalog-city-strip header b {
+  font-size: 9px;
+}
+.catalog-city-strip > div {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+.catalog-city-strip button {
+  height: 34px;
+  border: 1px solid #5d481b;
+  border-radius: 6px;
+  background: #090909;
+  color: #d9aa3d;
+  font-size: 7px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.catalog-city-strip button.active {
+  background: linear-gradient(135deg, #edc85b, #d9aa3d 52%, #b77c18);
+  color: #080808;
+}
+.catalog-city-strip button:hover {
+  border-color: #e3b545;
+}
+@media (max-width: 750px) {
+  .catalog-city-strip {
+    grid-template-columns: 1fr;
+  }
+  .catalog-city-strip > div {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Hierarquia do catálogo: rótulo discreto, cidades em primeiro plano. */
+.catalog-city-strip {
+  grid-template-columns: 176px minmax(0, 1fr);
+  padding: 9px 11px;
+  gap: 10px;
+}
+.catalog-city-strip header {
+  min-height: 34px;
+  justify-content: center;
+  padding: 0 16px 0 3px;
+  border-right: 1px solid #332b1b;
+}
+.catalog-city-strip header span {
+  font-size: 7px;
+}
+.catalog-city-strip header b {
+  color: #9b9b9b;
+  font-size: 8px;
+  font-weight: 500;
+  line-height: 1.35;
+}
+@media (max-width: 750px) {
+  .catalog-city-strip {
+    grid-template-columns: 1fr;
+  }
+  .catalog-city-strip header {
+    min-height: auto;
+    padding: 0 0 8px;
+    border-right: 0;
+    border-bottom: 1px solid #332b1b;
   }
 }

@@ -1,1 +1,19 @@
-.distribution-command>div.distribution-fields{grid-template-columns:1.1fr .8fr 1.1fr .5fr .75fr .85fr}.distribution-fields label:nth-child(3){padding:6px;border:1px solid #4b3b1b;border-radius:6px;background:#15120c}@media(max-width:1050px){.distribution-command>div.distribution-fields{grid-template-columns:repeat(3,1fr)}}@media(max-width:650px){.distribution-command>div.distribution-fields{grid-template-columns:1fr 1fr}}
+.distribution-command > div.distribution-fields {
+  grid-template-columns: 1.1fr 0.8fr 1.1fr 0.5fr 0.75fr 0.85fr;
+}
+.distribution-fields label:nth-child(3) {
+  padding: 6px;
+  border: 1px solid #4b3b1b;
+  border-radius: 6px;
+  background: #15120c;
+}
+@media (max-width: 1050px) {
+  .distribution-command > div.distribution-fields {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 650px) {
+  .distribution-command > div.distribution-fields {
+    grid-template-columns: 1fr 1fr;
+  }
+}
