@@ -229,3 +229,15 @@ Prompt inicial obrigatorio de cada tarefa:
 - Advisor de segurança mantém avisos `rls_enabled_no_policy` esperados para tabelas deliberadamente service-only; não há grant `anon`/`authenticated` nessas tabelas.
 - Pesquisa técnica seleciona Groq Free apenas para testes anonimizados: API OpenAI-compatible e STT Whisper atendem protótipo, mas privacidade/retenção precisa aprovação antes de qualquer dado real. Gemini Free não é aceitável para PII porque seus termos informam uso do conteúdo para melhoria de produtos.
 - Número comercial continua `NO-GO`; outbound real continua `OFF`; Simulation Mode continua `ON`; Sprint B.2 permanece inalterada.
+
+## Pivot — Disparador Inteligente WhatsApp em 22/08/2026
+
+- Agent Brain pausado por padrão via `AGENT_BRAIN_ENABLED`; fundação Sprint C preservada, sem continuação de LLM/STT.
+- Branch isolada `smart-whatsapp-dispatcher`, derivada do commit de preservação `2f4f04e`.
+- Implementados motor de elegibilidade/agendamento/idempotência/Dry Run, APIs autenticadas, painel na Carteira e biblioteca em `/configuracoes/whatsapp/abordagens`.
+- Migration `20260822212701_smart_whatsapp_dispatcher.sql` aplicada no Supabase canônico: 12 tabelas e três RPCs.
+- Read-back remoto confirmou 12 tabelas; RPCs `security invoker`, sem execução para `anon`/`authenticated`, com execução para `service_role`.
+- Resposta inbound interrompe apenas fila pendente da campanha; itens `SENDING_*` não são falsamente cancelados.
+- Testes do motor 7/7, ESLint do escopo, TypeScript e diff-check aprovados.
+- Outbound real bloqueado no API e no banco por `REAL_DISPATCH_WORKER_NOT_VALIDATED`.
+- Worker Node, mídia real, ACK real/read-back, concorrência, restart e teste allowlisted permanecem pendentes. Número comercial continua `NO-GO`.
