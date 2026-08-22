@@ -1,0 +1,16 @@
+"use client";
+import { useEffect, useState } from "react";
+import { CrmNavigation } from "@/app/components/crm-navigation";
+import "./agent.css";
+
+type Config = { persona: { persona_name: string; tone: Record<string, number>; sales: Record<string, number>; provider_preferences?: { provider?: string; model?: string } }; providers: Array<{ id: string; provider: string; model: string; enabled: boolean; priority: number }>; control: { global_mode: string; kill_switch: boolean; outbound_kill_switch: boolean; simulation_mode: boolean } };
+
+export default function AgentSettingsPage() {
+  const [config, setConfig] = useState<Config | null>(null);
+  const [message, setMessage] = useState("");
+  useEffect(() => { fetch("/api/agent/brain/config").then(async (response) => { if (!response.ok) throw new Error("Configuração indisponível"); return response.json() as Promise<Config>; }).then(setConfig).catch(() => setMessage("Configuração indisponível. Aplique a migration da Sprint C antes da validação runtime.")); }, []);
+  if (!config) return <main className="agent-settings"><CrmNavigation/><section><h1>Cérebro Comercial</h1><p>{message || "Carregando..."}</p></section></main>;
+  const updateScale = (group: "tone" | "sales", key: string, value: number) => setConfig({ ...config, persona: { ...config.persona, [group]: { ...config.persona[group], [key]: value } } });
+  const save = async () => { setMessage("Salvando..."); const response = await fetch("/api/agent/brain/config", { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ personaName: config.persona.persona_name, tone: config.persona.tone, sales: config.persona.sales, provider: config.persona.provider_preferences?.provider, model: config.persona.provider_preferences?.model }) }); setMessage(response.ok ? "Configuração salva." : "Falha ao salvar."); };
+  return <main className="agent-settings"><CrmNavigation/><section><header><span>Configurações / Agente</span><h1>Cérebro Comercial</h1><p>Decisão estruturada em Simulation Mode. Outbound real permanece OFF.</p></header><div className="agent-safety"><b>SIMULATION {config.control.simulation_mode ? "ON" : "OFF"}</b><b>OUTBOUND {config.control.outbound_kill_switch ? "OFF" : "LIBERADO"}</b><b>KILL SWITCH {config.control.kill_switch ? "ATIVO" : "INATIVO"}</b></div><label>Persona<input value={config.persona.persona_name} onChange={(event) => setConfig({ ...config, persona: { ...config.persona, persona_name: event.target.value } })}/></label><div className="agent-grid">{Object.entries({ ...config.persona.tone, ...config.persona.sales }).map(([key, value]) => <label key={key}>{key}<input type="range" min="0" max="10" value={value} onChange={(event) => updateScale(key in config.persona.tone ? "tone" : "sales", key, Number(event.target.value))}/><output>{value}</output></label>)}</div><div className="agent-providers"><h2>Providers</h2>{config.providers.length ? config.providers.map((provider) => <p key={provider.id}>{provider.priority}. {provider.provider} / {provider.model} — {provider.enabled ? "ativo" : "inativo"}</p>) : <p>Nenhum provider configurado. Fallback determinístico seguro ativo.</p>}</div><button onClick={save}>Salvar configuração</button>{message && <p>{message}</p>}</section></main>;
+}

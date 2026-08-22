@@ -12,6 +12,17 @@ export function createSession() {
     .digest("base64url");
   return `${payload}.${signature}`;
 }
+export function verifySession(token: string | undefined) {
+  if (!token) return false;
+  try {
+    const [payload, signature] = token.split(".");
+    if (!payload || !signature) return false;
+    const expected = crypto.createHmac("sha256", secret()).update(payload).digest("base64url");
+    if (!secureEqual(expected, signature)) return false;
+    const data = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as { sub?: string; exp?: number };
+    return data.sub === "franklin" && typeof data.exp === "number" && data.exp > Date.now();
+  } catch { return false; }
+}
 function secureEqual(expectedValue: string, receivedValue: string) {
   const expected = Buffer.from(expectedValue);
   const received = Buffer.from(receivedValue);
