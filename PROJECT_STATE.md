@@ -199,11 +199,15 @@ Prompt inicial obrigatorio de cada tarefa:
 - Worktree legado classificado e consolidado em commits auditáveis por domínio, sem reset ou descarte.
 - CRM: lint, TypeScript, 10 testes e build de 44 rotas aprovados.
 - Gateway: build e 3 testes aprovados; dependency audit sem vulnerabilidades.
-- Gateway Render online e sessão de teste conectada; outbound real geral permanece desligado.
+- Gateway Render suspenso manualmente em 22/08/2026 antes do primeiro start válido no Back4App, evitando dois sockets concorrentes.
+- Gateway Back4App Free implantado a partir da branch `sprint-b2-whatsapp-gateway`, com Dockerfile em `apps/whatsapp-gateway`; `/health` respondeu HTTP 200, `outboundReal: false` e aproximadamente 110 MB de RSS no limite de 256 MB.
+- Sessão de teste foi restaurada no Back4App sem novo QR: uma sessão local `connected`, circuito fechado, zero tentativas de reconnect e `lastError` nulo.
+- CRM de produção foi reimplantado com `WHATSAPP_GATEWAY_URL` apontando para o Back4App; o segredo permaneceu em ambiente protegido.
 - Nova sessão de teste `dde0e967-d932-484d-ac71-827f41d49448` conectada por QR em 22/08/2026; Supabase confirmou auth state novo, heartbeat ativo, zero tentativas de reconnect, circuito fechado e nenhuma falha.
 - Inbound real de texto, áudio, documento e vídeo persistido com identidade, mídia, eventos e auditoria.
 - Imagem JPEG inbound real validada em 22/08/2026: objeto de 124.566 bytes no bucket privado `whatsapp-media`, `storageError` nulo, cliente/conversa vinculados, evento e auditoria persistidos e uma única mensagem por `providerMessageId`.
 - Human Takeover e retorno para `AUTO` observados.
 - Disconnect/reconnect controlado passou; falha simulada de Storage preservou mensagem, evento e auditoria sem duplicação.
-- Sprint B.2 permanece `NO-GO` para número comercial até validar perda física de rede, outbound allowlisted, runtime sem sleep e soak de 24 horas.
+- O domínio gratuito fornecido pelo Back4App foi explicitamente marcado no painel como temporário por 60 minutos. Portanto ele comprova portabilidade e restauração, mas não comprova runtime durável nem soak.
+- Sprint B.2 permanece `NO-GO` para número comercial até validar perda física de rede, outbound allowlisted, URL/runtime permanente sem sleep e soak de 24 horas.
 - Sprint C não foi iniciada.

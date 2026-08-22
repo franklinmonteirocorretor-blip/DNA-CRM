@@ -16,7 +16,12 @@ Status: **NO-GO para número comercial**.
 
 ## Runtime validado
 
-- Gateway Render responde `/health` com `ok: true`.
+- Render foi suspenso manualmente antes do primeiro start saudável no Back4App; após o corte, o endpoint antigo respondeu HTTP 503.
+- Back4App Free implantou o commit `af17f91` da branch `sprint-b2-whatsapp-gateway` usando `apps/whatsapp-gateway/Dockerfile` e porta 10000.
+- O deploy Back4App `a6fd08cc-b7c9-418a-bfd7-604aa57eb0d0` ficou `Ready`; `/health` respondeu HTTP 200 com `ok: true`, `outboundReal: false`, `startupError` nulo e RSS de aproximadamente 110 MB em uma instância de 256 MB.
+- A restauração encontrou exatamente uma sessão local `connected`, circuito fechado, zero tentativas de reconnect e nenhum último erro, sem exigir novo QR.
+- Requisição com segredo incorreto em rota protegida recebeu HTTP 401.
+- O CRM Vercel foi reimplantado em produção depois da validação do novo runtime, com `WHATSAPP_GATEWAY_URL` atualizado e segredo preservado no ambiente protegido.
 - Sessão de teste está `connected`.
 - Logout da sessão antiga e conexão limpa da nova sessão `dde0e967-d932-484d-ac71-827f41d49448` por novo QR foram comprovados em 22/08/2026.
 - Novo auth state persistiu 945 registros criptografados no Supabase; heartbeat ficou ativo, reconnect zerado, circuito fechado e `failure_reason` nulo.
@@ -60,7 +65,7 @@ Status: **NO-GO para número comercial**.
 1. Perda física de rede com backoff observado; disconnect/reconnect lógico já passou.
 2. Outbound allowlisted único com ACK, read-back, retry e idempotência física.
 3. Cobertura automatizada de integração para lifecycle, takeover, Storage e outbound; Policy Engine, idempotência e backoff possuem cobertura unitária mínima.
-4. Runtime sem sleep.
+4. Runtime com URL permanente e sem sleep.
 5. Soak contínuo mínimo de 24 horas.
 
 ## Gates concluídos
@@ -70,7 +75,7 @@ Status: **NO-GO para número comercial**.
 
 ## Bloqueio estrutural
 
-Render Free pode suspender o processo por inatividade. Enquanto houver sleep, não existe garantia de socket contínuo nem soak válido. Número comercial permanece proibido.
+Render Free foi retirado do caminho ativo porque pode suspender o processo por inatividade. O Back4App Free executou corretamente o container, mas o painel marcou o domínio gerado como temporário e válido por apenas 60 minutos. Enquanto não houver URL permanente e continuidade comprovada, não existe soak válido. Número comercial permanece proibido.
 
 ## Runtime durável: decisão de infraestrutura
 
@@ -86,6 +91,17 @@ Fontes oficiais consultadas em 22/08/2026: [Render Free](https://render.com/docs
 
 Recomendação: concluir os gates destrutivos na conta teste e mover o gateway para um runtime pago mínimo antes do soak. Pings artificiais no Render Free não transformam o plano em runtime durável e não serão usados como prova de produção.
 
+### Experimento Back4App Free de 22/08/2026
+
+- Portabilidade do container: aprovada.
+- Build Docker e startup: aprovados.
+- Restauração do auth state e socket sem QR: aprovada.
+- Segurança de corte: aprovada; Render foi suspenso antes do Back4App restaurar a sessão.
+- Outbound geral: permaneceu desligado.
+- Limite de memória: aprovado no instante observado, com cerca de 110 MB de RSS para 256 MB disponíveis.
+- Runtime durável: não aprovado, porque a URL gratuita foi apresentada como temporária por 60 minutos.
+- Soak de 24 horas: não iniciado; a URL temporária invalida o pré-requisito.
+
 ## Decisão
 
-Sprint B.2 ainda não está fechada. Código e conta de teste funcionam, mas runtime contínuo, soak e gates destrutivos/controlados permanecem pendentes. **NO-GO técnico para número comercial.**
+Sprint B.2 ainda não está fechada. Código, container e conta de teste funcionam, e o corte Render → Back4App foi validado sem QR e sem dois sockets. Porém a URL gratuita temporária não oferece runtime contínuo; soak e gates destrutivos/controlados permanecem pendentes. **NO-GO técnico para número comercial.**
