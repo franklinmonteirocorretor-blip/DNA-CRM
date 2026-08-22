@@ -212,3 +212,16 @@ Prompt inicial obrigatorio de cada tarefa:
 - Redeploy controlado `8ca428e3-c134-4291-80f7-540c78bd0095` preservou o mesmo subdomínio e restaurou a sessão sem QR. Houve conflito transitório durante a troca de instâncias; cerca de 104 segundos após o início, a sessão voltou a `connected`, circuito fechado, zero reconnects e `lastError` nulo.
 - Sprint B.2 permanece `NO-GO` para número comercial até validar perda física de rede, outbound allowlisted, URL/runtime permanente sem sleep e soak de 24 horas.
 - Sprint C não foi iniciada.
+
+## Sprint C-A — cérebro comercial iniciado em 22/08/2026
+
+- Branch isolada `sprint-c-agent-brain`, criada a partir de `b2fb069`; `master` não foi modificado.
+- Seis documentos legados preservados em commit exclusivamente documental `f55c702`.
+- Implementados contratos `LLMProvider`, registry com fallback, provider OpenAI-compatible configurável e fallback determinístico.
+- Implementados Context Builder real, memória `FACT/INFERENCE/UNKNOWN`, resumo incremental, intenções, extração factual, estratégia, Next Best Action, resposta, follow-up, catálogo read-only, STT abstrato e Simulation Pipeline.
+- Implementadas fundações persistentes de providers, memória e playbooks na migration nova `20260822194555_agent_brain_sprint_c.sql`.
+- Implementadas API/tela de configuração e APIs de simulação/playbooks.
+- Segurança financeira e pedido humano possuem testes específicos; 23/23 testes aprovados.
+- Lint, TypeScript e build aprovados; build gera 48 rotas.
+- Migration nova ainda não foi aplicada remotamente por ausência de autenticação CLI/senha Postgres. Banco/API/UI dependentes dela permanecem pendentes de validação runtime.
+- Número comercial continua `NO-GO`; outbound real continua `OFF`; Simulation Mode continua `ON`; Sprint B.2 permanece inalterada.
