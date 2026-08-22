@@ -8,7 +8,7 @@ import { buildAgentContext } from "@/lib/agent/brain/context-builder";
 import { LLMProviderRegistry } from "@/lib/agent/brain/provider-registry";
 import { loadLLMProviderRegistry } from "@/lib/agent/brain/registry-loader";
 import { AgentBrainPipeline } from "@/lib/agent/brain/pipeline";
-import { persistConversationSummary, persistExtractedFacts } from "@/lib/agent/brain/memory-store";
+import { commitAgentMemory } from "@/lib/agent/brain/memory-store";
 import { normalizePhoneE164, resolveOutboundIdentity } from "./identity-resolver";
 import type { ConversationControlMode } from "./types";
 
@@ -81,11 +81,11 @@ async function registerAgentDecision(input: { providerMessageId: string; convers
   if (eventError && eventError.code !== "23505") throw eventError;
   const { error: auditError } = await db.from("agent_audit_logs").insert({ client_id: input.clientId, correlation_id: correlationId, idempotency_key: `${idempotencyKey}:audit`, phase: "decision", action_type: decision.action, status, input: decision, output: payload });
   if (auditError && auditError.code !== "23505") throw auditError;
-  await persistExtractedFacts(input.clientId, cognitive.extractedFacts).catch(async (error) => {
-    await db.from("agent_audit_logs").insert({ client_id: input.clientId, correlation_id: correlationId, idempotency_key: `${idempotencyKey}:memory-error`, phase: "error", action_type: "persist_agent_memory", status: "failed", input: {}, output: { message: error instanceof Error ? error.message : "Falha de memória." } });
-  });
   const summary = await registry.withFallback((provider) => provider.summarize({ previousSummary: context.summary || undefined, messages: context.recentMessages }));
-  await persistConversationSummary({ clientId: input.clientId, conversationId: input.conversationId, summary: summary.summary }).catch(() => undefined);
+  const lastMessageId = [...context.recentMessages].reverse().find((message) => message.direction.toLowerCase() === "inbound")?.id;
+  await commitAgentMemory({ clientId: input.clientId, conversationId: input.conversationId, summary: summary.summary, lastMessageId: typeof lastMessageId === "number" ? lastMessageId : undefined, facts: cognitive.extractedFacts }).catch(async (error) => {
+    await db.from("agent_audit_logs").insert({ client_id: input.clientId, correlation_id: correlationId, idempotency_key: `${idempotencyKey}:memory-error`, phase: "error", action_type: "commit_agent_memory", status: "failed", input: {}, output: { message: error instanceof Error ? error.message : "Falha transacional de memória." } });
+  });
 }
 
 export async function processProviderMessage(input: { sessionId: string; providerMessageId: string; providerConversationId: string; phone?: string; text?: string; occurredAt: string; fromMe?: boolean; manual?: boolean; messageType?: "text" | "audio" | "image" | "document" | "video"; mediaMetadata?: MediaMetadata | null }) {

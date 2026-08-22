@@ -35,6 +35,7 @@ export type AgentContext = {
   summary?: string | null; facts?: StructuredFact[]; knowledge?: unknown[]; missingData?: string[]; objections?: unknown[];
   motivation?: string; pain?: string; commitments?: unknown[]; documents?: unknown[]; appointments?: unknown[];
   creditState?: string; projectsPresented?: string[]; presentedProjects?: string[]; takeoverMode?: HumanTakeoverMode; controlMode?: string;
+  catalogMatches?: Array<{ id: number; name: string; builderName?: string; salePrice?: number; city?: string }>;
   capabilities?: string[]; allowedActions: string[]; forbiddenActions: string[];
 };
 export type ExtractionInput = { text: string; sourceMessageId?: string; knownFacts?: StructuredFact[] };

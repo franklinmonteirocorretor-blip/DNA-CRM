@@ -2,6 +2,7 @@ import { supabaseAdmin } from "@/lib/supabase-admin";
 
 export interface BuilderCatalogService {
   search(input: { city?: string; builderId?: number; query?: string; limit?: number }): Promise<Array<Record<string, unknown>>>;
+  findMentioned(text: string): Promise<Array<Record<string, unknown>>>;
 }
 
 export class SupabaseBuilderCatalogService implements BuilderCatalogService {
@@ -13,5 +14,11 @@ export class SupabaseBuilderCatalogService implements BuilderCatalogService {
     const { data, error } = await query;
     if (error) throw error;
     return data || [];
+  }
+  async findMentioned(text: string) {
+    const normalized = text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    const { data, error } = await supabaseAdmin().from("projects").select("id,name,city,sale_price,builder_id,builders!inner(id,name,active)").eq("active", true).eq("builders.active", true).limit(100);
+    if (error) throw error;
+    return (data || []).filter((project) => normalized.includes(String(project.name).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()));
   }
 }

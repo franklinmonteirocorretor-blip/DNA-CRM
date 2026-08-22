@@ -8,7 +8,7 @@ const rules: Array<[IntentType, RegExp, number]> = [
   ["SIMULATION_REQUEST", /\b(simulacao|simular)\b/, 0.94],
   ["DOCUMENT_SENT", /\b(enviei|mandei|segue|anexei).*(documento|rg|cpf|cnh|holerite|comprovante)|\b(documento|rg|cpf|cnh|holerite)\b.*\b(anexo|envio)\b/, 0.93],
   ["VISIT_REQUEST", /\b(visitar|visita|conhecer o imovel|agendar)\b/, 0.92],
-  ["PRICE_REQUEST", /\b(preco|valor do imovel|quanto custa)\b/, 0.91],
+  ["PRICE_REQUEST", /\b(preco|qual (?:e|o) valor|valor d[oa]|quanto custa)\b/, 0.91],
   ["LOCATION_REQUEST", /\b(onde fica|localizacao|endereco|bairro|regiao)\b/, 0.91],
   ["OBJECTION_PARTNER_DECISION", /\b(?:(esposa|esposo|marido|companheir[oa]).*(falar|conversar|decidir|ver)|(falar|conversar|decidir|ver).*(esposa|esposo|marido|companheir[oa]))\b/, 0.92],
   ["OBJECTION_TIMING", /\b(vou pensar|depois|agora nao|outro momento)\b/, 0.9],
@@ -20,7 +20,7 @@ const rules: Array<[IntentType, RegExp, number]> = [
   ["ACCEPTANCE", /\b(aceito|vamos fechar|quero seguir|pode continuar)\b/, 0.92],
   ["NEGOTIATION", /\b(desconto|negociar|proposta|condicao melhor)\b/, 0.89],
   ["QUALIFICATION_DATA", /\b(renda|salario|casad[oa]|solteir[oa]|autonom[oa]|clt|dependente|nasc|profissao)\b/, 0.88],
-  ["PROPERTY_INTEREST", /\b(apartamento|casa|imovel|empreendimento|quartos?)\b/, 0.84],
+  ["PROPERTY_INTEREST", /\b(apartamento|casa|imovel|empreendimento|residencial|village|quartos?)\b/, 0.84],
   ["GREETING", /^(oi|ola|bom dia|boa tarde|boa noite)\b/, 0.86],
 ];
 

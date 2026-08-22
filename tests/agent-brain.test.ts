@@ -18,6 +18,7 @@ const cases: Array<{ text: string; intent: IntentType; action: NextBestAction }>
   { text: "A entrada está alta", intent: "OBJECTION_ENTRY", action: "HANDLE_OBJECTION" },
   { text: "Vou pensar e falar com minha esposa", intent: "OBJECTION_PARTNER_DECISION", action: "HANDLE_OBJECTION" },
   { text: "Enviei meu RG em anexo", intent: "DOCUMENT_SENT", action: "REQUEST_MISSING_DOCUMENT" },
+  { text: "Qual é o valor do Residencial Sol Nascente?", intent: "PRICE_REQUEST", action: "SEND_PROPERTY_OPTIONS" },
 ];
 
 for (const fixture of cases) test(`classifica: ${fixture.text}`, async () => {
@@ -51,4 +52,40 @@ test("pipeline gera somente efeitos simulados", async () => {
   assert.equal(result.simulation, true);
   assert.ok(result.effects.some(({ type }) => type === "MESSAGE_PROPOSAL"));
   assert.equal("outboundSent" in result, false);
+  assert.equal(result.provider.decision, "deterministic-fallback");
+});
+
+test("catálogo inexistente não inventa produto ou preço", async () => {
+  const decision = await provider.decide({ ...context("Qual é o valor do Residencial Sol Nascente?"), catalogMatches: [] });
+  assert.match(decision.proposedMessage || "", /não localizei/i);
+  assert.doesNotMatch(decision.proposedMessage || "", /R\$\s*[\d.]/);
+});
+
+test("catálogo real usa somente preço confirmado", async () => {
+  const decision = await provider.decide({ ...context("Qual é o valor do Residencial Monte Verde?"), catalogMatches: [{ id: 1, name: "Residencial Monte Verde", salePrice: 240000 }] });
+  assert.match(decision.proposedMessage || "", /R\$\s*240\.000,00/);
+});
+
+test("lead antigo retorna sem resetar atendimento", async () => {
+  const decision = await provider.decide({ ...context("Voltei, quero continuar de onde paramos."), commercialHistory: [{ event: "contacted" }] });
+  assert.equal(decision.strategy, "REACTIVATION");
+  assert.equal(decision.nextBestAction, "REACTIVATE");
+  assert.equal(decision.proposedStage, undefined);
+});
+
+test("objetivo conhecido é extraído sem pergunta repetida", async () => {
+  const decision = await provider.decide(context("Já respondi que quero comprar para morar."));
+  assert.ok(decision.extractedFacts.some((fact) => fact.key === "purchase_objective" && fact.value === "morar"));
+  assert.doesNotMatch(decision.proposedMessage || "", /morar ou investir/i);
+});
+
+test("registry preserva modelos distintos do mesmo provider", () => {
+  const registry = new LLMProviderRegistry();
+  const first = new DeterministicLLMProvider();
+  const second = new DeterministicLLMProvider();
+  registry.register({ provider: "groq", model: "model-a", enabled: true, priority: 1 }, first);
+  registry.register({ provider: "groq", model: "model-b", enabled: true, priority: 2 }, second);
+  assert.equal(registry.get("groq", "model-a"), first);
+  assert.equal(registry.get("groq", "model-b"), second);
+  assert.equal(registry.ordered().length, 2);
 });

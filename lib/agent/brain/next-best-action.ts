@@ -10,6 +10,8 @@ export function calculateNextBestAction(context: AgentContext, intents: IntentTy
   if (intents.includes("QUALIFICATION_DATA")) return "ASK_PROFILE";
   if (strategy === "DOCUMENT_COLLECTION") return "REQUEST_DOCUMENTS";
   if (strategy === "VISIT_BOOKING") return "SCHEDULE_VISIT";
+  if (strategy === "REACTIVATION") return "REACTIVATE";
+  if (intents.includes("PRICE_REQUEST") || intents.includes("LOCATION_REQUEST")) return "SEND_PROPERTY_OPTIONS";
   if (intents.includes("PROPERTY_INTEREST") && context.stage !== "prospecting") return "SEND_PROPERTY_OPTIONS";
   if (!context.motivation) return "ASK_MOTIVATION";
   if (!context.pain) return "ASK_PAIN";
