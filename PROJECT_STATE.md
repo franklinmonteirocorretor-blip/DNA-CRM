@@ -241,3 +241,16 @@ Prompt inicial obrigatorio de cada tarefa:
 - Testes do motor 7/7, ESLint do escopo, TypeScript e diff-check aprovados.
 - Outbound real bloqueado no API e no banco por `REAL_DISPATCH_WORKER_NOT_VALIDATED`.
 - Worker Node, mídia real, ACK real/read-back, concorrência, restart e teste allowlisted permanecem pendentes. Número comercial continua `NO-GO`.
+
+## Dispatcher Runtime — fundação controlada em 22/08/2026
+
+- Branch `smart-whatsapp-dispatcher` publicada no remoto antes das novas alterações; sem force push.
+- Worker durável implementado no gateway Node com claim atômico, lease renovável, recovery, batch persistente e pausa sistêmica.
+- Provider do gateway agora observa ACK real do Baileys e suporta imagem, vídeo e documento do bucket privado.
+- Aceitação do provider é persistida antes do ACK; timeout ambíguo exige reconciliação e nunca recebe retry cego.
+- Endpoint outbound legado desativado por padrão. Worker exige flags específicas e allowlist de teste; padrão continua OFF.
+- Duas migrations runtime aplicadas no Supabase canônico: hardening de leases/deliveries/attempts e materialização de 1–5 clientes de teste.
+- Contratos remotos de concorrência/lease e materialização test-only aprovados com rollback.
+- CRM 85/85 e gateway 9/9 testes aprovados; nenhum outbound real executado.
+- Controle runtime Supabase aplicado em modo fail-closed: `real_enabled=false`, sem sessão autorizada e sem validade. RPC de fase exposta somente a `service_role`.
+- Gateway Back4App ainda não recebeu este worker. Flags remotas não foram alteradas. Número comercial permanece `NO-GO`.
