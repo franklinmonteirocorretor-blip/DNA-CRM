@@ -202,7 +202,8 @@ Prompt inicial obrigatorio de cada tarefa:
 - Gateway Render online e sessão de teste conectada; outbound real geral permanece desligado.
 - Nova sessão de teste `dde0e967-d932-484d-ac71-827f41d49448` conectada por QR em 22/08/2026; Supabase confirmou auth state novo, heartbeat ativo, zero tentativas de reconnect, circuito fechado e nenhuma falha.
 - Inbound real de texto, áudio, documento e vídeo persistido com identidade, mídia, eventos e auditoria.
+- Imagem JPEG inbound real validada em 22/08/2026: objeto de 124.566 bytes no bucket privado `whatsapp-media`, `storageError` nulo, cliente/conversa vinculados, evento e auditoria persistidos e uma única mensagem por `providerMessageId`.
 - Human Takeover e retorno para `AUTO` observados.
 - Disconnect/reconnect controlado passou; falha simulada de Storage preservou mensagem, evento e auditoria sem duplicação.
-- Sprint B.2 permanece `NO-GO` para número comercial até validar imagem real, perda física de rede, outbound allowlisted, runtime sem sleep e soak de 24 horas.
+- Sprint B.2 permanece `NO-GO` para número comercial até validar perda física de rede, outbound allowlisted, runtime sem sleep e soak de 24 horas.
 - Sprint C não foi iniciada.

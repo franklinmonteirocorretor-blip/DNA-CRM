@@ -26,6 +26,8 @@ Status: **NO-GO para número comercial**.
 - Disconnect e reconnect controlados foram repetidos em 22/08/2026: `connected → disconnected → reconnecting → connected`, com circuito fechado e zero falhas acumuladas ao final.
 - Auth state e Signal keys permanecem persistidos no Supabase.
 - Inbound real de texto, áudio, documento e vídeo foi observado.
+- Imagem JPEG inbound real foi observada em 22/08/2026; objeto de 124.566 bytes existe no bucket privado `whatsapp-media`, com `storagePath` persistido e `storageError` nulo.
+- A imagem ficou vinculada a cliente e conversa, gerou `MESSAGE_RECEIVED` e auditoria `process_provider_message/persisted`; a consulta por `providerMessageId` retornou exatamente uma mensagem.
 - Mídias verificadas possuem MIME e `storagePath`, sem `storageError`.
 - `providerMessageId`, `providerConversationId`, vínculo com conversa e cliente foram observados.
 - Replay do mesmo `providerMessageId` manteve um registro lógico.
@@ -55,16 +57,16 @@ Status: **NO-GO para número comercial**.
 
 ## Gates pendentes
 
-1. Imagem inbound real com persistência e dedupe comprovados.
-2. Perda física de rede com backoff observado; disconnect/reconnect lógico já passou.
-3. Outbound allowlisted único com ACK, read-back, retry e idempotência física.
-4. Cobertura automatizada de integração para lifecycle, takeover, Storage e outbound; Policy Engine, idempotência e backoff possuem cobertura unitária mínima.
-5. Runtime sem sleep.
-6. Soak contínuo mínimo de 24 horas.
+1. Perda física de rede com backoff observado; disconnect/reconnect lógico já passou.
+2. Outbound allowlisted único com ACK, read-back, retry e idempotência física.
+3. Cobertura automatizada de integração para lifecycle, takeover, Storage e outbound; Policy Engine, idempotência e backoff possuem cobertura unitária mínima.
+4. Runtime sem sleep.
+5. Soak contínuo mínimo de 24 horas.
 
 ## Gates concluídos
 
 1. Logout/invalidação da sessão antiga, novo QR e reconexão limpa em nova sessão, com auth state novo e leitura canônica no Supabase.
+2. Imagem inbound real com persistência no Storage, vínculo canônico, evento, auditoria e unicidade por `providerMessageId`.
 
 ## Bloqueio estrutural
 
