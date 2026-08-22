@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import "./smart-whatsapp-dispatcher.css";
 
 type DispatcherState =
@@ -8,6 +8,8 @@ type DispatcherState =
   | "READY"
   | "RUNNING"
   | "PAUSED"
+  | "PAUSED_SYSTEM"
+  | "COMPLETED"
   | "STOPPED"
   | "ERROR";
 
@@ -33,7 +35,13 @@ type DispatcherSnapshot = {
     gatewayConfigured: boolean;
     sessionConnected: boolean;
     outboundReal: boolean;
+    workerRunning: boolean;
+    testAllowlistConfigured: boolean;
+    testAllowlistCount: number;
+    realStartEnabled: boolean;
+    realStartBlocked: boolean;
   };
+  campaignRuntime?: { counts: Record<string, number>; nextSendAt: string | null } | null;
   campaigns: Campaign[];
   approaches: Entity[];
   templates: Entity[];
@@ -169,7 +177,7 @@ export function SmartWhatsAppDispatcher() {
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
 
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     const response = await fetch("/api/whatsapp-dispatcher", {
       cache: "no-store",
     });
@@ -187,7 +195,7 @@ export function SmartWhatsAppDispatcher() {
         data.campaigns?.[0] ||
         null,
     );
-  };
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -221,6 +229,12 @@ export function SmartWhatsAppDispatcher() {
       active = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (!snapshot || !["READY", "RUNNING", "PAUSED", "PAUSED_SYSTEM"].includes(snapshot.state)) return;
+    const timer = setInterval(() => void refresh().catch(() => undefined), 5_000);
+    return () => clearInterval(timer);
+  }, [refresh, snapshot]);
 
   const selectedProject = config.projectId;
   const approaches = useMemo(
@@ -256,7 +270,11 @@ export function SmartWhatsAppDispatcher() {
     currentDryRun || (
       snapshot?.health.gatewayConfigured &&
       snapshot.health.sessionConnected &&
-      snapshot.health.outboundReal
+      snapshot.health.outboundReal &&
+      snapshot.health.workerRunning &&
+      snapshot.health.testAllowlistConfigured &&
+      snapshot.health.realStartEnabled &&
+      !snapshot.health.realStartBlocked
     )
   ));
 
@@ -429,9 +447,24 @@ export function SmartWhatsAppDispatcher() {
           <span className={snapshot.health.outboundReal ? "warn" : "neutral"}>
             Outbound real {snapshot.health.outboundReal ? "ON" : "OFF"}
           </span>
+          <span className={snapshot.health.workerRunning ? "ok" : "bad"}>
+            Worker {snapshot.health.workerRunning ? "ativo" : "inativo"}
+          </span>
+          <span className={snapshot.health.testAllowlistConfigured ? "ok" : "bad"}>
+            Allowlist teste: {snapshot.health.testAllowlistCount || 0}
+          </span>
           <span className={currentDryRun ? "neutral" : "warn"}>
             Dry Run {currentDryRun ? "ON" : "OFF"}
           </span>
+        </div>
+      ) : null}
+
+      {snapshot?.campaignRuntime ? (
+        <div className="swd-health" aria-label="Runtime da campanha">
+          {Object.entries(snapshot.campaignRuntime.counts).map(([status, count]) => (
+            <span key={status} className={status === "FAILED" ? "bad" : "neutral"}>{status}: {count}</span>
+          ))}
+          <span className="neutral">Próximo envio: {snapshot.campaignRuntime.nextSendAt ? new Date(snapshot.campaignRuntime.nextSendAt).toLocaleString("pt-BR") : "—"}</span>
         </div>
       ) : null}
 
@@ -463,7 +496,7 @@ export function SmartWhatsAppDispatcher() {
           type="button"
           className="secondary"
           onClick={() => lifecycle("resume")}
-          disabled={campaignState !== "PAUSED" || Boolean(pending)}
+          disabled={!['PAUSED', 'PAUSED_SYSTEM'].includes(campaignState || '') || Boolean(pending)}
         >
           {pending === "resume" ? "Retomando..." : "Retomar"}
         </button>
@@ -472,7 +505,7 @@ export function SmartWhatsAppDispatcher() {
           className="danger"
           onClick={() => lifecycle("stop")}
           disabled={
-            !["READY", "RUNNING", "PAUSED"].includes(campaignState || "") ||
+            !["READY", "RUNNING", "PAUSED", "PAUSED_SYSTEM"].includes(campaignState || "") ||
             Boolean(pending)
           }
         >

@@ -22,6 +22,12 @@ const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-
 const sources = new Set(["DAILY_WALLET", "OWN_DATABASE", "DNA", "INDICATION", "MANUAL_LIST", "PROJECT_LIST", "REACTIVATION", "CUSTOM"]);
 const modes = new Set(["ROUND_ROBIN", "RANDOM", "WEIGHTED"]);
 
+function testClientAllowlist() {
+  const raw = process.env.WHATSAPP_DISPATCH_TEST_CLIENT_IDS || "";
+  const ids = raw.split(",").map((value) => Number(value.trim())).filter((value) => Number.isSafeInteger(value) && value > 0);
+  return [...new Set(ids)];
+}
+
 function optionalId(value: unknown) {
   if (value === "" || value == null) return null;
   const id = Number(value);
@@ -59,12 +65,34 @@ function normalizeConfig(input: UiConfig) {
 
 async function health() {
   const db = supabaseAdmin();
-  const { data: session } = await db.from("whatsapp_sessions").select("id,status,heartbeat_at").neq("status", "logged_out").order("created_at", { ascending: false }).limit(1).maybeSingle();
+  const testSessionId = process.env.WHATSAPP_DISPATCH_TEST_SESSION_ID?.trim();
+  const sessionQuery = db.from("whatsapp_sessions").select("id,status,heartbeat_at");
+  const { data: session } = testSessionId
+    ? await sessionQuery.eq("id", testSessionId).maybeSingle()
+    : await sessionQuery.eq("id", "00000000-0000-0000-0000-000000000000").maybeSingle();
   const heartbeat = session?.heartbeat_at ? Date.parse(session.heartbeat_at) : 0;
+  const allowlist = testClientAllowlist();
+  let workerRunning = false;
+  if (process.env.WHATSAPP_GATEWAY_URL && process.env.WHATSAPP_GATEWAY_SECRET) {
+    try {
+      const response = await fetch(`${process.env.WHATSAPP_GATEWAY_URL.replace(/\/$/, "")}/health`, {
+        headers: { authorization: `Bearer ${process.env.WHATSAPP_GATEWAY_SECRET}` }, cache: "no-store",
+      });
+      const payload = await response.json() as { dispatcher?: { enabled?: boolean; running?: boolean } };
+      workerRunning = response.ok && payload.dispatcher?.enabled === true && payload.dispatcher?.running === true;
+    } catch { workerRunning = false; }
+  }
+  const realStartEnabled = process.env.WHATSAPP_DISPATCH_REAL_START_ENABLED === "true";
   return {
     gatewayConfigured: Boolean(process.env.WHATSAPP_GATEWAY_URL && process.env.WHATSAPP_GATEWAY_SECRET),
     sessionConnected: session?.status === "connected" && Date.now() - heartbeat < 180_000,
     outboundReal: process.env.WHATSAPP_REAL_OUTBOUND_ENABLED === "true",
+    testAllowlistConfigured: allowlist.length > 0,
+    testAllowlistCount: allowlist.length,
+    testSessionConfigured: Boolean(testSessionId),
+    workerRunning,
+    realStartEnabled,
+    realStartBlocked: !(realStartEnabled && workerRunning),
     sessionId: session?.id as string | undefined,
   };
 }
@@ -105,6 +133,11 @@ async function candidateRows(config: ReturnType<typeof normalizeConfig>) {
     if (error) throw error;
     ids = [...new Set((data || []).map((row) => Number(row.client_id)))];
   }
+  if (!config.domain.dryRun) {
+    const allowlist = testClientAllowlist();
+    if (!allowlist.length) throw new Error("Campanha real exige WHATSAPP_DISPATCH_TEST_CLIENT_IDS explícita.");
+    ids = ids ? ids.filter((id) => allowlist.includes(id)) : allowlist;
+  }
   if (ids && !ids.length) return [];
   let query = db.from("clients").select("id,name,phone,can_contact,do_not_contact,opt_out_at,project_interest,data_quality").limit(10_000);
   if (ids) query = query.in("id", ids);
@@ -116,6 +149,22 @@ async function candidateRows(config: ReturnType<typeof normalizeConfig>) {
   const { data, error } = await query.order("id");
   if (error) throw error;
   return data || [];
+}
+
+async function loadCampaignRuntime(campaignId?: string) {
+  if (!campaignId) return null;
+  const db = supabaseAdmin();
+  const statuses = ["QUEUED", "WAITING", "SENDING_MEDIA", "SENDING_TEXT", "SENT", "FAILED", "SKIPPED", "CANCELLED", "REPLIED"] as const;
+  const [counts, next] = await Promise.all([
+    Promise.all(statuses.map(async (status) => {
+      const { count, error } = await db.from("whatsapp_campaign_queue").select("id", { count: "exact", head: true }).eq("campaign_id", campaignId).eq("status", status);
+      if (error) throw error;
+      return [status, count || 0] as const;
+    })),
+    db.from("whatsapp_campaign_queue").select("scheduled_for").eq("campaign_id", campaignId).in("status", ["QUEUED", "WAITING"]).order("scheduled_for").limit(1).maybeSingle(),
+  ]);
+  if (next.error) throw next.error;
+  return { campaignId, counts: Object.fromEntries(counts), nextSendAt: next.data?.scheduled_for || null };
 }
 
 async function makePreview(config: ReturnType<typeof normalizeConfig>, campaignId = randomUUID()) {
@@ -158,7 +207,8 @@ export async function GET() {
   try {
     const [library, runtime] = await Promise.all([loadLibrary(), health()]);
     const active = library.campaigns.find((campaign) => ["READY", "RUNNING", "PAUSED"].includes(campaign.status));
-    return NextResponse.json({ ...library, health: runtime, state: active?.status || (runtime.sessionConnected ? "READY" : "OFF") });
+    const campaignRuntime = await loadCampaignRuntime(active?.id ? String(active.id) : undefined);
+    return NextResponse.json({ ...library, health: runtime, campaignRuntime, state: active?.status || (runtime.sessionConnected ? "READY" : "OFF") });
   } catch (error) { return NextResponse.json({ error: error instanceof Error ? error.message : "Falha ao carregar disparador." }, { status: 500 }); }
 }
 
@@ -174,6 +224,9 @@ export async function POST(request: Request) {
       const config = normalizeConfig(body.config || {});
       const db = supabaseAdmin();
       const runtime = await health();
+      const preview = await makePreview(config);
+      if (!config.domain.dryRun && (preview.eligible < 1 || preview.eligible > 5)) throw new Error("Campanha real exige 1–5 contatos de teste elegíveis.");
+      const testIds = config.domain.dryRun ? [] : preview.rows.filter((row) => row.eligible).map((row) => row.clientId);
       const { data: campaign, error } = await db.from("whatsapp_campaigns").insert({
         name: config.name, source: config.source, base_id: config.baseId, project_id: config.projectId,
         approach_id: config.approachId, cadence_id: config.cadenceId, session_id: runtime.sessionId || null,
@@ -182,6 +235,8 @@ export async function POST(request: Request) {
         batch_pause_seconds: config.domain.batchPauseSeconds, hourly_limit: config.domain.hourlyLimit, daily_limit: config.domain.dailyLimit,
         allowed_start_time: config.domain.allowedStartTime, allowed_end_time: config.domain.allowedEndTime, timezone: config.domain.timeZone,
         stop_on_reply: config.domain.stopOnReply, dry_run: config.domain.dryRun,
+        test_only: !config.domain.dryRun, test_client_ids: testIds,
+        campaign_limit: config.domain.dryRun ? null : testIds.length,
       }).select("id,name,status,dry_run,source,created_at").single();
       if (error) throw error;
       const library = await loadLibrary();
@@ -189,7 +244,19 @@ export async function POST(request: Request) {
       const links = chosen.map((item, index) => ({ campaign_id: campaign.id, template_id: item.id, template_version: item.version, position: index + 1, weight: config.weights[String(item.id)] }));
       const { error: linkError } = await db.from("whatsapp_campaign_templates").insert(links);
       if (linkError) { await db.from("whatsapp_campaigns").delete().eq("id", campaign.id); throw linkError; }
-      await makePreview(config, campaign.id);
+      if (!config.domain.dryRun) {
+        const { data: step, error: stepError } = await db.from("whatsapp_cadence_steps")
+          .select("id").eq("cadence_id", config.cadenceId).eq("active", true).order("step_order").limit(1).single();
+        if (stepError) { await db.from("whatsapp_campaigns").delete().eq("id", campaign.id); throw stepError; }
+        const items = preview.rows.filter((row) => row.eligible && row.templateId && row.renderedText && row.estimatedAt).map((row) => ({
+          clientId: row.clientId, cadenceStepId: step.id, templateId: row.templateId,
+          templateVersion: row.templateVersion, mediaId: row.media?.id || null,
+          mediaVersion: row.media?.version || null, selectionOrder: row.order,
+          scheduledFor: row.estimatedAt, renderedBody: row.renderedText,
+        }));
+        const { error: materializeError } = await db.rpc("materialize_whatsapp_campaign_real", { p_campaign_id: campaign.id, p_items: items });
+        if (materializeError) { await db.from("whatsapp_campaigns").delete().eq("id", campaign.id); throw materializeError; }
+      }
       const { data: activated, error: activateError } = await db.rpc("transition_whatsapp_campaign", {
         p_campaign_id: campaign.id, p_action: "ACTIVATE", p_reason: null,
       });
@@ -200,11 +267,14 @@ export async function POST(request: Request) {
       const campaignId = String(body.campaignId || "");
       if (!uuid.test(campaignId)) return NextResponse.json({ error: "Campanha inválida." }, { status: 400 });
       const db = supabaseAdmin();
-      const { data: current, error: readError } = await db.from("whatsapp_campaigns").select("id,dry_run").eq("id", campaignId).single();
+      const { data: current, error: readError } = await db.from("whatsapp_campaigns").select("id,dry_run,test_only,session_id").eq("id", campaignId).single();
       if (readError) throw readError;
       const runtime = await health();
-      if (body.action === "start" && !current.dry_run) return NextResponse.json({ error: "Execução real bloqueada: worker/ACK real ainda não validados." }, { status: 409 });
-      if (body.action === "start" && !current.dry_run && (!runtime.gatewayConfigured || !runtime.sessionConnected)) return NextResponse.json({ error: "WhatsApp de teste indisponível." }, { status: 409 });
+      if (body.action === "start" && !current.dry_run && (
+        !current.test_only || current.session_id !== runtime.sessionId || !runtime.gatewayConfigured
+        || !runtime.sessionConnected || !runtime.outboundReal || !runtime.testAllowlistConfigured
+        || !runtime.realStartEnabled || !runtime.workerRunning
+      )) return NextResponse.json({ error: "Execução real bloqueada: gates da conta teste incompletos." }, { status: 409 });
       const action = body.action === "start" ? "START" : String(body.action).toUpperCase();
       const { data, error } = await db.rpc("transition_whatsapp_campaign", { p_campaign_id: campaignId, p_action: action, p_reason: body.action === "stop" ? "Parada pelo operador" : null });
       if (error) throw error;
